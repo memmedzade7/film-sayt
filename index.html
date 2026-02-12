@@ -409,20 +409,28 @@ async function filterByCountry(countryCode) {
                 container.appendChild(tag);
             });
         }
-        function showMovies(movies) {
+       function showMovies(movies) {
     main.innerHTML = '';
 
     movies.forEach((movie) => {
-        // original_title - filmin ilk (adətən ingilis) adı
-        // title - API-dən gələn tərcümə olunmuş ad
-        const { title, poster_path, vote_average, overview, original_title } = movie;
+        // API-dən gələn bütün lazımi məlumatları alırıq
+        const title = movie.title;
+        const original_title = movie.original_title;
+        const poster_path = movie.poster_path;
+        const vote_average = movie.vote_average;
+        const overview = movie.overview;
+
         const movieEl = document.createElement('div');
         movieEl.classList.add('movie');
 
-        // Əgər orijinal ad ilə tərcümə eynidirsə tək yaz, deyilsə mötərizədə göstər
-        const displayTitle = (original_title && original_title !== title) 
-            ? `${original_title} (${title})` 
-            : title;
+        // Mötərizə məntiqini burada yoxlayırıq
+        // Əgər orijinal ad varsa və o indiki başlıqdan fərqlidirsə mötərizədə yaz
+        let displayTitle;
+        if (original_title && original_title !== title) {
+            displayTitle = `${original_title} (${title})`;
+        } else {
+            displayTitle = title;
+        }
 
         movieEl.innerHTML = `
             <img src="${poster_path ? IMG_PATH + poster_path : 'https://via.placeholder.com/300x450?text=Poster+Tapılmadı'}" alt="${title}">
@@ -432,7 +440,7 @@ async function filterByCountry(countryCode) {
             </div>
             <div class="overview">
                 <h3>Haqqında</h3>
-                ${overview || "Məlumat yoxdur."}
+                ${overview || "Bu film haqqında məlumat hələ əlavə edilməyib."}
             </div>
         `;
         main.appendChild(movieEl);

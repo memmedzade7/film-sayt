@@ -408,30 +408,36 @@ async function filterByCountry(countryCode) {
                 container.appendChild(tag);
             });
         }
-       function showMovies(movies) {
+      function showMovies(movies) {
     main.innerHTML = '';
 
     movies.forEach((movie) => {
-        const title = movie.title;
-        const original_title = movie.original_title;
+        const title = movie.title; // Bu, API-dən gələn tərcümədir (az-AZ)
+        const original_title = movie.original_title; // Bu, həmişə orijinal (ingilis) addır
         const poster_path = movie.poster_path;
         const vote_average = movie.vote_average;
 
         const movieEl = document.createElement('div');
         movieEl.classList.add('movie');
 
-        // Mötərizəni MƏCBURİ çıxarırıq (yoxlamaq üçün)
-        let displayTitle = `${original_title} (${title})`;
+        // Məntiq: Orijinal adı başa qoy, tərcüməni (title) mötərizəyə sal
+        // Əgər adlar eynidirsə (məsələn: "Avatar"), sadəcə birini yaz
+        let displayTitle;
+        if (original_title && original_title !== title) {
+            displayTitle = `${original_title} (${title})`;
+        } else {
+            displayTitle = original_title || title;
+        }
 
         movieEl.innerHTML = `
-            <img src="${poster_path ? IMG_PATH + poster_path : 'https://via.placeholder.com/300x450?text=Poster+Tapılmadı'}" alt="${title}">
+            <img src="${poster_path ? IMG_PATH + poster_path : 'https://via.placeholder.com/300x450?text=Poster+Tapılmadı'}" alt="${original_title}">
             <div class="movie-info">
                 <h3>${displayTitle}</h3>
                 <span class="${getClassByRate(vote_average)}">${vote_average}</span>
             </div>
             <div class="overview">
                 <h3>Haqqında</h3>
-                ${movie.overview || "Məlumat yoxdur."}
+                ${movie.overview || "Bu film haqqında məlumat hələ əlavə edilməyib."}
             </div>
         `;
         main.appendChild(movieEl);

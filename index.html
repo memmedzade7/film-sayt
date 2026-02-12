@@ -311,33 +311,37 @@
     border-radius: 2px;
 }
 }
-        .modal {
-    display: none; /* İlk başda gizli olsun */
+.modal {
+    display: none; 
     position: fixed;
-    z-index: 1000;
+    z-index: 2000;
     left: 0; top: 0;
     width: 100%; height: 100%;
-    background-color: rgba(0,0,0,0.9); /* Arxa fonu qaraldır */
+    background-color: rgba(0,0,0,0.95);
 }
 
 .modal-content {
-    margin: 50px auto;
-    width: 80%;
-    max-width: 900px;
+    margin: 5% auto;
+    width: 90%;
+    max-width: 1000px;
+    background: #000;
+    padding: 10px;
+    border-radius: 10px;
 }
 
 .close-modal {
-    color: white;
+    color: #ff007f;
     float: right;
-    font-size: 30px;
+    font-size: 40px;
+    font-weight: bold;
     cursor: pointer;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
 }
 
 #player-container iframe {
     width: 100%;
-    height: 500px;
-    border: 2px solid #ff007f; /* Sənin çəhrayı rəngin */
+    height: 550px;
+    border: 1px solid #333;
 }
     </style>
 </head>
@@ -409,22 +413,53 @@ async function filterByCountry(countryCode) {
         getMovies(API_URL);
         return;
     }
+function showMovies(movies) {
+    main.innerHTML = '';
+
+    movies.forEach((movie) => {
+        const { title, poster_path, vote_average, original_title, id } = movie; // Burada 'id' əlavə etdik
+        const movieEl = document.createElement('div');
+        movieEl.classList.add('movie');
+
+        // BURA DİQQƏT: Klik funksiyasını bura yazırıq
+        movieEl.onclick = () => playMovie(id);
+
+        const displayTitle = (original_title && original_title !== title) 
+            ? `${original_title} (${title})` 
+            : title;
+
+        movieEl.innerHTML = `
+            <img src="${poster_path ? IMG_PATH + poster_path : 'https://via.placeholder.com/300x450'}" alt="${title}">
+            <div class="movie-info">
+                <h3>${displayTitle}</h3>
+                <span class="${getClassByRate(vote_average)}">${vote_average}</span>
+            </div>
+            <div class="overview">
+                <h3>Haqqında</h3>
+                ${movie.overview || "Məlumat yoxdur."}
+            </div>
+        `;
+        main.appendChild(movieEl);
+    });
+}
+
+// BU İKİ FUNKSİYANI DA KODUN ƏN SONUNA QOY:
 function playMovie(id) {
     const modal = document.getElementById('movie-modal');
     const container = document.getElementById('player-container');
     
-    // Vidsrc xidmətindən filmi ID-yə görə çağırırıq
+    // Pleyeri yükləyirik
     container.innerHTML = `<iframe src="https://vidsrc.me/embed/movie?tmdb=${id}" allowfullscreen></iframe>`;
     
-    modal.style.display = 'block'; // Pəncərəni göstər
+    modal.style.display = 'block';
 }
 
 function closeMovie() {
     const modal = document.getElementById('movie-modal');
     const container = document.getElementById('player-container');
     
-    container.innerHTML = ''; // Videonu dayandır
-    modal.style.display = 'none'; // Pəncərəni bağla
+    container.innerHTML = ''; // Videonu söndür
+    modal.style.display = 'none';
 }
     // 3. Ölkəyə görə API-dən filmləri çağır
     // 'with_origin_country' parametri həmin ölkənin filmlərini tapır
@@ -609,7 +644,7 @@ async function getRandomMovie() {
 }
         init();
     </script>
-    <div id="movie-modal" class="modal">
+   <div id="movie-modal" class="modal">
     <div class="modal-content">
         <span class="close-modal" onclick="closeMovie()">&times;</span>
         <div id="player-container"></div>

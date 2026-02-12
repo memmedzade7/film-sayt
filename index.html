@@ -368,7 +368,7 @@
 
         function init() {
             renderGenres();
-           getMovies(`${BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}&language=az-AZ`);
+            getMovies(`${BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}`);
             updateWatchlistCount();
         }
 async function filterByCountry(countryCode) {
@@ -384,7 +384,8 @@ async function filterByCountry(countryCode) {
 
     // 3. Ölkəyə görə API-dən filmləri çağır
     // 'with_origin_country' parametri həmin ölkənin filmlərini tapır
-    const COUNTRY_URL = `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_origin_country=${countryCode}&sort_by=popularity.desc&language=az-AZ`;
+    const COUNTRY_URL = `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&with_origin_country=${countryCode}&sort_by=popularity.desc`;
+    
     const res = await fetch(COUNTRY_URL);
     const data = await res.json();
     
@@ -394,32 +395,44 @@ async function filterByCountry(countryCode) {
         main.innerHTML = `<h2 class="no-results">Bu ölkəyə aid film tapılmadı.</h2>`;
     }
 }
-      function showMovies(movies) {
+        function renderGenres() {
+            const container = document.getElementById('genres');
+            genres.forEach(g => {
+                const tag = document.createElement('div');
+                tag.className = 'genre-tag';
+                tag.innerText = g.name;
+                tag.onclick = () => {
+                    document.querySelectorAll('.genre-tag').forEach(t => t.classList.remove('active'));
+                    tag.classList.add('active');
+                    getMovies(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${g.id}`);
+                };
+                container.appendChild(tag);
+            });
+        }
+        function showMovies(movies) {
     main.innerHTML = '';
 
     movies.forEach((movie) => {
-        // Dəyişənləri birbaşa movie obyektindən alırıq
-        const o_title = movie.original_title; // Əsas ad (İngilis)
-        const a_title = movie.title;          // Tərcümə (Azərbaycan)
-        const poster = movie.poster_path;
-        const vote = movie.vote_average;
-
+        // original_title - filmin ilk (adətən ingilis) adı
+        // title - API-dən gələn tərcümə olunmuş ad
+        const { title, poster_path, vote_average, overview, original_title } = movie;
         const movieEl = document.createElement('div');
         movieEl.classList.add('movie');
 
-        // Məcburi format: Orijinal Ad (Azərbaycan Adı)
-        // Hətta adlar eyni olsa belə mötərizə çıxacaq ki, işlədiyini görəsən
-        const displayTitle = `${o_title} (${a_title})`;
+        // Əgər orijinal ad ilə tərcümə eynidirsə tək yaz, deyilsə mötərizədə göstər
+        const displayTitle = (original_title && original_title !== title) 
+            ? `${original_title} (${title})` 
+            : title;
 
         movieEl.innerHTML = `
-            <img src="${poster ? IMG_PATH + poster : 'https://via.placeholder.com/300x450?text=No+Poster'}" alt="${o_title}">
+            <img src="${poster_path ? IMG_PATH + poster_path : 'https://via.placeholder.com/300x450?text=Poster+Tapılmadı'}" alt="${title}">
             <div class="movie-info">
                 <h3>${displayTitle}</h3>
-                <span class="${getClassByRate(vote)}">${vote}</span>
+                <span class="${getClassByRate(vote_average)}">${vote_average}</span>
             </div>
             <div class="overview">
                 <h3>Haqqında</h3>
-                ${movie.overview || "Məlumat yoxdur."}
+                ${overview || "Məlumat yoxdur."}
             </div>
         `;
         main.appendChild(movieEl);

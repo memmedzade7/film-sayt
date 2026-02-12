@@ -368,7 +368,7 @@
 
         function init() {
             renderGenres();
-            getMovies(`${BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}`);
+           getMovies(`${BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}&language=az-AZ`);
             updateWatchlistCount();
         }
 async function filterByCountry(countryCode) {
@@ -384,8 +384,7 @@ async function filterByCountry(countryCode) {
 
     // 3. Ölkəyə görə API-dən filmləri çağır
     // 'with_origin_country' parametri həmin ölkənin filmlərini tapır
-    const COUNTRY_URL = `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&with_origin_country=${countryCode}&sort_by=popularity.desc`;
-    
+    const COUNTRY_URL = `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_origin_country=${countryCode}&sort_by=popularity.desc&language=az-AZ`;
     const res = await fetch(COUNTRY_URL);
     const data = await res.json();
     
@@ -413,24 +412,16 @@ async function filterByCountry(countryCode) {
     main.innerHTML = '';
 
     movies.forEach((movie) => {
-        // API-dən gələn bütün lazımi məlumatları alırıq
         const title = movie.title;
         const original_title = movie.original_title;
         const poster_path = movie.poster_path;
         const vote_average = movie.vote_average;
-        const overview = movie.overview;
 
         const movieEl = document.createElement('div');
         movieEl.classList.add('movie');
 
-        // Mötərizə məntiqini burada yoxlayırıq
-        // Əgər orijinal ad varsa və o indiki başlıqdan fərqlidirsə mötərizədə yaz
-        let displayTitle;
-        if (original_title && original_title !== title) {
-            displayTitle = `${original_title} (${title})`;
-        } else {
-            displayTitle = title;
-        }
+        // Mötərizəni MƏCBURİ çıxarırıq (yoxlamaq üçün)
+        let displayTitle = `${original_title} (${title})`;
 
         movieEl.innerHTML = `
             <img src="${poster_path ? IMG_PATH + poster_path : 'https://via.placeholder.com/300x450?text=Poster+Tapılmadı'}" alt="${title}">
@@ -440,7 +431,7 @@ async function filterByCountry(countryCode) {
             </div>
             <div class="overview">
                 <h3>Haqqında</h3>
-                ${overview || "Bu film haqqında məlumat hələ əlavə edilməyib."}
+                ${movie.overview || "Məlumat yoxdur."}
             </div>
         `;
         main.appendChild(movieEl);

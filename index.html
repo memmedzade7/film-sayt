@@ -292,6 +292,13 @@
         async src="//gc.zgo.at/count.js"></script>
     </header>
 
+
+    <div class="country-tabs">
+    <button class="tab-btn active" onclick="filterByCountry('all')">Hamısı</button>
+    <button class="tab-btn" onclick="filterByCountry('AZ')">Azərbaycan</button>
+    <button class="tab-btn" onclick="filterByCountry('TR')">Türkiyə</button>
+    <button class="tab-btn" onclick="filterByCountry('IN')">Hindistan</button>
+</div>
     <div id="genres" class="genres-container"></div>
 <div class="country-tabs">
     <button class="tab-btn active" onclick="filterByCountry('all')">Hamısı</button>
@@ -329,7 +336,30 @@
             getMovies(`${BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}`);
             updateWatchlistCount();
         }
+async function filterByCountry(countryCode) {
+    // 1. Düymələrin rəngini dəyişmək üçün (vizual effekt)
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
 
+    // 2. Əgər 'Hamısı' seçilsə, əsas siyahını gətir
+    if (countryCode === 'all') {
+        getMovies(API_URL);
+        return;
+    }
+
+    // 3. Ölkəyə görə API-dən filmləri çağır
+    // 'with_origin_country' parametri həmin ölkənin filmlərini tapır
+    const COUNTRY_URL = `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&with_origin_country=${countryCode}&sort_by=popularity.desc`;
+    
+    const res = await fetch(COUNTRY_URL);
+    const data = await res.json();
+    
+    if (data.results && data.results.length > 0) {
+        showMovies(data.results);
+    } else {
+        main.innerHTML = `<h2 class="no-results">Bu ölkəyə aid film tapılmadı.</h2>`;
+    }
+}
         function renderGenres() {
             const container = document.getElementById('genres');
             genres.forEach(g => {

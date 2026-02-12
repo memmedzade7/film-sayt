@@ -227,14 +227,7 @@
         .cast-container { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; margin-top: 20px; }
         .cast-card { min-width: 100px; text-align: center; font-size: 0.8rem; }
         .cast-card img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 8px; }
-
-       @media (max-width: 850px) {
-    .details-grid { grid-template-columns: 1fr; }
-    .details-grid img { display: none; }
-    
-    header { 
-        flex-direction: column; 
-        gap: 20px; 
+  gap: 20px; 
     }
     
     .search-container {
@@ -248,6 +241,13 @@
 }
     }
 }
+       @media (max-width: 850px) {
+    .details-grid { grid-template-columns: 1fr; }
+    .details-grid img { display: none; }
+    
+    header { 
+        flex-direction: column; 
+      
     </style>
 </head>
 <body>

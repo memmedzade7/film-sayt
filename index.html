@@ -234,6 +234,31 @@
             header { flex-direction: column; gap: 20px; }
             .search { width: 100%; }
         }
+        /* Yaradıcı yazısının stili */
+.creator-text {
+    color: #ff007f; /* RM Film loqosunun rəngi */
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    font-family: Arial, sans-serif;
+}
+
+/* Axtarış xanasını və yazını bir yerdə tutan qutu */
+.search-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end; /* Yazını axtarışın sağına çəkir */
+}
+
+/* Mobil telefonlar üçün tənzimləmə */
+@media (max-width: 850px) {
+    .search-container {
+        align-items: center; /* Telefonda mərkəzə gətirir */
+        width: 100%;
+    }
+}
     </style>
 </head>
 <body>
@@ -245,9 +270,12 @@
            <div id="watchlist-count" class="watchlist-pill" onclick="showFavorites()">Siyahım (0)</div>
 <button class="random-btn" onclick="getRandomMovie()">🎲 Şansımı yoxla</button>
         </div>
-        <form id="form">
-            <input type="text" id="search" class="search" placeholder="İstənilən filmi kəşf et...">
-        </form>
+      <div class="search-container">
+    <div class="creator-text">YARADICI: RƏSUL MƏMMƏDZADƏ</div>
+    <form id="form">
+        <input type="text" id="search" class="search" placeholder="Film axtar...">
+    </form>
+</div>
     <script data-goatcounter="https://rm-film.goatcounter.com/count"
         async src="//gc.zgo.at/count.js"></script>
     </header>

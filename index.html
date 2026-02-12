@@ -394,50 +394,32 @@ async function filterByCountry(countryCode) {
         main.innerHTML = `<h2 class="no-results">Bu ölkəyə aid film tapılmadı.</h2>`;
     }
 }
-        function renderGenres() {
-            const container = document.getElementById('genres');
-            genres.forEach(g => {
-                const tag = document.createElement('div');
-                tag.className = 'genre-tag';
-                tag.innerText = g.name;
-                tag.onclick = () => {
-                    document.querySelectorAll('.genre-tag').forEach(t => t.classList.remove('active'));
-                    tag.classList.add('active');
-                    getMovies(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${g.id}`);
-                };
-                container.appendChild(tag);
-            });
-        }
       function showMovies(movies) {
     main.innerHTML = '';
 
     movies.forEach((movie) => {
-        const title = movie.title; // Bu, API-dən gələn tərcümədir (az-AZ)
-        const original_title = movie.original_title; // Bu, həmişə orijinal (ingilis) addır
-        const poster_path = movie.poster_path;
-        const vote_average = movie.vote_average;
+        // Dəyişənləri birbaşa movie obyektindən alırıq
+        const o_title = movie.original_title; // Əsas ad (İngilis)
+        const a_title = movie.title;          // Tərcümə (Azərbaycan)
+        const poster = movie.poster_path;
+        const vote = movie.vote_average;
 
         const movieEl = document.createElement('div');
         movieEl.classList.add('movie');
 
-        // Məntiq: Orijinal adı başa qoy, tərcüməni (title) mötərizəyə sal
-        // Əgər adlar eynidirsə (məsələn: "Avatar"), sadəcə birini yaz
-        let displayTitle;
-        if (original_title && original_title !== title) {
-            displayTitle = `${original_title} (${title})`;
-        } else {
-            displayTitle = original_title || title;
-        }
+        // Məcburi format: Orijinal Ad (Azərbaycan Adı)
+        // Hətta adlar eyni olsa belə mötərizə çıxacaq ki, işlədiyini görəsən
+        const displayTitle = `${o_title} (${a_title})`;
 
         movieEl.innerHTML = `
-            <img src="${poster_path ? IMG_PATH + poster_path : 'https://via.placeholder.com/300x450?text=Poster+Tapılmadı'}" alt="${original_title}">
+            <img src="${poster ? IMG_PATH + poster : 'https://via.placeholder.com/300x450?text=No+Poster'}" alt="${o_title}">
             <div class="movie-info">
                 <h3>${displayTitle}</h3>
-                <span class="${getClassByRate(vote_average)}">${vote_average}</span>
+                <span class="${getClassByRate(vote)}">${vote}</span>
             </div>
             <div class="overview">
                 <h3>Haqqında</h3>
-                ${movie.overview || "Bu film haqqında məlumat hələ əlavə edilməyib."}
+                ${movie.overview || "Məlumat yoxdur."}
             </div>
         `;
         main.appendChild(movieEl);

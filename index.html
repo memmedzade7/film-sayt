@@ -409,6 +409,35 @@ async function filterByCountry(countryCode) {
                 container.appendChild(tag);
             });
         }
+        function showMovies(movies) {
+    main.innerHTML = '';
+
+    movies.forEach((movie) => {
+        // original_title - filmin ilk (adətən ingilis) adı
+        // title - API-dən gələn tərcümə olunmuş ad
+        const { title, poster_path, vote_average, overview, original_title } = movie;
+        const movieEl = document.createElement('div');
+        movieEl.classList.add('movie');
+
+        // Əgər orijinal ad ilə tərcümə eynidirsə tək yaz, deyilsə mötərizədə göstər
+        const displayTitle = (original_title && original_title !== title) 
+            ? `${original_title} (${title})` 
+            : title;
+
+        movieEl.innerHTML = `
+            <img src="${poster_path ? IMG_PATH + poster_path : 'https://via.placeholder.com/300x450?text=Poster+Tapılmadı'}" alt="${title}">
+            <div class="movie-info">
+                <h3>${displayTitle}</h3>
+                <span class="${getClassByRate(vote_average)}">${vote_average}</span>
+            </div>
+            <div class="overview">
+                <h3>Haqqında</h3>
+                ${overview || "Məlumat yoxdur."}
+            </div>
+        `;
+        main.appendChild(movieEl);
+    });
+}
 
         async function getMovies(url) {
             main.innerHTML = '<div style="grid-column: 1/-1; text-align: center; opacity: 0.5;">Filmlər gətirilir...</div>';

@@ -253,23 +253,32 @@
 .country-tabs {
     display: flex;
     justify-content: center;
-    gap: 10px;
-    margin: 20px 0;
+    gap: 12px;
+    margin: 25px 0;
+    padding: 10px;
 }
 
 .tab-btn {
-    background: #222;
-    color: #fff;
-    border: 1px solid #444;
-    padding: 8px 15px;
+    background: #1a1a1a; /* Tünd boz/qara fon */
+    color: #cccccc; /* Yumşaq ağ/boz yazı */
+    border: 1px solid #333; /* Zərif çərçivə */
+    padding: 10px 22px;
     cursor: pointer;
-    border-radius: 20px;
-    transition: 0.3s;
+    border-radius: 6px; /* Tam dairəvi yox, azca künclü (daha ağır görünür) */
+    font-size: 13px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
 }
 
+/* Aktiv olan və üzərinə gələndə görünən halı */
 .tab-btn.active, .tab-btn:hover {
-    background: #ff007f; /* Loqo rəngin */
-    border-color: #ff007f;
+    background: #ffffff; /* Ağ fon */
+    color: #000000; /* Qara yazı */
+    border-color: #ffffff;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.1); /* Çox zərif işıqlanma */
+}
 }
     </style>
 </head>

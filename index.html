@@ -228,35 +228,24 @@
         .cast-card { min-width: 100px; text-align: center; font-size: 0.8rem; }
         .cast-card img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 8px; }
 
-        @media (max-width: 850px) {
-            .details-grid { grid-template-columns: 1fr; }
-            .details-grid img { display: none; }
-            header { flex-direction: column; gap: 20px; }
-            .search { width: 100%; }
-        }
-        /* Yaradıcı yazısının stili */
-.creator-text {
-    color: #a0a0a0; /* Yumşaq boz rəng */
-    font-size: 10px;
-    font-weight: 500; /* Yazını bir az daha incəltmək üçün */
-    letter-spacing: 1px;
-    margin-bottom: 5px;
-    text-transform: uppercase;
-    opacity: 0.8; /* Bir az şəffaflıq veririk ki, daha təbii görünsün */
-}
-
-/* Axtarış xanasını və yazını bir yerdə tutan qutu */
-.search-container {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end; /* Yazını axtarışın sağına çəkir */
-}
-
-/* Mobil telefonlar üçün tənzimləmə */
-@media (max-width: 850px) {
+       @media (max-width: 850px) {
+    .details-grid { grid-template-columns: 1fr; }
+    .details-grid img { display: none; }
+    
+    header { 
+        flex-direction: column; 
+        gap: 20px; 
+    }
+    
     .search-container {
-        align-items: center; /* Telefonda mərkəzə gətirir */
         width: 100%;
+        align-items: center; /* Telefonda yaradıcı adını və axtarışı ortalayır */
+    }
+
+    .search { 
+        width: 100%; 
+    }
+}
     }
 }
     </style>

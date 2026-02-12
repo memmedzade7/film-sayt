@@ -258,26 +258,57 @@
     padding: 10px;
 }
 
-.tab-btn {
-    background: #1a1a1a; /* Tünd boz/qara fon */
-    color: #cccccc; /* Yumşaq ağ/boz yazı */
-    border: 1px solid #333; /* Zərif çərçivə */
-    padding: 10px 22px;
-    cursor: pointer;
-    border-radius: 6px; /* Tam dairəvi yox, azca künclü (daha ağır görünür) */
-    font-size: 13px;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    transition: all 0.3s ease;
+.country-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 30px 0;
 }
 
-/* Aktiv olan və üzərinə gələndə görünən halı */
-.tab-btn.active, .tab-btn:hover {
-    background: #ffffff; /* Ağ fon */
-    color: #000000; /* Qara yazı */
-    border-color: #ffffff;
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.1); /* Çox zərif işıqlanma */
+.tab-btn {
+    background: linear-gradient(145deg, #1e1e1e, #111); /* Brendin tünd keçidi */
+    color: #999;
+    border: 1px solid #333;
+    padding: 10px 25px;
+    cursor: pointer;
+    border-radius: 12px; /* Daha modern, yumşaq künclər */
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Elastik keçid */
+    position: relative;
+    overflow: hidden;
+}
+
+/* Seçilən düymənin kreativ stili */
+.tab-btn.active {
+    background: #fff;
+    color: #000;
+    border-color: #fff;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    transform: translateY(-3px); /* Bir az yuxarı qalxma effekti */
+}
+
+/* Üzərinə gələndə zərif neon xətt effekti */
+.tab-btn:hover:not(.active) {
+    color: #fff;
+    border-color: #555;
+    background: #1a1a1a;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+}
+
+/* Aktiv düymənin altına kiçik bir parlaq nöqtə/xətt */
+.tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 10px;
+    height: 2px;
+    background: #ff007f; /* Brend rəngindən kiçik bir nişanə */
+    border-radius: 2px;
 }
 }
     </style>

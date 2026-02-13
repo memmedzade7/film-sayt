@@ -33,7 +33,6 @@
             overflow-x: hidden;
         }
 
-        /* --- HEADER & BRAND --- */
         header {
             padding: 1.5rem 5%;
             display: flex;
@@ -120,7 +119,6 @@
 
         .search:focus { width: 380px; outline: none; border-color: #a855f7; box-shadow: var(--neon-glow); }
 
-        /* --- GENRES & CATEGORIES --- */
         .genres-container {
             display: flex;
             justify-content: center;
@@ -150,7 +148,6 @@
             box-shadow: var(--neon-glow);
         }
 
-        /* --- MOVIE GRID --- */
         main {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -193,7 +190,6 @@
         }
         .fav-btn.active { color: #ff4757; background: white; }
 
-        /* --- MODAL SYSTEM --- */
         .modal {
             position: fixed;
             inset: 0;
@@ -219,7 +215,15 @@
 
         .close-modal { position: absolute; top: 20px; right: 20px; font-size: 2.5rem; cursor: pointer; color: white; z-index: 100; }
         
-        .video-container { width: 100%; aspect-ratio: 16/9; background: #000; }
+        /* VIDEO CONTAINER & REKLAM QORUYUCU */
+        .video-container { width: 100%; aspect-ratio: 16/9; background: #000; position: relative; }
+        .ad-shield {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 85%;
+            z-index: 5;
+            cursor: pointer;
+            background: transparent;
+        }
         
         .details-grid { padding: 40px; display: grid; grid-template-columns: 300px 1fr; gap: 40px; }
         .details-grid img { width: 100%; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
@@ -288,18 +292,6 @@
             background: #1a1a1a;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
         }
-
-        .tab-btn.active::after {
-            content: '';
-            position: absolute;
-            bottom: 4px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 10px;
-            height: 2px;
-            background: #ff007f;
-            border-radius: 2px;
-        }
     </style>
 </head>
 <body>
@@ -338,8 +330,6 @@
         const API_KEY = '34d4692f40f9b4827503c570ebda8db7';
         const BASE_URL = 'https://api.themoviedb.org/3';
         const IMG_PATH = 'https://image.tmdb.org/t/p/w1280';
-        
-        // Dil parametrini bura əlavə etdik
         const LANG = 'tr-TR'; 
 
         const main = document.getElementById('main');
@@ -364,21 +354,13 @@
         async function filterByCountry(countryCode) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
-
             if (countryCode === 'all') {
                 getMovies(`${BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}&language=${LANG}`);
                 return;
             }
-
-            const COUNTRY_URL = `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_origin_country=${countryCode}&sort_by=popularity.desc&language=${LANG}`;
-            const res = await fetch(COUNTRY_URL);
+            const res = await fetch(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_origin_country=${countryCode}&sort_by=popularity.desc&language=${LANG}`);
             const data = await res.json();
-            
-            if (data.results && data.results.length > 0) {
-                showMovies(data.results);
-            } else {
-                main.innerHTML = `<h2 class="no-results" style="grid-column: 1/-1; text-align: center;">Bu ölkəyə aid film tapılmadı.</h2>`;
-            }
+            showMovies(data.results);
         }
 
         function renderGenres() {
@@ -408,7 +390,6 @@
             movies.forEach(movie => {
                 const { id, title, poster_path, vote_average } = movie;
                 const isFav = favorites.some(f => f.id === id);
-                
                 const el = document.createElement('div');
                 el.className = 'movie';
                 el.innerHTML = `
@@ -426,28 +407,15 @@
 
         function toggleFav(movie, btn) {
             const index = favorites.findIndex(f => f.id === movie.id);
-            if(index > -1) {
-                favorites.splice(index, 1);
-                btn.classList.remove('active');
-            } else {
-                favorites.push(movie);
-                btn.classList.add('active');
-            }
+            if(index > -1) { favorites.splice(index, 1); btn.classList.remove('active'); }
+            else { favorites.push(movie); btn.classList.add('active'); }
             localStorage.setItem('favorites', JSON.stringify(favorites));
             updateWatchlistCount();
         }
 
-        function updateWatchlistCount() {
-            document.getElementById('watchlist-count').innerText = `Siyahım (${favorites.length})`;
-        }
+        function updateWatchlistCount() { document.getElementById('watchlist-count').innerText = `Siyahım (${favorites.length})`; }
 
-        function showFavorites() {
-            if(favorites.length === 0) {
-                alert("Siyahınız hələ boşdur!");
-                return;
-            }
-            showMovies(favorites);
-        }
+        function showFavorites() { if(favorites.length === 0) { alert("Siyahınız hələ boşdur!"); return; } showMovies(favorites); }
 
         async function openDetails(id) {
             modal.style.display = 'flex';
@@ -468,15 +436,14 @@
 
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
-           <div class="video-container">
-    <iframe src="https://vidsrc.xyz/embed/movie/${id}" 
-            width="100%" 
-            height="100%" 
-            frameborder="0" 
-            allowfullscreen 
-            allow="autoplay; encrypted-media">
-    </iframe>
-</div>
+                <div class="video-container">
+                    <div class="ad-shield" onclick="this.remove()" title="Videonu başlatmaq üçün klikləyin"></div>
+                    
+                    <iframe src="https://vidsrc.me/embed/movie?tmdb=${id}&ds_lang=tr" 
+                            width="100%" height="100%" frameborder="0" 
+                            allowfullscreen allow="autoplay">
+                    </iframe>
+                </div>
                 <div class="details-grid">
                     <img src="${movie.poster_path ? IMG_PATH + movie.poster_path : 'https://via.placeholder.com/300x450'}">
                     <div>

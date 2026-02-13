@@ -311,6 +311,30 @@
     border-radius: 2px;
 }
 }
+        .modal {
+    display: none; 
+    position: fixed;
+    z-index: 2000;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.95);
+}
+.modal-content {
+    margin: 5% auto;
+    width: 90%;
+    max-width: 1000px;
+}
+.close-modal {
+    color: #ff007f;
+    float: right;
+    font-size: 40px;
+    cursor: pointer;
+}
+#player-container iframe {
+    width: 100%;
+    height: 550px;
+    border: none;
+}
     </style>
 </head>
 <body>
@@ -563,6 +587,30 @@ async function getRandomMovie() {
     openDetails(data.results[randomIndex].id); // Təsadüfi filmi açır
 }
         init();
+        function playMovie(id) {
+    const modal = document.getElementById('movie-modal');
+    const container = document.getElementById('player-container');
+    
+    // Pulsuz pleyer mənbəsi (vidsrc.to ən populyarıdır)
+    const videoUrl = `https://vidsrc.to/embed/movie/${id}`;
+    
+    container.innerHTML = `<iframe src="${videoUrl}" allowfullscreen></iframe>`;
+    modal.style.display = 'block';
+}
+
+function closeMovie() {
+    const modal = document.getElementById('movie-modal');
+    const container = document.getElementById('player-container');
+    
+    container.innerHTML = ''; // Videonu dayandır
+    modal.style.display = 'none';
+}
     </script>
+    <div id="movie-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeMovie()">&times;</span>
+        <div id="player-container"></div>
+    </div>
+</div>
 </body>
 </html>

@@ -358,9 +358,7 @@
         const modalContent = document.getElementById('modal-content');
         
         let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-let currentPage = 1;
-let currentUrl = '';
-let isLoading = false;
+
         const genres = [
             { id: 28, name: 'Aksiyon' }, { id: 12, name: 'Macəra' },
             { id: 16, name: 'Animasiya' }, { id: 35, name: 'Komediya' },
@@ -379,11 +377,11 @@ async function filterByCountry(countryCode) {
     event.target.classList.add('active');
 
     // 2. Əgər 'Hamısı' seçilsə, əsas siyahını gətir
-    if (countryCode === 'all' currentPage = 1;) {
+    if (countryCode === 'all') {
         getMovies(API_URL);
         return;
     }
-currentPage = 1;
+
     // 3. Ölkəyə görə API-dən filmləri çağır
     // 'with_origin_country' parametri həmin ölkənin filmlərini tapır
     const COUNTRY_URL = `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&with_origin_country=${countryCode}&sort_by=popularity.desc`;
@@ -441,59 +439,32 @@ currentPage = 1;
     });
 }
 
- async function getMovies(url, addNew = false) {
-    currentUrl = url;
-    isLoading = true;
-
-    // Əgər yeni kateqoriyadırsa, ekranı təmizlə və yüklənir mesajı ver
-    if (!addNew) {
-        main.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: white;">Yüklənir...</div>';
-    }
-
-    try {
-        const res = await fetch(url);
-        const data = await res.json();
-
-        if (data.results) {
-            showMovies(data.results, addNew);
+        async function getMovies(url) {
+            main.innerHTML = '<div style="grid-column: 1/-1; text-align: center; opacity: 0.5;">Filmlər gətirilir...</div>';
+            const res = await fetch(url);
+            const data = await res.json();
+            showMovies(data.results);
         }
-    } catch (error) {
-        console.error("Xəta baş verdi:", error);
-    }
-    
-    isLoading = false;
-}
-    function showMovies(movies, addNew = false) {
-    // Əgər addNew false-dursa, ekranı təmizləyirik
-    if (!addNew) {
-        main.innerHTML = '';
-    }
 
-    if (!movies || movies.length === 0) {
-        if (!addNew) main.innerHTML = '<h2 style="color:white; text-align:center;">Film tapılmadı.</h2>';
-        return;
-    }
-
-    movies.forEach((movie) => {
-        const { id, title, poster_path, vote_average } = movie;
-        const isFav = favorites.some(f => f.id === id);
-
-        const el = document.createElement('div');
-        el.className = 'movie';
-        el.innerHTML = `
-            <button class="fav-btn ${isFav ? 'active' : ''}" onclick="event.stopPropagation(); toggleFav(${JSON.stringify(movie).replace(/"/g, '&quot;')}, this)">❤</button>
-            <img src="${poster_path ? IMG_PATH + poster_path : 'https://via.placeholder.com/300x450'}" alt="${title}">
-            <div class="movie-info">
-                <h3>${title}</h3>
-                <div class="rating">${vote_average ? vote_average.toFixed(1) : '0'}</div>
-            </div>
-        `;
-        el.onclick = () => openDetails(id);
-        main.appendChild(el);
-    });
-}
-}
-}
+        function showMovies(movies) {
+            main.innerHTML = '';
+            movies.forEach(movie => {
+                const { id, title, poster_path, vote_average } = movie;
+                const isFav = favorites.some(f => f.id === id);
+                
+                const el = document.createElement('div');
+                el.className = 'movie';
+                el.innerHTML = `
+                    <button class="fav-btn ${isFav ? 'active' : ''}" onclick="event.stopPropagation(); toggleFav(${JSON.stringify(movie).replace(/"/g, '&quot;')}, this)">❤</button>
+                    <img src="${poster_path ? IMG_PATH + poster_path : 'https://via.placeholder.com/300x450'}" alt="${title}">
+                    <div class="movie-info">
+                        <h3>${title}</h3>
+                        <div class="rating">${vote_average.toFixed(1)}</div>
+                    </div>
+                `;
+                el.onclick = () => openDetails(id);
+                main.appendChild(el);
+            });
         }
 
         // Watchlist Funksiyası
@@ -592,15 +563,6 @@ async function getRandomMovie() {
     openDetails(data.results[randomIndex].id); // Təsadüfi filmi açır
 }
         init();
-       window.onscroll = function() {
-    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
-        if (!isLoading && currentUrl) {
-            currentPage++;
-            const nextUrl = `${currentUrl}${currentUrl.includes('?') ? '&' : '?'}page=${currentPage}`;
-            getMovies(nextUrl, true);
-        }
-    }
-};
     </script>
 </body>
 </html>

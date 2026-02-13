@@ -2,8 +2,7 @@
 <html lang="az">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RM Film | Minlərlə film, Tək Məkan</title>
+    <meta name="viewport" content="width=1200"> <title>RM Film | Minlərlə film, Tək Məkan</title>
     <style>
         #ambient-layer {
             position: absolute;
@@ -30,7 +29,8 @@
             color: var(--text-main);
             font-family: 'Plus Jakarta Sans', sans-serif;
             margin: 0;
-            overflow-x: hidden;
+            overflow-x: auto; /* Genişlik sabit olduğu üçün sağa sürüşməyə icazə veririk */
+            min-width: 1200px; /* Saytın minimum genişliyini desktopa uyğunlaşdırırıq */
         }
 
         header {
@@ -125,9 +125,7 @@
             gap: 10px;
             padding: 20px 5%;
             overflow-x: auto;
-            scrollbar-width: none;
         }
-        .genres-container::-webkit-scrollbar { display: none; }
 
         .genre-tag {
             background: rgba(255, 255, 255, 0.05);
@@ -224,18 +222,28 @@
             background: transparent;
         }
         
-        .details-grid { padding: 40px; display: grid; grid-template-columns: 300px 1fr; gap: 40px; }
-        .details-grid img { width: 100%; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        /* MOBİLDƏ DƏ DESKTOP GÖRÜNÜŞÜNÜ QORUMAQ ÜÇÜN DƏYİŞDİRİLDİ */
+        .details-grid { 
+            padding: 40px; 
+            display: grid; 
+            grid-template-columns: 300px 1fr; 
+            gap: 40px; 
+        }
+        .details-grid img { 
+            width: 100%; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+            display: block !important; /* Mobil versiyada gizlənməsin deyə məcburi aktiv edildi */
+        }
         
         .cast-container { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; margin-top: 20px; }
         .cast-card { min-width: 100px; text-align: center; font-size: 0.8rem; }
         .cast-card img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 8px; }
 
+        /* Media Query blokundakı "gizlətmə" və "tək sütun" kodları silindi və ya modifikasiya olundu */
         @media (max-width: 850px) {
-            .details-grid { grid-template-columns: 1fr; }
-            .details-grid img { display: none; }
-            header { flex-direction: column; gap: 20px; }
-            .search { width: 100%; }
+            header { flex-direction: row; gap: 20px; } /* Headerin yanaşı qalması üçün row saxlanıldı */
+            .search { width: 280px; }
         }
 
         .creator-text {
@@ -337,11 +345,10 @@
         
         let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
         
-        // Infinite Scroll üçün dəyişənlər
         let currentPage = 1;
         let currentApiUrl = `${BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}&language=${LANG}`;
         let isNextPageLoading = false;
-        let isFavoritesView = false; // Favoritlərdə skrolun qarşısını almaq üçün
+        let isFavoritesView = false; 
 
         const genres = [
             { id: 28, name: 'Aksiyon' }, { id: 12, name: 'Macəra' },
@@ -421,9 +428,8 @@
             });
         }
 
-        // Skrol hadisəsi
         window.onscroll = function() {
-            if (isFavoritesView) return; // Siyahım bölməsində skrol etmə
+            if (isFavoritesView) return;
             
             if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 800) {
                 if (!isNextPageLoading) {
@@ -476,7 +482,7 @@
                     </iframe>
                 </div>
                 <div class="details-grid">
-                    <img src="${movie.poster_path ? IMG_PATH + movie.poster_path : 'https://via.placeholder.com/300x450'}">
+                    <img src="${movie.poster_path ? IMG_PATH + movie.poster_path : 'https://via.placeholder.com/300x450'}" style="display:block;">
                     <div>
                         <h2 style="font-size: 2.5rem; margin-top:0;">${movie.title}</h2>
                         <p style="font-size: 1.1rem; line-height:1.6; color:var(--text-muted);">${movie.overview || "Məlumat yoxdur."}</p>

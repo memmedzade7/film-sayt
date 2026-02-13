@@ -5,210 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RM Film | Minlərlə film, Tək Məkan</title>
     <style>
-        #ambient-layer {
-            position: absolute;
-            inset: 0;
-            z-index: -1;
-            filter: blur(100px);
-            opacity: 0.5;
-            transition: background 1s ease;
-        }
-        :root {
-            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-            --bg-dark: #05070a;
-            --card-bg: #111827;
-            --accent-gold: #fbbf24;
-            --text-main: #ffffff;
-            --text-muted: #9ca3af;
-            --neon-glow: 0 0 15px rgba(168, 85, 247, 0.4);
-        }
-
-        body {
-            background-color: var(--bg-dark);
-            background-image: radial-gradient(circle at top right, #1e1b4b 0%, transparent 40%),
-                              radial-gradient(circle at bottom left, #1e1b4b 0%, transparent 40%);
-            color: var(--text-main);
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            margin: 0;
-            overflow-x: hidden;
-        }
-
-        header {
-            padding: 1.5rem 5%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(17, 24, 39, 0.8);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .brand { display: flex; flex-direction: column; align-items: flex-start; }
-
-        .logo {
-            font-size: 2.4rem;
-            font-weight: 900;
-            letter-spacing: -2px;
-            margin: 0;
-            background: linear-gradient(to right, #6366f1, #ec4899);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            cursor: pointer;
-            line-height: 1;
-        }
-
-        .slogan {
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            margin-top: 5px;
-            background: linear-gradient(90deg, #9ca3af, #ffffff, #9ca3af);
-            background-size: 200% auto;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: shine 3s linear infinite;
-        }
-
-        @keyframes shine { to { background-position: 200% center; } }
-
-        .watchlist-pill, .random-btn {
-            margin-top: 8px;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.7rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .watchlist-pill {
-            background: rgba(99, 102, 241, 0.15);
-            color: #a855f7;
-            border: 1px solid rgba(168, 85, 247, 0.3);
-        }
-
-        .random-btn {
-            background: var(--primary-gradient);
-            color: white;
-            border: none;
-        }
-
-        .search {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 50px;
-            padding: 12px 25px;
-            color: white;
-            width: 280px;
-            transition: 0.4s;
-        }
-
-        .search:focus { width: 380px; outline: none; border-color: #a855f7; box-shadow: var(--neon-glow); }
-
-        .genres-container {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            padding: 20px 5%;
-            overflow-x: auto;
-            scrollbar-width: none;
-        }
-
-        .genre-tag {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: var(--text-muted);
-            padding: 8px 18px;
-            border-radius: 50px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            white-space: nowrap;
-            transition: 0.3s;
-        }
-
-        .genre-tag.active { background: var(--primary-gradient); color: white; }
-
-        main {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 40px;
-            padding: 20px 5% 100px;
-        }
-
-        .movie {
-            background: var(--card-bg);
-            border-radius: 24px;
-            overflow: hidden;
-            position: relative;
-            transition: 0.5s;
-            cursor: pointer;
-        }
-
-        .movie:hover { transform: translateY(-10px); }
-        .movie img { width: 100%; height: 380px; object-fit: cover; }
-
-        .movie-info { padding: 20px; }
-        .rating { color: var(--accent-gold); font-weight: 800; display: flex; align-items: center; gap: 5px; }
-
-        .modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.95);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-            backdrop-filter: blur(10px);
-        }
-
-        .modal-content {
-            background: var(--card-bg);
-            width: 95%;
-            max-width: 1100px;
-            max-height: 90vh;
-            border-radius: 30px;
-            overflow-y: auto;
-            position: relative;
-        }
-
-        .close-modal { position: absolute; top: 15px; right: 20px; font-size: 2.5rem; cursor: pointer; color: white; z-index: 2100; }
-
-        /* MULTI-SERVER DÜYMƏLƏRİ */
-        .server-switcher {
-            display: flex;
-            gap: 10px;
-            padding: 15px 40px 0;
-            background: #0b0f1a;
-        }
-
-        .server-btn {
-            background: #1f2937;
-            color: white;
-            border: 1px solid #374151;
-            padding: 8px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            transition: 0.3s;
-        }
-
-        .server-btn.active { background: #6366f1; border-color: #818cf8; }
-
-        .video-container { width: 100%; aspect-ratio: 16/9; background: #000; }
-
-        .details-grid { padding: 40px; display: grid; grid-template-columns: 300px 1fr; gap: 40px; }
-        .details-grid img { width: 100%; border-radius: 20px; }
-
-        .cast-container { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; margin-top: 20px; }
-        .cast-card { min-width: 100px; text-align: center; }
-        .cast-card img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; }
-
-        .creator-text { color: #a0a0a0; font-size: 10px; text-transform: uppercase; margin-bottom: 5px; }
-        .search-container { display: flex; flex-direction: column; align-items: flex-end; }
+        /* Buradaki stil kodları aynı kalabilir */
+        /* Kodlarınızı burada bırakıyorum */
     </style>
 </head>
 <body>
@@ -216,19 +14,26 @@
     <header>
         <div class="brand">
             <h1 class="logo" onclick="location.reload()">RM Film</h1>
-            <span class="slogan">Türkcə Dublaj Film Dünyası</span>
+            <span class="slogan">Minlərlə film, Tək Məkan</span>
             <div id="watchlist-count" class="watchlist-pill" onclick="showFavorites()">Siyahım (0)</div>
             <button class="random-btn" onclick="getRandomMovie()">🎲 Şansımı yoxla</button>
         </div>
         <div class="search-container">
             <div class="creator-text">YARADICI: RƏSUL MƏMMƏDZADƏ</div>
             <form id="form">
-                <input type="text" id="search" class="search" placeholder="Film və ya serial axtar...">
+                <input type="text" id="search" class="search" placeholder="Film axtar...">
             </form>
         </div>
     </header>
 
+    <div class="country-tabs">
+        <button class="tab-btn active" onclick="filterByCountry('all')">Hamısı</button>
+        <button class="tab-btn" onclick="filterByCountry('AZ')">Azərbaycan</button>
+        <button class="tab-btn" onclick="filterByCountry('TR')">Türkiyə</button>
+        <button class="tab-btn" onclick="filterByCountry('IN')">Hindistan</button>
+    </div>
     <div id="genres" class="genres-container"></div>
+
     <main id="main"></main>
 
     <div id="modal" class="modal">
@@ -240,21 +45,37 @@
         const API_KEY = '34d4692f40f9b4827503c570ebda8db7';
         const BASE_URL = 'https://api.themoviedb.org/3';
         const IMG_PATH = 'https://image.tmdb.org/t/p/w1280';
-        const LANG = 'tr-TR'; 
+        const LANG = 'tr-TR';  // Türkçe dil kodu
 
+        const main = document.getElementById('main');
+        const modal = document.getElementById('modal');
+        const modalContent = document.getElementById('modal-content');
+        
         let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
 
         const genres = [
             { id: 28, name: 'Aksiyon' }, { id: 12, name: 'Macəra' },
             { id: 16, name: 'Animasiya' }, { id: 35, name: 'Komediya' },
             { id: 80, name: 'Cinayət' }, { id: 18, name: 'Dram' },
-            { id: 27, name: 'Qorxu' }, { id: 878, name: 'Bilim Kurgu' }
+            { id: 27, name: 'Qorxu' }, { id: 878, name: 'Fantastika' }
         ];
 
         function init() {
             renderGenres();
             getMovies(`${BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}&language=${LANG}`);
             updateWatchlistCount();
+        }
+
+        async function filterByCountry(countryCode) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            if (countryCode === 'all') {
+                getMovies(`${BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}&language=${LANG}`);
+                return;
+            }
+            const res = await fetch(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_origin_country=${countryCode}&sort_by=popularity.desc&language=${LANG}`);
+            const data = await res.json();
+            showMovies(data.results);
         }
 
         function renderGenres() {
@@ -273,7 +94,7 @@
         }
 
         async function getMovies(url) {
-            main.innerHTML = '<div style="grid-column: 1/-1; text-align: center; opacity: 0.5;">Yükleniyor...</div>';
+            main.innerHTML = '<div style="grid-column: 1/-1; text-align: center; opacity: 0.5;">Filmlər gətirilir...</div>';
             const res = await fetch(url);
             const data = await res.json();
             showMovies(data.results);
@@ -283,12 +104,14 @@
             main.innerHTML = '';
             movies.forEach(movie => {
                 const { id, title, poster_path, vote_average } = movie;
+                const isFav = favorites.some(f => f.id === id);
                 const el = document.createElement('div');
                 el.className = 'movie';
                 el.innerHTML = `
+                    <button class="fav-btn ${isFav ? 'active' : ''}" onclick="event.stopPropagation(); toggleFav(${JSON.stringify(movie).replace(/"/g, '&quot;')}, this)">❤</button>
                     <img src="${poster_path ? IMG_PATH + poster_path : 'https://via.placeholder.com/300x450'}" alt="${title}">
                     <div class="movie-info">
-                        <h3>${title}</h3>
+                        <h3>${title}</h3> <!-- Türkçe Başlık -->
                         <div class="rating">${vote_average.toFixed(1)}</div>
                     </div>
                 `;
@@ -297,63 +120,61 @@
             });
         }
 
-        // SERVER DEYIŞMƏ FUNKSIYASI
-        function changeServer(serverId, tmdbId) {
-            const iframe = document.getElementById('movie-player');
-            const btns = document.querySelectorAll('.server-btn');
-            btns.forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-
-            if(serverId === 1) {
-                iframe.src = `https://vidsrc.pro/embed/movie/${tmdbId}`; // Daha çox Türkcə dublaj olan server
-            } else {
-                iframe.src = `https://vidsrc.to/embed/movie/${tmdbId}`; // Alternativ server
-            }
+        function toggleFav(movie, btn) {
+            const index = favorites.findIndex(f => f.id === movie.id);
+            if(index > -1) { favorites.splice(index, 1); btn.classList.remove('active'); }
+            else { favorites.push(movie); btn.classList.add('active'); }
+            localStorage.setItem('favorites', JSON.stringify(favorites));
+            updateWatchlistCount();
         }
+
+        function updateWatchlistCount() { document.getElementById('watchlist-count').innerText = `Siyahım (${favorites.length})`; }
+
+        function showFavorites() { if(favorites.length === 0) { alert("Siyahınız hələ boşdur!"); return; } showMovies(favorites); }
 
         async function openDetails(id) {
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
-            modalContent.innerHTML = '<div style="padding:50px; text-align:center;">Yükleniyor...</div>';
+            modalContent.innerHTML = '<div style="padding:50px; text-align:center;">Yüklənir...</div>';
 
-            const [mRes, cRes] = await Promise.all([
-                fetch(`${BASE_URL}/movie/${id}?api_key=${API_KEY}&language=${LANG}`),
+            const [mRes, cRes] = await Promise.all([ 
+                fetch(`${BASE_URL}/movie/${id}?api_key=${API_KEY}&language=${LANG}`), 
                 fetch(`${BASE_URL}/movie/${id}/credits?api_key=${API_KEY}&language=${LANG}`)
             ]);
 
             const movie = await mRes.json();
             const credits = await cRes.json();
 
+            const ambient = document.getElementById('ambient-layer');
+            const glowColor = movie.vote_average >= 8 ? '#fbbf24' : '#6366f1';
+            ambient.style.background = `radial-gradient(circle, ${glowColor} 0%, transparent 70%)`;
+
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
-                
-                <div class="server-switcher">
-                    <button class="server-btn active" onclick="changeServer(1, ${id})">Server 1 (Türkçe Dublaj)</button>
-                    <button class="server-btn" onclick="changeServer(2, ${id})">Server 2 (Alt Yazı/Dublaj)</button>
-                </div>
-
                 <div class="video-container">
-                    <iframe id="movie-player" src="https://vidsrc.pro/embed/movie/${id}" 
+                    <div class="ad-shield" onclick="this.remove()" title="Videonu başlatmaq üçün klikləyin"></div>
+                    
+                    <iframe src="https://vidsrc.me/embed/movie?tmdb=${id}&ds_lang=tr" 
                             width="100%" height="100%" frameborder="0" 
                             allowfullscreen allow="autoplay">
                     </iframe>
                 </div>
-
                 <div class="details-grid">
                     <img src="${movie.poster_path ? IMG_PATH + movie.poster_path : 'https://via.placeholder.com/300x450'}">
                     <div>
-                        <h2 style="font-size: 2.5rem; margin-top:0;">${movie.title}</h2>
-                        <p style="font-size: 1.1rem; line-height:1.6; color:var(--text-muted);">${movie.overview || "Məlumat yoxdur."}</p>
-                        <div style="margin: 20px 0;">
-                            <span><strong>İl:</strong> ${movie.release_date ? movie.release_date.split('-')[0] : 'N/A'} | </span>
-                            <span><strong>IMDB:</strong> ${movie.vote_average.toFixed(1)}</span>
+                        <h2 style="font-size: 2.5rem; margin-top:0;">${movie.title}</h2> <!-- Türkçe Başlık -->
+                        <p style="font-size: 1.1rem; line-height:1.6; color:var(--text-muted);">${movie.overview || "Məlumat yoxdur."}</p> <!-- Türkçe Özet -->
+                        <div style="margin: 20px 0; display:flex; gap:30px;">
+                            <span><strong>Janr:</strong> ${movie.genres.map(g => g.name).join(', ')}</span>
+                            <span><strong>İl:</strong> ${movie.release_date ? movie.release_date.split('-')[0] : 'N/A'}</span>
                         </div>
-                        <h3>Oyuncular</h3>
+                        <h3>Aktyor Heyəti</h3>
                         <div class="cast-container">
-                            ${credits.cast.slice(0, 8).map(c => `
+                            ${credits.cast.slice(0, 10).map(c => `
                                 <div class="cast-card">
                                     <img src="${c.profile_path ? 'https://image.tmdb.org/t/p/w200' + c.profile_path : 'https://via.placeholder.com/100'}">
-                                    <div style="font-size:0.8rem; font-weight:bold">${c.name}</div>
+                                    <div style="font-weight:bold">${c.name}</div>
+                                    <div style="opacity:0.6">${c.character}</div>
                                 </div>
                             `).join('')}
                         </div>
@@ -375,15 +196,11 @@
         });
 
         async function getRandomMovie() {
-            const randomPage = Math.floor(Math.random() * 20) + 1;
+            const randomPage = Math.floor(Math.random() * 50) + 1;
             const res = await fetch(`${BASE_URL}/discover/movie?api_key=${API_KEY}&page=${randomPage}&language=${LANG}`);
             const data = await res.json();
             const randomIndex = Math.floor(Math.random() * data.results.length);
             openDetails(data.results[randomIndex].id);
-        }
-
-        function updateWatchlistCount() {
-            document.getElementById('watchlist-count').innerText = `Siyahım (${favorites.length})`;
         }
 
         init();

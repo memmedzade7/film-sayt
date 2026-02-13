@@ -441,43 +441,45 @@ currentPage = 1;
     });
 }
 
-        async function getMovies(url, addNew = false) {
+ async function getMovies(url, addNew = false) {
     currentUrl = url;
     isLoading = true;
-    
-    // Əgər yeni kateqoriyadırsa, "Yüklənir..." yazısını göstər, 
-    // amma sonsuz skroldursa (addNew true), göstərmə ki, ekran titrəməsin.
+
+    // Əgər yeni kateqoriyadırsa, ekranı təmizlə və yüklənir mesajı ver
     if (!addNew) {
-        main.innerHTML = '<div style="grid-column: 1/-1; text-align: center; opacity: 0.5;">Filmlər gətirilir...</div>';
+        main.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: white;">Yüklənir...</div>';
+    }
+
+    try {
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (data.results) {
+            showMovies(data.results, addNew);
+        }
+    } catch (error) {
+        console.error("Xəta baş verdi:", error);
     }
     
-    const res = await fetch(url);
-    const data = await res.json();
-
-    showMovies(data.results, addNew); 
     isLoading = false;
 }
-     function showMovies(movies, addNew = false) {
-    // Əgər yeni kateqoriyadırsa (addNew false-dursa) ekranı təmizlə
-    // Əgər sonsuz skroldursa (addNew true-dursa) təmizləmə, köhnələr qalsın
+    function showMovies(movies, addNew = false) {
+    // Əgər addNew false-dursa, ekranı təmizləyirik
     if (!addNew) {
-        main.innerHTML = ''; 
+        main.innerHTML = '';
     }
 
-    // Əgər gələn məlumat boşdursa, ekrana xəbərdarlıq çıxar
     if (!movies || movies.length === 0) {
-        if (!addNew) main.innerHTML = '<div class="no-results">Film tapılmadı.</div>';
+        if (!addNew) main.innerHTML = '<h2 style="color:white; text-align:center;">Film tapılmadı.</h2>';
         return;
     }
 
-    movies.forEach(movie => {
+    movies.forEach((movie) => {
         const { id, title, poster_path, vote_average } = movie;
         const isFav = favorites.some(f => f.id === id);
 
         const el = document.createElement('div');
         el.className = 'movie';
-        
-        // Buradakı HTML strukturu sənin əvvəlki dizaynındır
         el.innerHTML = `
             <button class="fav-btn ${isFav ? 'active' : ''}" onclick="event.stopPropagation(); toggleFav(${JSON.stringify(movie).replace(/"/g, '&quot;')}, this)">❤</button>
             <img src="${poster_path ? IMG_PATH + poster_path : 'https://via.placeholder.com/300x450'}" alt="${title}">
@@ -486,10 +488,10 @@ currentPage = 1;
                 <div class="rating">${vote_average ? vote_average.toFixed(1) : '0'}</div>
             </div>
         `;
-        
         el.onclick = () => openDetails(id);
         main.appendChild(el);
     });
+}
 }
 }
         }
@@ -590,14 +592,12 @@ async function getRandomMovie() {
     openDetails(data.results[randomIndex].id); // Təsadüfi filmi açır
 }
         init();
-        window.onscroll = function() {
-    // Səhifənin sonuna 200px qalmış yeni filmləri çağırır
-    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 200) {
-        if (!isLoading) {
+       window.onscroll = function() {
+    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
+        if (!isLoading && currentUrl) {
             currentPage++;
-            // Mövcud linkin sonuna növbəti səhifə nömrəsini yapışdırırıq
             const nextUrl = `${currentUrl}${currentUrl.includes('?') ? '&' : '?'}page=${currentPage}`;
-            getMovies(nextUrl, true); // 'true' göndəririk ki, köhnə filmlər silinməsin
+            getMovies(nextUrl, true);
         }
     }
 };

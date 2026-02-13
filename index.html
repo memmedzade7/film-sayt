@@ -215,7 +215,6 @@
 
         .close-modal { position: absolute; top: 20px; right: 20px; font-size: 2.5rem; cursor: pointer; color: white; z-index: 100; }
         
-        /* VIDEO CONTAINER & REKLAM QORUYUCU */
         .video-container { width: 100%; aspect-ratio: 16/9; background: #000; position: relative; }
         .ad-shield {
             position: absolute;
@@ -430,6 +429,16 @@
             const movie = await mRes.json();
             const credits = await cRes.json();
 
+            // AZƏRBAYCAN FİLMİ YOXLANIŞI
+            const isAzeri = movie.production_countries.some(c => c.iso_3166_1 === 'AZ');
+            // Yeni Dublaj Serveri (vidsrc.xyz daha çox səs seçimi verir)
+            let embedUrl = `https://vidsrc.xyz/embed/movie/${id}`; 
+            
+            // Əgər Azərbaycan filmidirsə YouTube-da axtar
+            if(isAzeri) {
+                embedUrl = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(movie.title + ' tam film')}`;
+            }
+
             const ambient = document.getElementById('ambient-layer');
             const glowColor = movie.vote_average >= 8 ? '#fbbf24' : '#6366f1';
             ambient.style.background = `radial-gradient(circle, ${glowColor} 0%, transparent 70%)`;
@@ -438,8 +447,7 @@
                 <span class="close-modal" onclick="closeModal()">&times;</span>
                 <div class="video-container">
                     <div class="ad-shield" onclick="this.remove()" title="Videonu başlatmaq üçün klikləyin"></div>
-                    
-                    <iframe src="https://vidsrc.me/embed/movie?tmdb=${id}&ds_lang=tr" 
+                    <iframe src="${embedUrl}" 
                             width="100%" height="100%" frameborder="0" 
                             allowfullscreen allow="autoplay">
                     </iframe>
@@ -452,6 +460,7 @@
                         <div style="margin: 20px 0; display:flex; gap:30px;">
                             <span><strong>Janr:</strong> ${movie.genres.map(g => g.name).join(', ')}</span>
                             <span><strong>İl:</strong> ${movie.release_date ? movie.release_date.split('-')[0] : 'N/A'}</span>
+                            <span><strong>Ölkə:</strong> ${movie.production_countries.map(c => c.name).join(', ')}</span>
                         </div>
                         <h3>Aktyor Heyəti</h3>
                         <div class="cast-container">

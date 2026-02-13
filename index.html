@@ -457,9 +457,17 @@ currentPage = 1;
     showMovies(data.results, addNew); 
     isLoading = false;
 }
-      function showMovies(movies, addNew = false) { // 460-cı sətir: addNew əlavə edildi
+     function showMovies(movies, addNew = false) {
+    // Əgər yeni kateqoriyadırsa (addNew false-dursa) ekranı təmizlə
+    // Əgər sonsuz skroldursa (addNew true-dursa) təmizləmə, köhnələr qalsın
     if (!addNew) {
-        main.innerHTML = ''; // Əgər addNew false-dursa (yəni yeni kateqoriyadırsa) təmizlə
+        main.innerHTML = ''; 
+    }
+
+    // Əgər gələn məlumat boşdursa, ekrana xəbərdarlıq çıxar
+    if (!movies || movies.length === 0) {
+        if (!addNew) main.innerHTML = '<div class="no-results">Film tapılmadı.</div>';
+        return;
     }
 
     movies.forEach(movie => {
@@ -468,17 +476,21 @@ currentPage = 1;
 
         const el = document.createElement('div');
         el.className = 'movie';
+        
+        // Buradakı HTML strukturu sənin əvvəlki dizaynındır
         el.innerHTML = `
             <button class="fav-btn ${isFav ? 'active' : ''}" onclick="event.stopPropagation(); toggleFav(${JSON.stringify(movie).replace(/"/g, '&quot;')}, this)">❤</button>
             <img src="${poster_path ? IMG_PATH + poster_path : 'https://via.placeholder.com/300x450'}" alt="${title}">
             <div class="movie-info">
                 <h3>${title}</h3>
-                <div class="rating">${vote_average.toFixed(1)}</div>
+                <div class="rating">${vote_average ? vote_average.toFixed(1) : '0'}</div>
             </div>
         `;
+        
         el.onclick = () => openDetails(id);
         main.appendChild(el);
     });
+}
 }
         }
 

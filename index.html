@@ -215,7 +215,6 @@
 
         .close-modal { position: absolute; top: 20px; right: 20px; font-size: 2.5rem; cursor: pointer; color: white; z-index: 100; }
         
-        /* VIDEO CONTAINER & REKLAM QORUYUCU */
         .video-container { width: 100%; aspect-ratio: 16/9; background: #000; position: relative; }
         .ad-shield {
             position: absolute;
@@ -337,6 +336,12 @@
         const modalContent = document.getElementById('modal-content');
         
         let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+        
+        // Infinite Scroll üçün dəyişənlər
+        let currentPage = 1;
+        let currentApiUrl = `${BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}&language=${LANG}`;
+        let isNextPageLoading = false;
+        let isFavoritesView = false; // Favoritlərdə skrolun qarşısını almaq üçün
 
         const genres = [
             { id: 28, name: 'Aksiyon' }, { id: 12, name: 'Macəra' },
@@ -347,20 +352,22 @@
 
         function init() {
             renderGenres();
-            getMovies(`${BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}&language=${LANG}`);
+            getMovies(currentApiUrl);
             updateWatchlistCount();
         }
 
         async function filterByCountry(countryCode) {
+            isFavoritesView = false;
+            currentPage = 1;
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
+            
             if (countryCode === 'all') {
-                getMovies(`${BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}&language=${LANG}`);
-                return;
+                currentApiUrl = `${BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}&language=${LANG}`;
+            } else {
+                currentApiUrl = `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_origin_country=${countryCode}&sort_by=popularity.desc&language=${LANG}`;
             }
-            const res = await fetch(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_origin_country=${countryCode}&sort_by=popularity.desc&language=${LANG}`);
-            const data = await res.json();
-            showMovies(data.results);
+            getMovies(currentApiUrl);
         }
 
         function renderGenres() {
@@ -370,23 +377,32 @@
                 tag.className = 'genre-tag';
                 tag.innerText = g.name;
                 tag.onclick = () => {
+                    isFavoritesView = false;
+                    currentPage = 1;
                     document.querySelectorAll('.genre-tag').forEach(t => t.classList.remove('active'));
                     tag.classList.add('active');
-                    getMovies(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${g.id}&language=${LANG}`);
+                    currentApiUrl = `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${g.id}&language=${LANG}`;
+                    getMovies(currentApiUrl);
                 };
                 container.appendChild(tag);
             });
         }
 
-        async function getMovies(url) {
-            main.innerHTML = '<div style="grid-column: 1/-1; text-align: center; opacity: 0.5;">Filmlər gətirilir...</div>';
-            const res = await fetch(url);
+        async function getMovies(url, append = false) {
+            if (!append) main.innerHTML = '<div style="grid-column: 1/-1; text-align: center; opacity: 0.5;">Filmlər gətirilir...</div>';
+            
+            isNextPageLoading = true;
+            const res = await fetch(`${url}&page=${currentPage}`);
             const data = await res.json();
-            showMovies(data.results);
+            
+            if (!append) main.innerHTML = '';
+            showMovies(data.results, append);
+            isNextPageLoading = false;
         }
 
-        function showMovies(movies) {
-            main.innerHTML = '';
+        function showMovies(movies, append = false) {
+            if (!append) main.innerHTML = '';
+            
             movies.forEach(movie => {
                 const { id, title, poster_path, vote_average } = movie;
                 const isFav = favorites.some(f => f.id === id);
@@ -405,6 +421,18 @@
             });
         }
 
+        // Skrol hadisəsi
+        window.onscroll = function() {
+            if (isFavoritesView) return; // Siyahım bölməsində skrol etmə
+            
+            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 800) {
+                if (!isNextPageLoading) {
+                    currentPage++;
+                    getMovies(currentApiUrl, true);
+                }
+            }
+        };
+
         function toggleFav(movie, btn) {
             const index = favorites.findIndex(f => f.id === movie.id);
             if(index > -1) { favorites.splice(index, 1); btn.classList.remove('active'); }
@@ -415,7 +443,11 @@
 
         function updateWatchlistCount() { document.getElementById('watchlist-count').innerText = `Siyahım (${favorites.length})`; }
 
-        function showFavorites() { if(favorites.length === 0) { alert("Siyahınız hələ boşdur!"); return; } showMovies(favorites); }
+        function showFavorites() { 
+            if(favorites.length === 0) { alert("Siyahınız hələ boşdur!"); return; } 
+            isFavoritesView = true;
+            showMovies(favorites, false); 
+        }
 
         async function openDetails(id) {
             modal.style.display = 'flex';
@@ -438,7 +470,6 @@
                 <span class="close-modal" onclick="closeModal()">&times;</span>
                 <div class="video-container">
                     <div class="ad-shield" onclick="this.remove()" title="Videonu başlatmaq üçün klikləyin"></div>
-                    
                     <iframe src="https://vidsrc.me/embed/movie?tmdb=${id}&ds_lang=tr" 
                             width="100%" height="100%" frameborder="0" 
                             allowfullscreen allow="autoplay">
@@ -476,8 +507,13 @@
 
         document.getElementById('form').addEventListener('submit', (e) => {
             e.preventDefault();
+            isFavoritesView = false;
+            currentPage = 1;
             const q = document.getElementById('search').value;
-            if(q) getMovies(`${BASE_URL}/search/movie?api_key=${API_KEY}&query=${q}&language=${LANG}`);
+            if(q) {
+                currentApiUrl = `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${q}&language=${LANG}`;
+                getMovies(currentApiUrl);
+            }
         });
 
         async function getRandomMovie() {

@@ -82,6 +82,48 @@
             to { background-position: 200% center; }
         }
 
+        /* --- MOOD SEARCH STYLES --- */
+        .mood-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .mood-title {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        .mood-container {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        .mood-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .mood-btn:hover {
+            background: var(--primary-gradient);
+            transform: scale(1.05);
+            box-shadow: var(--neon-glow);
+            border-color: transparent;
+        }
+        /* -------------------------- */
+
         .watchlist-pill, .random-btn {
             margin-top: 8px;
             padding: 4px 12px;
@@ -143,7 +185,6 @@
             padding: 20px 5% 100px;
         }
 
-        /* --- YENİ KART ANİMASİYALARI --- */
         .movie {
             background: var(--card-bg);
             border-radius: 24px;
@@ -194,7 +235,6 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        /* ------------------------------- */
 
         .rating { color: var(--accent-gold); font-weight: 800; display: flex; align-items: center; gap: 5px; margin-top: 5px; }
         .rating::before { content: '★'; }
@@ -300,6 +340,17 @@
         </div>
     </header>
 
+    <div class="mood-section">
+        <div class="mood-title">BU GÜN ÖZÜNÜ NECƏ HİSS EDİRSƏN?</div>
+        <div class="mood-container">
+            <button class="mood-btn" onclick="searchByMood(35)">😊 Şən</button>
+            <button class="mood-btn" onclick="searchByMood(28)">😎 Güclü</button>
+            <button class="mood-btn" onclick="searchByMood(18)">😢 Kədərli</button>
+            <button class="mood-btn" onclick="searchByMood(27)">😱 Həyəcanlı</button>
+            <button class="mood-btn" onclick="searchByMood(10749)">😍 Sevgi</button>
+        </div>
+    </div>
+
     <div class="country-tabs">
         <button class="tab-btn active" onclick="filterByCountry('all', this)">Hamısı</button>
         <button class="tab-btn" onclick="filterByCountry('AZ', this)">Azərbaycan</button>
@@ -345,6 +396,18 @@
             renderGenres();
             getMovies(currentApiUrl);
             updateWatchlistCount();
+        }
+
+        // MOOD SEARCH FUNCTION
+        function searchByMood(genreId) {
+            isFavoritesView = false;
+            // Janr taglarını sıfırla
+            document.querySelectorAll('.genre-tag').forEach(t => t.classList.remove('active'));
+            // Mood-a uyğun API sorğusu
+            currentApiUrl = `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${genreId}&language=${LANG}&sort_by=popularity.desc`;
+            getMovies(currentApiUrl);
+            // Səhifənin yuxarısına sürüşdür
+            window.scrollTo({ top: 400, behavior: 'smooth' });
         }
 
         async function getMovies(url, isNew = true) {

@@ -9,29 +9,31 @@
             position: absolute;
             inset: 0;
             z-index: -1;
-            filter: blur(100px);
-            opacity: 0.5;
+            filter: blur(80px); /* Blur azaldıldı ki, rəng daha aydın olsun */
+            opacity: 0.6;
             transition: background 1s ease;
         }
         :root {
             --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-            --bg-dark: #05070a;
-            --card-bg: #111827;
+            --bg-dark: #020617; /* Daha tünd göy/qara fon */
+            --card-bg: #1e293b; /* Kart fonu daha aydın edildi */
             --accent-gold: #fbbf24;
             --text-main: #ffffff;
-            --text-muted: #9ca3af;
-            --neon-glow: 0 0 20px rgba(168, 85, 247, 0.4);
+            --text-muted: #cbd5e1;
+            --neon-glow: 0 0 25px rgba(168, 85, 247, 0.6);
         }
 
         body {
             background-color: var(--bg-dark);
-            background-image: radial-gradient(circle at top right, #1e1b4b 0%, transparent 40%),
-                              radial-gradient(circle at bottom left, #1e1b4b 0%, transparent 40%);
+            /* İlkin fon rəngləri daha canlı edildi */
+            background-image: radial-gradient(circle at top right, #312e81 0%, transparent 50%),
+                              radial-gradient(circle at bottom left, #312e81 0%, transparent 50%);
             color: var(--text-main);
             font-family: 'Plus Jakarta Sans', sans-serif;
             margin: 0;
             overflow-x: auto;
             min-width: 1200px;
+            transition: background 1s ease;
         }
 
         header {
@@ -39,9 +41,9 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(17, 24, 39, 0.8);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             position: sticky;
             top: 0;
             z-index: 1000;
@@ -54,11 +56,11 @@
         }
 
         .logo {
-            font-size: 2.4rem;
+            font-size: 2.6rem;
             font-weight: 900;
             letter-spacing: -2px;
             margin: 0;
-            background: linear-gradient(to right, #6366f1, #ec4899);
+            background: linear-gradient(to right, #818cf8, #f472b6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             cursor: pointer;
@@ -70,8 +72,8 @@
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 3px;
-            margin-top: 5px;
-            background: linear-gradient(90deg, #9ca3af, #ffffff, #9ca3af);
+            margin-top: 8px;
+            background: linear-gradient(90deg, #94a3b8, #ffffff, #94a3b8);
             background-size: 200% auto;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -86,16 +88,17 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 20px 0;
-            background: rgba(255, 255, 255, 0.02);
+            padding: 25px 0;
+            background: rgba(255, 255, 255, 0.03);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
         .mood-title {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            margin-bottom: 12px;
+            font-size: 0.95rem;
+            color: #fff;
+            margin-bottom: 15px;
             font-weight: bold;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
+            text-shadow: 0 0 10px rgba(255,255,255,0.3);
         }
         .mood-container {
             display: flex;
@@ -103,70 +106,72 @@
             justify-content: center;
         }
         .mood-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             color: white;
-            padding: 10px 20px;
+            padding: 12px 24px;
             border-radius: 50px;
             cursor: pointer;
-            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            font-size: 0.9rem;
+            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.95rem;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
         .mood-btn:hover {
             background: var(--primary-gradient);
-            transform: scale(1.05);
+            transform: translateY(-3px) scale(1.05);
             box-shadow: var(--neon-glow);
             border-color: transparent;
         }
 
         .watchlist-pill, .random-btn {
-            margin-top: 8px;
-            padding: 4px 12px;
+            margin-top: 10px;
+            padding: 6px 15px;
             border-radius: 20px;
-            font-size: 0.7rem;
-            font-weight: bold;
+            font-size: 0.75rem;
+            font-weight: 800;
             cursor: pointer;
             transition: 0.3s;
         }
 
         .watchlist-pill {
-            background: rgba(99, 102, 241, 0.15);
-            color: #a855f7;
-            border: 1px solid rgba(168, 85, 247, 0.3);
+            background: rgba(168, 85, 247, 0.2);
+            color: #d8b4fe;
+            border: 1px solid rgba(168, 85, 247, 0.4);
         }
 
         .random-btn {
             background: var(--primary-gradient);
             color: white;
             border: none;
+            box-shadow: 0 4px 15px rgba(129, 140, 248, 0.3);
         }
 
         .search {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 50px;
-            padding: 12px 25px;
+            padding: 14px 28px;
             color: white;
-            width: 280px;
+            width: 300px;
             transition: 0.4s;
         }
 
-        .search:focus { width: 380px; outline: none; border-color: #a855f7; box-shadow: var(--neon-glow); }
+        .search:focus { width: 400px; outline: none; border-color: #a855f7; box-shadow: var(--neon-glow); background: rgba(255,255,255,0.12); }
 
-        .genres-container { display: flex; justify-content: center; gap: 10px; padding: 20px 5%; overflow-x: auto; }
+        .genres-container { display: flex; justify-content: center; gap: 12px; padding: 25px 5%; overflow-x: auto; }
 
         .genre-tag {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
             color: var(--text-muted);
-            padding: 8px 18px;
+            padding: 10px 20px;
             border-radius: 50px;
             cursor: pointer;
             transition: 0.3s;
             white-space: nowrap;
+            font-weight: 600;
         }
 
         .genre-tag:hover, .genre-tag.active {
@@ -183,43 +188,43 @@
             padding: 20px 5% 100px;
         }
 
+        /* QUICK VIEW STYLES - RƏNGLƏR CANLANDIRILDI */
         .movie {
-            background: var(--card-bg);
+            background: #111827;
             border-radius: 24px;
             overflow: hidden;
             position: relative;
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             cursor: pointer;
-            border: 1px solid rgba(255, 255, 255, 0.03);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
         }
 
         .movie:hover {
-            transform: translateY(-15px) scale(1.02);
-            border-color: rgba(168, 85, 247, 0.6);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.8), var(--neon-glow);
+            transform: translateY(-15px) scale(1.03);
+            border-color: rgba(168, 85, 247, 0.8);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.9), var(--neon-glow);
         }
 
         .movie img { 
             width: 100%; 
-            height: 380px; 
+            height: 400px; 
             object-fit: cover; 
             transition: transform 0.6s ease, filter 0.6s ease;
         }
 
         .movie:hover img {
-            transform: scale(1.1);
-            filter: brightness(0.6);
+            transform: scale(1.15);
+            filter: brightness(0.4);
         }
 
-        /* QUICK VIEW SECTION */
         .movie-info { 
             padding: 20px; 
-            background: linear-gradient(to top, rgba(17, 24, 39, 0.95) 70%, transparent);
+            background: linear-gradient(to top, #0f172a 85%, transparent);
             position: absolute;
             bottom: 0;
             width: 100%;
-            transform: translateY(70%); /* Başlanğıcda yalnız başlıq görünür */
+            transform: translateY(75%);
             transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             box-sizing: border-box;
         }
@@ -231,14 +236,14 @@
         .quick-view-data {
             opacity: 0;
             transition: opacity 0.3s ease;
-            margin-top: 10px;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding-top: 10px;
+            margin-top: 12px;
+            font-size: 0.9rem;
+            color: #e2e8f0;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            padding-top: 12px;
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 6px;
         }
 
         .movie:hover .quick-view-data {
@@ -247,98 +252,83 @@
 
         .movie-info h3 { 
             margin: 0; 
-            font-size: 1.1rem; 
+            font-size: 1.15rem; 
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             color: #fff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
-        .rating { color: var(--accent-gold); font-weight: 800; display: flex; align-items: center; gap: 5px; margin-top: 5px; }
-        .rating::before { content: '★'; }
+        .rating { color: var(--accent-gold); font-weight: 900; display: flex; align-items: center; gap: 5px; margin-top: 8px; font-size: 1.1rem; }
+        .rating::before { content: '★'; filter: drop-shadow(0 0 5px rgba(251, 191, 36, 0.6)); }
 
         .fav-btn {
             position: absolute;
             top: 15px; right: 15px;
-            background: rgba(0,0,0,0.6);
+            background: rgba(0,0,0,0.7);
             border: none;
             color: white;
-            width: 40px; height: 40px;
+            width: 45px; height: 45px;
             border-radius: 50%;
             cursor: pointer;
             z-index: 10;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             transition: 0.3s;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.1);
         }
-        .fav-btn:hover { transform: scale(1.2); }
-        .fav-btn.active { color: #ff4757; background: white; }
+        .fav-btn:hover { transform: scale(1.2); background: #fff; color: #ff4757; }
+        .fav-btn.active { color: #ff4757; background: white; box-shadow: 0 0 15px white; }
 
+        /* Modal & Country Tabs (Qorundu) */
         .modal {
             position: fixed; inset: 0;
-            background: rgba(0, 0, 0, 0.95);
+            background: rgba(0, 0, 0, 0.97);
             display: none; justify-content: center; align-items: center;
             z-index: 2000; padding: 20px;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(15px);
         }
 
         .modal-content {
-            background: var(--card-bg);
+            background: #0f172a;
             width: 100%; max-width: 1100px; max-height: 90vh;
             border-radius: 30px; overflow-y: auto;
-            position: relative; border: 1px solid rgba(255,255,255,0.1);
+            position: relative; border: 1px solid rgba(255,255,255,0.15);
         }
 
-        .close-modal { position: absolute; top: 20px; right: 20px; font-size: 2.5rem; cursor: pointer; color: white; z-index: 100; }
-        .video-container { width: 100%; aspect-ratio: 16/9; background: #000; }
+        .close-modal { position: absolute; top: 20px; right: 20px; font-size: 2.8rem; cursor: pointer; color: white; z-index: 100; }
+        .video-container { width: 100%; aspect-ratio: 16/9; background: #000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
 
-        .details-grid { padding: 40px; display: grid; grid-template-columns: 300px 1fr; gap: 40px; }
-        .details-grid img { width: 100%; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .details-grid { padding: 45px; display: grid; grid-template-columns: 320px 1fr; gap: 45px; }
+        .details-grid img { width: 100%; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); }
 
-        .comment-section { margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; }
-        .comment-input {
-            width: 100%; background: rgba(255,255,255,0.05); border: 1px solid #333;
-            color: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; resize: vertical; font-family: inherit;
-        }
-        .comment-btn {
-            background: var(--primary-gradient); color: white; border: none;
-            padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold;
-        }
-        .comments-list { margin-top: 20px; }
-        .comment-item {
-            background: rgba(255,255,255,0.03); padding: 15px; border-radius: 10px; margin-bottom: 10px;
-            border-left: 3px solid #a855f7;
-        }
-
-        .cast-container { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; margin-top: 20px;}
-        .cast-card { min-width: 100px; text-align: center; font-size: 0.8rem; }
-        .cast-card img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 8px; border: 2px solid rgba(168, 85, 247, 0.3);}
+        .cast-card img { width: 85px; height: 85px; border-radius: 50%; object-fit: cover; border: 3px solid #a855f7; margin-bottom: 10px; }
 
         .country-tabs { display: flex; justify-content: center; gap: 15px; margin: 30px 0; }
         .tab-btn {
-            background: #111; color: #999; border: 1px solid #333;
-            padding: 10px 25px; cursor: pointer; border-radius: 12px; transition: 0.4s;
-            font-weight: 600; text-transform: uppercase; letter-spacing: 1px;
+            background: #1e293b; color: #94a3b8; border: 1px solid #334155;
+            padding: 12px 30px; cursor: pointer; border-radius: 12px; transition: 0.4s;
+            font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;
         }
         .tab-btn.active { 
             background: #fff; 
             color: #000; 
             border-color: #fff;
-            box-shadow: 0 0 15px rgba(255,255,255,0.2);
+            box-shadow: 0 0 20px rgba(255,255,255,0.4);
         }
 
         .creator-text {
-            color: #a0a0a0; font-size: 10px; font-weight: 500;
-            letter-spacing: 1px; margin-bottom: 5px; text-transform: uppercase; opacity: 0.8;
+            color: #6366f1; font-size: 11px; font-weight: 800;
+            letter-spacing: 2px; margin-bottom: 8px; text-transform: uppercase;
         }
-        .search-container { display: flex; flex-direction: column; align-items: flex-end; }
 
         .loader {
             grid-column: 1/-1;
             text-align: center;
-            padding: 20px;
+            padding: 30px;
             font-weight: bold;
-            opacity: 0.6;
+            color: #a855f7;
             display: none;
         }
     </style>
@@ -361,11 +351,11 @@
     <div class="mood-section">
         <div class="mood-title">BU GÜN ÖZÜNÜ NECƏ HİSS EDİRSƏN?</div>
         <div class="mood-container">
-            <button class="mood-btn" onclick="searchByMood(35)">😊 Şən</button>
-            <button class="mood-btn" onclick="searchByMood(28)">😎 Güclü</button>
-            <button class="mood-btn" onclick="searchByMood(18)">😢 Kədərli</button>
-            <button class="mood-btn" onclick="searchByMood(27)">😱 Həyəcanlı</button>
-            <button class="mood-btn" onclick="searchByMood(10749)">😍 Sevgi</button>
+            <button class="mood-btn" onclick="searchByMood(35, '#22c55e')">😊 Şən</button>
+            <button class="mood-btn" onclick="searchByMood(28, '#ef4444')">😎 Güclü</button>
+            <button class="mood-btn" onclick="searchByMood(18, '#3b82f6')">😢 Kədərli</button>
+            <button class="mood-btn" onclick="searchByMood(27, '#991b1b')">😱 Həyəcanlı</button>
+            <button class="mood-btn" onclick="searchByMood(10749, '#ec4899')">😍 Sevgi</button>
         </div>
     </div>
 
@@ -416,8 +406,12 @@
             updateWatchlistCount();
         }
 
-        function searchByMood(genreId) {
+        // MOOD FUNKSİYASI - RƏNGLƏR DAHA PARLAQ EDİLDİ
+        function searchByMood(genreId, color) {
             isFavoritesView = false;
+            document.body.style.backgroundImage = `radial-gradient(circle at top right, ${color} 0%, transparent 60%),
+                                                   radial-gradient(circle at bottom left, ${color} 0%, transparent 60%)`;
+            
             document.querySelectorAll('.genre-tag').forEach(t => t.classList.remove('active'));
             currentApiUrl = `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${genreId}&language=${LANG}&sort_by=popularity.desc`;
             getMovies(currentApiUrl);
@@ -444,7 +438,6 @@
                 const isFav = favorites.some(f => f.id === movie.id);
                 const releaseYear = movie.release_date ? movie.release_date.split('-')[0] : 'N/A';
                 
-                // Film janrlarını göstərmək üçün (Discover data adətən id verir, tam ad üçün xəritələmə lazımdır)
                 const genreNames = movie.genre_ids 
                     ? movie.genre_ids.map(id => {
                         const g = genres.find(genre => genre.id === id);
@@ -463,7 +456,7 @@
                         <div class="quick-view-data">
                             <span>🎭 ${genreNames || 'Film'}</span>
                             <span>📅 İl: ${releaseYear}</span>
-                            <span style="color:var(--accent-gold); font-size: 10px; margin-top:5px;">DAHA ÇOXUNA BAXMAQ ÜÇÜN KLİKLƏ</span>
+                            <span style="color:#818cf8; font-size: 11px; margin-top:5px; font-weight:bold;">ƏTRAFLI BAX</span>
                         </div>
                     </div>
                 `;
@@ -510,43 +503,47 @@
         async function openDetails(id) {
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
-            modalContent.innerHTML = '<div style="padding:50px; text-align:center;">Yüklənir...</div>';
+            modalContent.innerHTML = '<div style="padding:50px; text-align:center; color:#a855f7; font-weight:bold;">Yüklənir...</div>';
+            
             const [mRes, vRes, cRes] = await Promise.all([
                 fetch(`${BASE_URL}/movie/${id}?api_key=${API_KEY}&language=${LANG}`),
                 fetch(`${BASE_URL}/movie/${id}/videos?api_key=${API_KEY}`),
                 fetch(`${BASE_URL}/movie/${id}/credits?api_key=${API_KEY}&language=${LANG}`)
             ]);
+            
             const movie = await mRes.json();
             const videos = await vRes.json();
             const credits = await cRes.json();
+            
             const trailer = videos.results.find(v => v.type === 'Trailer' && v.site === 'YouTube') || videos.results[0];
             const trailerHtml = trailer 
-                ? `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${trailer.key}" frameborder="0" allowfullscreen></iframe>`
+                ? `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${trailer.key}?autoplay=1" frameborder="0" allowfullscreen></iframe>`
                 : `<div style="padding:100px; text-align:center; background:#000;">Fraqman yoxdur.</div>`;
+            
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
                 <div class="video-container">${trailerHtml}</div>
                 <div class="details-grid">
                     <img src="${movie.poster_path ? IMG_PATH + movie.poster_path : 'https://via.placeholder.com/300x450'}">
                     <div>
-                        <h2 style="font-size: 2.5rem; margin-top:0;">${movie.title}</h2>
-                        <p style="font-size: 1.1rem; line-height:1.6; color:var(--text-muted);">${movie.overview || "Məlumat yoxdur."}</p>
-                        <div style="margin: 20px 0; display:flex; gap:30px;">
-                            <span><strong>Janr:</strong> ${movie.genres.map(g => g.name).join(', ')}</span>
-                            <span><strong>İl:</strong> ${movie.release_date ? movie.release_date.split('-')[0] : 'N/A'}</span>
+                        <h2 style="font-size: 2.8rem; margin-top:0; color:#fff;">${movie.title}</h2>
+                        <p style="font-size: 1.15rem; line-height:1.7; color:#cbd5e1;">${movie.overview || "Məlumat yoxdur."}</p>
+                        <div style="margin: 25px 0; display:flex; gap:35px; font-size: 1.1rem;">
+                            <span><strong style="color:#a855f7">Janr:</strong> ${movie.genres.map(g => g.name).join(', ')}</span>
+                            <span><strong style="color:#a855f7">İl:</strong> ${movie.release_date ? movie.release_date.split('-')[0] : 'N/A'}</span>
                         </div>
-                        <h3>Aktyor Heyəti</h3>
+                        <h3 style="border-bottom: 2px solid #a855f7; display:inline-block; padding-bottom:5px;">Aktyor Heyəti</h3>
                         <div class="cast-container">
                             ${credits.cast.slice(0, 8).map(c => `
                                 <div class="cast-card">
-                                    <img src="${c.profile_path ? 'https://image.tmdb.org/p/w200' + c.profile_path : 'https://via.placeholder.com/100'}">
-                                    <div style="font-weight:bold">${c.name}</div>
-                                    <div style="opacity:0.6; font-size:10px;">${c.character}</div>
+                                    <img src="${c.profile_path ? 'https://image.tmdb.org/t/p/w200' + c.profile_path : 'https://via.placeholder.com/100'}">
+                                    <div style="font-weight:900; color:#fff;">${c.name}</div>
+                                    <div style="opacity:0.7; font-size:11px;">${c.character}</div>
                                 </div>
                             `).join('')}
                         </div>
                         <div class="comment-section">
-                            <h3>Rəy Bildir</h3>
+                            <h3 style="color:#a855f7">Rəy Bildir</h3>
                             <textarea id="comment-text" class="comment-input" rows="4" placeholder="Fikirlərinizi yazın..."></textarea>
                             <button class="comment-btn" onclick="addComment(${id})">Göndər</button>
                             <div id="comments-list-${id}" class="comments-list"></div>
@@ -572,10 +569,10 @@
             const comments = JSON.parse(localStorage.getItem(`comments_${movieId}`)) || [];
             container.innerHTML = comments.map(c => `
                 <div class="comment-item">
-                    <div style="font-size: 0.75rem; color: #a855f7; margin-bottom: 5px; font-weight:bold;">${c.date}</div>
-                    <div>${c.text}</div>
+                    <div style="font-size: 0.8rem; color: #a855f7; margin-bottom: 5px; font-weight:bold;">${c.date}</div>
+                    <div style="color:#f1f5f9;">${c.text}</div>
                 </div>
-            `).join('') || '<p style="color:#666">Hələ rəy yazılmayıb.</p>';
+            `).join('') || '<p style="color:#64748b">Hələ rəy yazılmayıb. İlk yazan sən ol!</p>';
         }
 
         function closeModal() {
@@ -593,7 +590,14 @@
         }
 
         function updateWatchlistCount() { document.getElementById('watchlist-count').innerText = `Siyahım (${favorites.length})`; }
-        function showFavorites() { if(favorites.length === 0) { alert("Siyahınız boşdur!"); return; } isFavoritesView = true; main.innerHTML = ''; showMovies(favorites); }
+        
+        function showFavorites() { 
+            if(favorites.length === 0) { alert("Siyahınız boşdur!"); return; } 
+            isFavoritesView = true; 
+            main.innerHTML = ''; 
+            showMovies(favorites); 
+            window.scrollTo({ top: 400, behavior: 'smooth' });
+        }
 
         document.getElementById('form').addEventListener('submit', (e) => {
             e.preventDefault();

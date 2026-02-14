@@ -5,6 +5,18 @@
     <meta name="viewport" content="width=1200"> 
     <title>RM Film | Minlərlə film, Tək Məkan</title>
     <style>
+        /* Mood-a görə dəyişən dinamik arxa fon təbəqəsi */
+        #bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            transition: background 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            background: var(--bg-dark);
+        }
+
         #ambient-layer {
             position: absolute;
             inset: 0;
@@ -25,8 +37,6 @@
 
         body {
             background-color: var(--bg-dark);
-            background-image: radial-gradient(circle at top right, #1e1b4b 0%, transparent 40%),
-                              radial-gradient(circle at bottom left, #1e1b4b 0%, transparent 40%);
             color: var(--text-main);
             font-family: 'Plus Jakarta Sans', sans-serif;
             margin: 0;
@@ -116,16 +126,13 @@
             gap: 8px;
         }
 
-        /* Ehval rəngləri */
         .mood-happy:hover { background: #fbbf24 !important; color: #000 !important; box-shadow: 0 0 15px rgba(251, 191, 36, 0.4); border-color: transparent; }
         .mood-strong:hover { background: #3b82f6 !important; color: #fff !important; box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); border-color: transparent; }
         .mood-sad:hover { background: #6b7280 !important; color: #fff !important; box-shadow: 0 0 15px rgba(107, 114, 128, 0.4); border-color: transparent; }
         .mood-scary:hover { background: #ef4444 !important; color: #fff !important; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); border-color: transparent; }
         .mood-love:hover { background: #f472b6 !important; color: #fff !important; box-shadow: 0 0 15px rgba(244, 114, 182, 0.4); border-color: transparent; }
 
-        .mood-btn:hover {
-            transform: scale(1.05);
-        }
+        .mood-btn:hover { transform: scale(1.05); }
 
         .watchlist-pill, .random-btn {
             margin-top: 8px;
@@ -228,9 +235,7 @@
             box-sizing: border-box;
         }
 
-        .movie:hover .movie-info {
-            transform: translateY(0);
-        }
+        .movie:hover .movie-info { transform: translateY(0); }
 
         .quick-view-data {
             opacity: 0;
@@ -245,9 +250,7 @@
             gap: 4px;
         }
 
-        .movie:hover .quick-view-data {
-            opacity: 1;
-        }
+        .movie:hover .quick-view-data { opacity: 1; }
 
         .movie-info h3 { 
             margin: 0; 
@@ -331,18 +334,22 @@
             box-shadow: 0 0 15px rgba(255,255,255,0.2);
         }
 
-        /* YARADICI HİSSƏSİ - YENİLƏNDİ */
+        /* YARADICI HİSSƏSİ - DAHA SOFT VƏ MİNİMALİST */
         .creator-text {
-            color: #ffffff;
-            font-size: 13px; /* Ölçü bir az böyüdü */
-            font-weight: 800;
-            letter-spacing: 2px; 
-            margin-bottom: 10px; 
+            color: var(--text-muted);
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 1.5px; 
+            margin-bottom: 6px; 
             text-transform: uppercase; 
-            opacity: 1;
+            opacity: 0.7;
             text-align: right;
             width: 100%;
-            text-shadow: 0 0 10px rgba(168, 85, 247, 0.8); /* Yüngül neon effekti */
+            transition: 0.3s;
+        }
+        .creator-text:hover {
+            opacity: 1;
+            color: #a855f7;
         }
         .search-container { 
             display: flex; 
@@ -363,6 +370,8 @@
 </head>
 <body>
 
+    <div id="bg-overlay"></div>
+
     <header>
         <div class="brand">
             <h1 class="logo" onclick="location.reload()">RM Film</h1>
@@ -371,7 +380,7 @@
             <button class="random-btn" onclick="getRandomMovie()">🎲 Şansımı yoxla</button>
         </div>
         <div class="search-container">
-            <div class="creator-text">YARADICI: RƏSUL MƏMMƏDZADƏ</div>
+            <div class="creator-text">Developer: Rəsul Məmmədzadə</div>
             <form id="form"><input type="text" id="search" class="search" placeholder="Film axtar..."></form>
         </div>
     </header>
@@ -379,11 +388,11 @@
     <div class="mood-section">
         <div class="mood-title">BU GÜN ÖZÜNÜ NECƏ HİSS EDİRSƏN?</div>
         <div class="mood-container">
-            <button class="mood-btn mood-happy" onclick="searchByMood(35)"><span>😊</span> Şən</button>
-            <button class="mood-btn mood-strong" onclick="searchByMood(28)"><span>😎</span> Güclü</button>
-            <button class="mood-btn mood-sad" onclick="searchByMood(18)"><span>😢</span> Kədərli</button>
-            <button class="mood-btn mood-scary" onclick="searchByMood(27)"><span>😱</span> Həyəcanlı</button>
-            <button class="mood-btn mood-love" onclick="searchByMood(10749)"><span>😍</span> Sevgi</button>
+            <button class="mood-btn mood-happy" onclick="searchByMood(35, '#2d2401')"><span>😊</span> Şən</button>
+            <button class="mood-btn mood-strong" onclick="searchByMood(28, '#01162d')"><span>😎</span> Güclü</button>
+            <button class="mood-btn mood-sad" onclick="searchByMood(18, '#1a1a1a')"><span>😢</span> Kədərli</button>
+            <button class="mood-btn mood-scary" onclick="searchByMood(27, '#2d0101')"><span>😱</span> Həyəcanlı</button>
+            <button class="mood-btn mood-love" onclick="searchByMood(10749, '#2d011a')"><span>😍</span> Sevgi</button>
         </div>
     </div>
 
@@ -399,7 +408,6 @@
     <div id="loader" class="loader">Daha çox film yüklənir...</div>
 
     <div id="modal" class="modal">
-        <div id="ambient-layer"></div>
         <div class="modal-content" id="modal-content"></div>
     </div>
 
@@ -413,6 +421,7 @@
         const loader = document.getElementById('loader');
         const modal = document.getElementById('modal');
         const modalContent = document.getElementById('modal-content');
+        const bgOverlay = document.getElementById('bg-overlay');
         
         let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
         let currentPage = 1;
@@ -434,8 +443,12 @@
             updateWatchlistCount();
         }
 
-        function searchByMood(genreId) {
+        // Mood-a görə həm film axtarır, həm də arxa fonu dəyişir
+        function searchByMood(genreId, bgColor) {
             isFavoritesView = false;
+            // Arxa fonu yumşaq şəkildə dəyiş
+            bgOverlay.style.background = `radial-gradient(circle at center, ${bgColor} 0%, #05070a 100%)`;
+            
             document.querySelectorAll('.genre-tag').forEach(t => t.classList.remove('active'));
             currentApiUrl = `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${genreId}&language=${LANG}&sort_by=popularity.desc`;
             getMovies(currentApiUrl);

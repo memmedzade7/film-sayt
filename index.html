@@ -296,7 +296,8 @@
             { id: 28, name: 'Aksiyon' }, { id: 12, name: 'Macəra' },
             { id: 16, name: 'Animasiya' }, { id: 35, name: 'Komediya' },
             { id: 80, name: 'Cinayət' }, { id: 18, name: 'Dram' },
-            { id: 27, name: 'Qorxu' }, { id: 878, name: 'Fantastika' }
+            { id: 27, name: 'Qorxu' }, { id: 878, name: 'Fantastika' },
+            { id: 10749, name: 'Romantik' }
         ];
 
         function init() {
@@ -310,22 +311,17 @@
                 main.innerHTML = '';
                 currentPage = 1;
             }
-            
             isLoading = true;
             loader.style.display = 'block';
-
             const res = await fetch(`${url}&page=${currentPage}`);
             const data = await res.json();
-            
             showMovies(data.results);
-            
             isLoading = false;
             loader.style.display = 'none';
         }
 
         function showMovies(movies) {
             if(!movies || movies.length === 0) return;
-            
             movies.forEach(movie => {
                 const isFav = favorites.some(f => f.id === movie.id);
                 const el = document.createElement('div');
@@ -343,10 +339,8 @@
             });
         }
 
-        // SONSUZ SÜRÜŞMƏ (Infinite Scroll)
         window.addEventListener('scroll', () => {
             if (isFavoritesView || isLoading) return;
-            
             if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 800) {
                 currentPage++;
                 getMovies(currentApiUrl, false);
@@ -357,7 +351,6 @@
             isFavoritesView = false;
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            
             currentApiUrl = code === 'all' 
                 ? `${BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}&language=${LANG}`
                 : `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_origin_country=${code}&language=${LANG}`;
@@ -385,22 +378,18 @@
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
             modalContent.innerHTML = '<div style="padding:50px; text-align:center;">Yüklənir...</div>';
-
             const [mRes, vRes, cRes] = await Promise.all([
                 fetch(`${BASE_URL}/movie/${id}?api_key=${API_KEY}&language=${LANG}`),
                 fetch(`${BASE_URL}/movie/${id}/videos?api_key=${API_KEY}`),
                 fetch(`${BASE_URL}/movie/${id}/credits?api_key=${API_KEY}&language=${LANG}`)
             ]);
-
             const movie = await mRes.json();
             const videos = await vRes.json();
             const credits = await cRes.json();
-            
             const trailer = videos.results.find(v => v.type === 'Trailer' && v.site === 'YouTube') || videos.results[0];
             const trailerHtml = trailer 
                 ? `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${trailer.key}" frameborder="0" allowfullscreen></iframe>`
                 : `<div style="padding:100px; text-align:center; background:#000;">Fraqman yoxdur.</div>`;
-
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
                 <div class="video-container">${trailerHtml}</div>
@@ -413,7 +402,6 @@
                             <span><strong>Janr:</strong> ${movie.genres.map(g => g.name).join(', ')}</span>
                             <span><strong>İl:</strong> ${movie.release_date ? movie.release_date.split('-')[0] : 'N/A'}</span>
                         </div>
-                        
                         <h3>Aktyor Heyəti</h3>
                         <div class="cast-container">
                             ${credits.cast.slice(0, 8).map(c => `
@@ -424,7 +412,6 @@
                                 </div>
                             `).join('')}
                         </div>
-
                         <div class="comment-section">
                             <h3>Rəy Bildir</h3>
                             <textarea id="comment-text" class="comment-input" rows="4" placeholder="Fikirlərinizi yazın..."></textarea>
@@ -473,22 +460,12 @@
         }
 
         function updateWatchlistCount() { document.getElementById('watchlist-count').innerText = `Siyahım (${favorites.length})`; }
-        
-        function showFavorites() { 
-            if(favorites.length === 0) { alert("Siyahınız boşdur!"); return; }
-            isFavoritesView = true;
-            main.innerHTML = '';
-            showMovies(favorites); 
-        }
+        function showFavorites() { if(favorites.length === 0) { alert("Siyahınız boşdur!"); return; } isFavoritesView = true; main.innerHTML = ''; showMovies(favorites); }
 
         document.getElementById('form').addEventListener('submit', (e) => {
             e.preventDefault();
             const q = document.getElementById('search').value;
-            if(q) {
-                isFavoritesView = false;
-                currentApiUrl = `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${q}&language=${LANG}`;
-                getMovies(currentApiUrl);
-            }
+            if(q) { isFavoritesView = false; currentApiUrl = `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${q}&language=${LANG}`; getMovies(currentApiUrl); }
         });
 
         async function getRandomMovie() {

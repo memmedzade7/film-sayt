@@ -11,7 +11,7 @@
             z-index: -1;
             filter: blur(100px);
             opacity: 0.5;
-            transition: background 1.5s ease; /* Keçid sürəti */
+            transition: background 1s ease;
         }
         :root {
             --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
@@ -25,8 +25,6 @@
 
         body {
             background-color: var(--bg-dark);
-            /* Dinamik fon keçidi üçün transition əlavə edildi */
-            transition: background-color 1.2s ease, background-image 1.2s ease;
             background-image: radial-gradient(circle at top right, #1e1b4b 0%, transparent 40%),
                               radial-gradient(circle at bottom left, #1e1b4b 0%, transparent 40%);
             color: var(--text-main);
@@ -34,7 +32,6 @@
             margin: 0;
             overflow-x: auto;
             min-width: 1200px;
-            background-attachment: fixed;
         }
 
         header {
@@ -207,26 +204,45 @@
             width: 100%; 
             height: 380px; 
             object-fit: cover; 
-            transition: transform 0.6s ease;
+            transition: transform 0.6s ease, filter 0.6s ease;
         }
 
         .movie:hover img {
             transform: scale(1.1);
+            filter: brightness(0.6);
         }
 
+        /* QUICK VIEW SECTION */
         .movie-info { 
             padding: 20px; 
-            background: linear-gradient(to top, var(--card-bg) 80%, transparent);
+            background: linear-gradient(to top, rgba(17, 24, 39, 0.95) 70%, transparent);
             position: absolute;
             bottom: 0;
             width: 100%;
-            transform: translateY(10px);
-            transition: transform 0.4s ease;
+            transform: translateY(70%); /* Başlanğıcda yalnız başlıq görünür */
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             box-sizing: border-box;
         }
 
         .movie:hover .movie-info {
             transform: translateY(0);
+        }
+
+        .quick-view-data {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .movie:hover .quick-view-data {
+            opacity: 1;
         }
 
         .movie-info h3 { 
@@ -235,6 +251,7 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            color: #fff;
         }
 
         .rating { color: var(--accent-gold); font-weight: 800; display: flex; align-items: center; gap: 5px; margin-top: 5px; }
@@ -344,11 +361,11 @@
     <div class="mood-section">
         <div class="mood-title">BU GÜN ÖZÜNÜ NECƏ HİSS EDİRSƏN?</div>
         <div class="mood-container">
-            <button class="mood-btn" onclick="searchByMood(35, 'happy')">😊 Şən</button>
-            <button class="mood-btn" onclick="searchByMood(28, 'strong')">😎 Güclü</button>
-            <button class="mood-btn" onclick="searchByMood(18, 'sad')">😢 Kədərli</button>
-            <button class="mood-btn" onclick="searchByMood(27, 'horror')">😱 Həyəcanlı</button>
-            <button class="mood-btn" onclick="searchByMood(10749, 'love')">😍 Sevgi</button>
+            <button class="mood-btn" onclick="searchByMood(35)">😊 Şən</button>
+            <button class="mood-btn" onclick="searchByMood(28)">😎 Güclü</button>
+            <button class="mood-btn" onclick="searchByMood(18)">😢 Kədərli</button>
+            <button class="mood-btn" onclick="searchByMood(27)">😱 Həyəcanlı</button>
+            <button class="mood-btn" onclick="searchByMood(10749)">😍 Sevgi</button>
         </div>
     </div>
 
@@ -399,51 +416,11 @@
             updateWatchlistCount();
         }
 
-        // --- YENİ: DİNAMİK FON FUNKSİYASI ---
-        function changeAtmosphere(mood) {
-            const body = document.body;
-            let bgColor, gradientColor;
-
-            switch(mood) {
-                case 'happy': // Şən - Parlaq mavi tonlar
-                    bgColor = "#05070a";
-                    gradientColor = "#1e3a8a"; 
-                    break;
-                case 'strong': // Güclü - Tünd narıncı/metalik tonlar
-                    bgColor = "#0a0505";
-                    gradientColor = "#7c2d12";
-                    break;
-                case 'sad': // Kədərli - Tünd göy/boz tonlar
-                    bgColor = "#020617";
-                    gradientColor = "#1e293b";
-                    break;
-                case 'horror': // Həyəcanlı/Qorxu - Qırmızı və Qara
-                    bgColor = "#000000";
-                    gradientColor = "#450a0a";
-                    break;
-                case 'love': // Sevgi - Çəhrayı/Bənövşəyi
-                    bgColor = "#0a050a";
-                    gradientColor = "#701a75";
-                    break;
-                default:
-                    bgColor = "#05070a";
-                    gradientColor = "#1e1b4b";
-            }
-
-            body.style.backgroundColor = bgColor;
-            body.style.backgroundImage = `radial-gradient(circle at top right, ${gradientColor} 0%, transparent 40%),
-                                          radial-gradient(circle at bottom left, ${gradientColor} 0%, transparent 40%)`;
-        }
-
-        function searchByMood(genreId, moodName) {
+        function searchByMood(genreId) {
             isFavoritesView = false;
             document.querySelectorAll('.genre-tag').forEach(t => t.classList.remove('active'));
             currentApiUrl = `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${genreId}&language=${LANG}&sort_by=popularity.desc`;
             getMovies(currentApiUrl);
-            
-            // Atmosferi dəyiş
-            changeAtmosphere(moodName);
-            
             window.scrollTo({ top: 400, behavior: 'smooth' });
         }
 
@@ -465,6 +442,16 @@
             if(!movies || movies.length === 0) return;
             movies.forEach(movie => {
                 const isFav = favorites.some(f => f.id === movie.id);
+                const releaseYear = movie.release_date ? movie.release_date.split('-')[0] : 'N/A';
+                
+                // Film janrlarını göstərmək üçün (Discover data adətən id verir, tam ad üçün xəritələmə lazımdır)
+                const genreNames = movie.genre_ids 
+                    ? movie.genre_ids.map(id => {
+                        const g = genres.find(genre => genre.id === id);
+                        return g ? g.name : null;
+                    }).filter(n => n).slice(0, 2).join(' | ')
+                    : '';
+
                 const el = document.createElement('div');
                 el.className = 'movie';
                 el.innerHTML = `
@@ -473,6 +460,11 @@
                     <div class="movie-info">
                         <h3>${movie.title}</h3>
                         <div class="rating">${movie.vote_average.toFixed(1)}</div>
+                        <div class="quick-view-data">
+                            <span>🎭 ${genreNames || 'Film'}</span>
+                            <span>📅 İl: ${releaseYear}</span>
+                            <span style="color:var(--accent-gold); font-size: 10px; margin-top:5px;">DAHA ÇOXUNA BAXMAQ ÜÇÜN KLİKLƏ</span>
+                        </div>
                     </div>
                 `;
                 el.onclick = () => openDetails(movie.id);
@@ -496,8 +488,6 @@
                 ? `${BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}&language=${LANG}`
                 : `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_origin_country=${code}&language=${LANG}`;
             getMovies(currentApiUrl);
-            // Ölkə filtrində fonu sıfırla
-            changeAtmosphere('default');
         }
 
         function renderGenres() {

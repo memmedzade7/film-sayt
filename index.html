@@ -103,9 +103,9 @@
             justify-content: center;
         }
         .mood-btn {
-            background: rgba(255, 255, 255, 0.03); /* Rəng tonu azaldıldı */
+            background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            color: #d1d5db; /* Daha yumşaq ağ */
+            color: #d1d5db;
             padding: 10px 20px;
             border-radius: 50px;
             cursor: pointer;
@@ -115,15 +115,16 @@
             align-items: center;
             gap: 8px;
         }
-        .mood-btn span {
-            font-size: 0.8rem; /* İkonlar bir az kiçildildi */
-        }
+
+        /* Ehval rəngləri */
+        .mood-happy:hover { background: #fbbf24 !important; color: #000 !important; box-shadow: 0 0 15px rgba(251, 191, 36, 0.4); border-color: transparent; }
+        .mood-strong:hover { background: #3b82f6 !important; color: #fff !important; box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); border-color: transparent; }
+        .mood-sad:hover { background: #6b7280 !important; color: #fff !important; box-shadow: 0 0 15px rgba(107, 114, 128, 0.4); border-color: transparent; }
+        .mood-scary:hover { background: #ef4444 !important; color: #fff !important; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); border-color: transparent; }
+        .mood-love:hover { background: #f472b6 !important; color: #fff !important; box-shadow: 0 0 15px rgba(244, 114, 182, 0.4); border-color: transparent; }
+
         .mood-btn:hover {
-            background: var(--primary-gradient);
             transform: scale(1.05);
-            box-shadow: var(--neon-glow);
-            border-color: transparent;
-            color: white;
         }
 
         .watchlist-pill, .random-btn {
@@ -330,17 +331,18 @@
             box-shadow: 0 0 15px rgba(255,255,255,0.2);
         }
 
-        /* YARADICI HİSSƏSİ ÜÇÜN DÜZƏLİŞ */
+        /* YARADICI HİSSƏSİ - YENİLƏNDİ */
         .creator-text {
-            color: #555b66; /* Daha soft və tutqun boz */
-            font-size: 10px; 
-            font-weight: 600;
-            letter-spacing: 1.5px; 
-            margin-bottom: 8px; 
+            color: #ffffff;
+            font-size: 13px; /* Ölçü bir az böyüdü */
+            font-weight: 800;
+            letter-spacing: 2px; 
+            margin-bottom: 10px; 
             text-transform: uppercase; 
-            opacity: 0.9;
-            text-align: right; /* Sağ tərəfə söykəndi */
+            opacity: 1;
+            text-align: right;
             width: 100%;
+            text-shadow: 0 0 10px rgba(168, 85, 247, 0.8); /* Yüngül neon effekti */
         }
         .search-container { 
             display: flex; 
@@ -377,11 +379,11 @@
     <div class="mood-section">
         <div class="mood-title">BU GÜN ÖZÜNÜ NECƏ HİSS EDİRSƏN?</div>
         <div class="mood-container">
-            <button class="mood-btn" onclick="searchByMood(35)"><span>😊</span> Şən</button>
-            <button class="mood-btn" onclick="searchByMood(28)"><span>😎</span> Güclü</button>
-            <button class="mood-btn" onclick="searchByMood(18)"><span>😢</span> Kədərli</button>
-            <button class="mood-btn" onclick="searchByMood(27)"><span>😱</span> Həyəcanlı</button>
-            <button class="mood-btn" onclick="searchByMood(10749)"><span>😍</span> Sevgi</button>
+            <button class="mood-btn mood-happy" onclick="searchByMood(35)"><span>😊</span> Şən</button>
+            <button class="mood-btn mood-strong" onclick="searchByMood(28)"><span>😎</span> Güclü</button>
+            <button class="mood-btn mood-sad" onclick="searchByMood(18)"><span>😢</span> Kədərli</button>
+            <button class="mood-btn mood-scary" onclick="searchByMood(27)"><span>😱</span> Həyəcanlı</button>
+            <button class="mood-btn mood-love" onclick="searchByMood(10749)"><span>😍</span> Sevgi</button>
         </div>
     </div>
 

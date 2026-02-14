@@ -11,7 +11,7 @@
             z-index: -1;
             filter: blur(100px);
             opacity: 0.5;
-            transition: background 1s ease;
+            transition: background 1.5s ease; /* Keçid sürəti */
         }
         :root {
             --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
@@ -25,6 +25,8 @@
 
         body {
             background-color: var(--bg-dark);
+            /* Dinamik fon keçidi üçün transition əlavə edildi */
+            transition: background-color 1.2s ease, background-image 1.2s ease;
             background-image: radial-gradient(circle at top right, #1e1b4b 0%, transparent 40%),
                               radial-gradient(circle at bottom left, #1e1b4b 0%, transparent 40%);
             color: var(--text-main);
@@ -32,6 +34,7 @@
             margin: 0;
             overflow-x: auto;
             min-width: 1200px;
+            background-attachment: fixed;
         }
 
         header {
@@ -82,7 +85,6 @@
             to { background-position: 200% center; }
         }
 
-        /* --- MOOD SEARCH STYLES --- */
         .mood-section {
             display: flex;
             flex-direction: column;
@@ -122,7 +124,6 @@
             box-shadow: var(--neon-glow);
             border-color: transparent;
         }
-        /* -------------------------- */
 
         .watchlist-pill, .random-btn {
             margin-top: 8px;
@@ -343,11 +344,11 @@
     <div class="mood-section">
         <div class="mood-title">BU GÜN ÖZÜNÜ NECƏ HİSS EDİRSƏN?</div>
         <div class="mood-container">
-            <button class="mood-btn" onclick="searchByMood(35)">😊 Şən</button>
-            <button class="mood-btn" onclick="searchByMood(28)">😎 Güclü</button>
-            <button class="mood-btn" onclick="searchByMood(18)">😢 Kədərli</button>
-            <button class="mood-btn" onclick="searchByMood(27)">😱 Həyəcanlı</button>
-            <button class="mood-btn" onclick="searchByMood(10749)">😍 Sevgi</button>
+            <button class="mood-btn" onclick="searchByMood(35, 'happy')">😊 Şən</button>
+            <button class="mood-btn" onclick="searchByMood(28, 'strong')">😎 Güclü</button>
+            <button class="mood-btn" onclick="searchByMood(18, 'sad')">😢 Kədərli</button>
+            <button class="mood-btn" onclick="searchByMood(27, 'horror')">😱 Həyəcanlı</button>
+            <button class="mood-btn" onclick="searchByMood(10749, 'love')">😍 Sevgi</button>
         </div>
     </div>
 
@@ -398,15 +399,51 @@
             updateWatchlistCount();
         }
 
-        // MOOD SEARCH FUNCTION
-        function searchByMood(genreId) {
+        // --- YENİ: DİNAMİK FON FUNKSİYASI ---
+        function changeAtmosphere(mood) {
+            const body = document.body;
+            let bgColor, gradientColor;
+
+            switch(mood) {
+                case 'happy': // Şən - Parlaq mavi tonlar
+                    bgColor = "#05070a";
+                    gradientColor = "#1e3a8a"; 
+                    break;
+                case 'strong': // Güclü - Tünd narıncı/metalik tonlar
+                    bgColor = "#0a0505";
+                    gradientColor = "#7c2d12";
+                    break;
+                case 'sad': // Kədərli - Tünd göy/boz tonlar
+                    bgColor = "#020617";
+                    gradientColor = "#1e293b";
+                    break;
+                case 'horror': // Həyəcanlı/Qorxu - Qırmızı və Qara
+                    bgColor = "#000000";
+                    gradientColor = "#450a0a";
+                    break;
+                case 'love': // Sevgi - Çəhrayı/Bənövşəyi
+                    bgColor = "#0a050a";
+                    gradientColor = "#701a75";
+                    break;
+                default:
+                    bgColor = "#05070a";
+                    gradientColor = "#1e1b4b";
+            }
+
+            body.style.backgroundColor = bgColor;
+            body.style.backgroundImage = `radial-gradient(circle at top right, ${gradientColor} 0%, transparent 40%),
+                                          radial-gradient(circle at bottom left, ${gradientColor} 0%, transparent 40%)`;
+        }
+
+        function searchByMood(genreId, moodName) {
             isFavoritesView = false;
-            // Janr taglarını sıfırla
             document.querySelectorAll('.genre-tag').forEach(t => t.classList.remove('active'));
-            // Mood-a uyğun API sorğusu
             currentApiUrl = `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${genreId}&language=${LANG}&sort_by=popularity.desc`;
             getMovies(currentApiUrl);
-            // Səhifənin yuxarısına sürüşdür
+            
+            // Atmosferi dəyiş
+            changeAtmosphere(moodName);
+            
             window.scrollTo({ top: 400, behavior: 'smooth' });
         }
 
@@ -459,6 +496,8 @@
                 ? `${BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}&language=${LANG}`
                 : `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_origin_country=${code}&language=${LANG}`;
             getMovies(currentApiUrl);
+            // Ölkə filtrində fonu sıfırla
+            changeAtmosphere('default');
         }
 
         function renderGenres() {

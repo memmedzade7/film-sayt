@@ -103,9 +103,9 @@
             justify-content: center;
         }
         .mood-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: white;
+            background: rgba(255, 255, 255, 0.03); /* Rəng tonu azaldıldı */
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #d1d5db; /* Daha yumşaq ağ */
             padding: 10px 20px;
             border-radius: 50px;
             cursor: pointer;
@@ -115,11 +115,15 @@
             align-items: center;
             gap: 8px;
         }
+        .mood-btn span {
+            font-size: 0.8rem; /* İkonlar bir az kiçildildi */
+        }
         .mood-btn:hover {
             background: var(--primary-gradient);
             transform: scale(1.05);
             box-shadow: var(--neon-glow);
             border-color: transparent;
+            color: white;
         }
 
         .watchlist-pill, .random-btn {
@@ -212,14 +216,13 @@
             filter: brightness(0.6);
         }
 
-        /* QUICK VIEW SECTION */
         .movie-info { 
             padding: 20px; 
             background: linear-gradient(to top, rgba(17, 24, 39, 0.95) 70%, transparent);
             position: absolute;
             bottom: 0;
             width: 100%;
-            transform: translateY(70%); /* Başlanğıcda yalnız başlıq görünür */
+            transform: translateY(70%);
             transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             box-sizing: border-box;
         }
@@ -327,11 +330,24 @@
             box-shadow: 0 0 15px rgba(255,255,255,0.2);
         }
 
+        /* YARADICI HİSSƏSİ ÜÇÜN DÜZƏLİŞ */
         .creator-text {
-            color: #a0a0a0; font-size: 10px; font-weight: 500;
-            letter-spacing: 1px; margin-bottom: 5px; text-transform: uppercase; opacity: 0.8;
+            color: #555b66; /* Daha soft və tutqun boz */
+            font-size: 10px; 
+            font-weight: 600;
+            letter-spacing: 1.5px; 
+            margin-bottom: 8px; 
+            text-transform: uppercase; 
+            opacity: 0.9;
+            text-align: right; /* Sağ tərəfə söykəndi */
+            width: 100%;
         }
-        .search-container { display: flex; flex-direction: column; align-items: flex-end; }
+        .search-container { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: flex-end; 
+            justify-content: center;
+        }
 
         .loader {
             grid-column: 1/-1;
@@ -361,11 +377,11 @@
     <div class="mood-section">
         <div class="mood-title">BU GÜN ÖZÜNÜ NECƏ HİSS EDİRSƏN?</div>
         <div class="mood-container">
-            <button class="mood-btn" onclick="searchByMood(35)">😊 Şən</button>
-            <button class="mood-btn" onclick="searchByMood(28)">😎 Güclü</button>
-            <button class="mood-btn" onclick="searchByMood(18)">😢 Kədərli</button>
-            <button class="mood-btn" onclick="searchByMood(27)">😱 Həyəcanlı</button>
-            <button class="mood-btn" onclick="searchByMood(10749)">😍 Sevgi</button>
+            <button class="mood-btn" onclick="searchByMood(35)"><span>😊</span> Şən</button>
+            <button class="mood-btn" onclick="searchByMood(28)"><span>😎</span> Güclü</button>
+            <button class="mood-btn" onclick="searchByMood(18)"><span>😢</span> Kədərli</button>
+            <button class="mood-btn" onclick="searchByMood(27)"><span>😱</span> Həyəcanlı</button>
+            <button class="mood-btn" onclick="searchByMood(10749)"><span>😍</span> Sevgi</button>
         </div>
     </div>
 
@@ -444,7 +460,6 @@
                 const isFav = favorites.some(f => f.id === movie.id);
                 const releaseYear = movie.release_date ? movie.release_date.split('-')[0] : 'N/A';
                 
-                // Film janrlarını göstərmək üçün (Discover data adətən id verir, tam ad üçün xəritələmə lazımdır)
                 const genreNames = movie.genre_ids 
                     ? movie.genre_ids.map(id => {
                         const g = genres.find(genre => genre.id === id);

@@ -297,7 +297,25 @@
         }
 
         .close-modal { position: absolute; top: 20px; right: 20px; font-size: 2.5rem; cursor: pointer; color: white; z-index: 100; }
-        .video-container { width: 100%; aspect-ratio: 16/9; background: #000; }
+        
+        /* Video Player Seçimləri */
+        .video-container { width: 100%; aspect-ratio: 16/9; background: #000; position: relative; }
+        .player-tabs {
+            display: flex;
+            background: #111;
+            padding: 10px;
+            gap: 10px;
+        }
+        .player-btn {
+            background: #222;
+            color: white;
+            border: 1px solid #444;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .player-btn.active { background: #a855f7; border-color: #a855f7; }
 
         .details-grid { padding: 40px; display: grid; grid-template-columns: 300px 1fr; gap: 40px; }
         .details-grid img { width: 100%; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
@@ -334,7 +352,6 @@
             box-shadow: 0 0 15px rgba(255,255,255,0.2);
         }
 
-        /* YARADICI HİSSƏSİ - DAHA SOFT VƏ MİNİMALİST */
         .creator-text {
             color: var(--text-muted);
             font-size: 10px;
@@ -415,7 +432,7 @@
         const API_KEY = '34d4692f40f9b4827503c570ebda8db7';
         const BASE_URL = 'https://api.themoviedb.org/3';
         const IMG_PATH = 'https://image.tmdb.org/t/p/w1280';
-        const CAST_IMG_PATH = 'https://image.tmdb.org/t/p/w200'; // Aktyorlar üçün ölçü
+        const CAST_IMG_PATH = 'https://image.tmdb.org/t/p/w200'; 
         const LANG = 'tr-TR'; 
 
         const main = document.getElementById('main');
@@ -429,6 +446,11 @@
         let currentApiUrl = `${BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}&language=${LANG}`;
         let isFavoritesView = false;
         let isLoading = false;
+
+        // ÖZƏL: Google Drive Filmlər Bazası (Bura öz Drive linklərini əlavə edə bilərsən)
+        const myDriveMovies = {
+            // Nümunə: "550": "https://drive.google.com/uc?export=download&id=FAYL_IDSI"
+        };
 
         const genres = [
             { id: 28, name: 'Aksiyon' }, { id: 12, name: 'Macəra' },
@@ -491,7 +513,7 @@
                         <div class="quick-view-data">
                             <span>🎭 ${genreNames || 'Film'}</span>
                             <span>📅 İl: ${releaseYear}</span>
-                            <span style="color:var(--accent-gold); font-size: 10px; margin-top:5px;">DAHA ÇOXUNA BAXMAQ ÜÇÜN KLİKLƏ</span>
+                            <span style="color:var(--accent-gold); font-size: 10px; margin-top:5px;">İZLƏMƏK ÜÇÜN KLİKLƏ</span>
                         </div>
                     </div>
                 `;
@@ -539,6 +561,7 @@
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
             modalContent.innerHTML = '<div style="padding:50px; text-align:center;">Yüklənir...</div>';
+            
             const [mRes, vRes, cRes] = await Promise.all([
                 fetch(`${BASE_URL}/movie/${id}?api_key=${API_KEY}&language=${LANG}`),
                 fetch(`${BASE_URL}/movie/${id}/videos?api_key=${API_KEY}`),
@@ -547,14 +570,22 @@
             const movie = await mRes.json();
             const videos = await vRes.json();
             const credits = await cRes.json();
-            const trailer = videos.results.find(v => v.type === 'Trailer' && v.site === 'YouTube') || videos.results[0];
-            const trailerHtml = trailer 
-                ? `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${trailer.key}" frameborder="0" allowfullscreen></iframe>`
-                : `<div style="padding:100px; text-align:center; background:#000;">Fraqman yoxdur.</div>`;
+
+            // Pleyer Mənbələri
+            // 1. Əgər sənin Drive-da varsa onu göstər, yoxdursa reklamsız Vidsrc-ni yoxla
+            const driveLink = myDriveMovies[id] || "";
+            const vidsrcLink = `https://vidsrc.to/embed/movie/${id}`; 
             
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
-                <div class="video-container">${trailerHtml}</div>
+                <div class="video-container">
+                    <iframe id="main-player" width="100%" height="100%" src="${vidsrcLink}" frameborder="0" allowfullscreen sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts"></iframe>
+                </div>
+                <div class="player-tabs">
+                    <button class="player-btn active" onclick="changeSource('${vidsrcLink}', this)">Türkçe / Altyazı (Auto)</button>
+                    ${driveLink ? `<button class="player-btn" onclick="changeSource('${driveLink}', this)">Mənim Drive-ım</button>` : ''}
+                    <button class="player-btn" onclick="changeSource('https://www.youtube.com/embed/${videos.results[0]?.key}', this)">Treyler</button>
+                </div>
                 <div class="details-grid">
                     <img src="${movie.poster_path ? IMG_PATH + movie.poster_path : 'https://via.placeholder.com/300x450'}">
                     <div>
@@ -584,6 +615,12 @@
                 </div>
             `;
             loadComments(id);
+        }
+
+        function changeSource(url, btn) {
+            document.getElementById('main-player').src = url;
+            document.querySelectorAll('.player-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
         }
 
         function addComment(movieId) {

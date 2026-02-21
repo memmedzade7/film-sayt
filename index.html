@@ -298,7 +298,7 @@
 
         .close-modal { position: absolute; top: 20px; right: 20px; font-size: 2.5rem; cursor: pointer; color: white; z-index: 100; }
         
-        /* REKLAM QALXANI ÜÇÜN KONTEYNER */
+        /* AD-SHIELD PROTECTOR */
         .video-container { 
             width: 100%; 
             aspect-ratio: 16/9; 
@@ -307,12 +307,28 @@
             overflow: hidden;
         }
 
-        .ad-shield {
+        #protection-overlay {
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 50px;
-            z-index: 10; cursor: default;
+            inset: 0;
+            z-index: 999;
+            cursor: pointer;
+            background: rgba(0,0,0,0.01);
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
-        
+        .shield-msg {
+            background: var(--primary-gradient);
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-weight: bold;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            pointer-events: none;
+            opacity: 0;
+            transition: 0.3s;
+        }
+        #protection-overlay:hover .shield-msg { opacity: 1; }
+
         .player-tabs {
             display: flex;
             background: #111;
@@ -332,16 +348,15 @@
             transition: 0.3s;
             white-space: nowrap;
         }
-        .player-btn.active { background: #6366f1; border-color: #6366f1; box-shadow: 0 0 10px rgba(99, 102, 241, 0.4); }
-        .player-btn:hover { background: #333; }
+        .player-btn.active { background: #6366f1; border-color: #6366f1; }
 
         .details-grid { padding: 40px; display: grid; grid-template-columns: 300px 1fr; gap: 40px; }
-        .details-grid img { width: 100%; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .details-grid img { width: 100%; border-radius: 20px; }
 
         .comment-section { margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; }
         .comment-input {
             width: 100%; background: rgba(255,255,255,0.05); border: 1px solid #333;
-            color: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; resize: vertical; font-family: inherit;
+            color: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; font-family: inherit;
         }
         .comment-btn {
             background: var(--primary-gradient); color: white; border: none;
@@ -355,20 +370,14 @@
 
         .cast-container { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; margin-top: 20px;}
         .cast-card { min-width: 100px; text-align: center; font-size: 0.8rem; }
-        .cast-card img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 8px; border: 2px solid rgba(168, 85, 247, 0.3);}
+        .cast-card img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(168, 85, 247, 0.3);}
 
         .country-tabs { display: flex; justify-content: center; gap: 15px; margin: 30px 0; }
         .tab-btn {
             background: #111; color: #999; border: 1px solid #333;
             padding: 10px 25px; cursor: pointer; border-radius: 12px; transition: 0.4s;
-            font-weight: 600; text-transform: uppercase; letter-spacing: 1px;
         }
-        .tab-btn.active { 
-            background: #fff; 
-            color: #000; 
-            border-color: #fff;
-            box-shadow: 0 0 15px rgba(255,255,255,0.2);
-        }
+        .tab-btn.active { background: #fff; color: #000; }
 
         .creator-text {
             color: var(--text-muted);
@@ -377,30 +386,12 @@
             letter-spacing: 1.5px; 
             margin-bottom: 6px; 
             text-transform: uppercase; 
-            opacity: 0.7;
             text-align: right;
             width: 100%;
-            transition: 0.3s;
         }
-        .creator-text:hover {
-            opacity: 1;
-            color: #a855f7;
-        }
-        .search-container { 
-            display: flex; 
-            flex-direction: column; 
-            align-items: flex-end; 
-            justify-content: center;
-        }
+        .search-container { display: flex; flex-direction: column; align-items: flex-end; }
 
-        .loader {
-            grid-column: 1/-1;
-            text-align: center;
-            padding: 20px;
-            font-weight: bold;
-            opacity: 0.6;
-            display: none;
-        }
+        .loader { grid-column: 1/-1; text-align: center; padding: 20px; display: none; }
     </style>
 </head>
 <body>
@@ -440,7 +431,7 @@
     <div id="genres" class="genres-container"></div>
 
     <main id="main"></main>
-    <div id="loader" class="loader">Daha çox film yüklənir...</div>
+    <div id="loader" class="loader">Yüklənir...</div>
 
     <div id="modal" class="modal">
         <div class="modal-content" id="modal-content"></div>
@@ -465,8 +456,6 @@
         let isFavoritesView = false;
         let isLoading = false;
 
-        const myDriveMovies = {};
-
         const genres = [
             { id: 28, name: 'Aksiyon' }, { id: 12, name: 'Macəra' },
             { id: 16, name: 'Animasiya' }, { id: 35, name: 'Komediya' },
@@ -481,46 +470,21 @@
             updateWatchlistCount();
         }
 
-        function searchByMood(genreId, bgColor) {
-            isFavoritesView = false;
-            bgOverlay.style.background = `radial-gradient(circle at center, ${bgColor} 0%, #05070a 100%)`;
-            document.querySelectorAll('.genre-tag').forEach(t => t.classList.remove('active'));
-            currentApiUrl = `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${genreId}&language=${LANG}&sort_by=popularity.desc`;
-            getMovies(currentApiUrl);
-            window.scrollTo({ top: 400, behavior: 'smooth' });
-        }
-
         async function getMovies(url, isNew = true) {
-            if (isNew) {
-                main.innerHTML = '';
-                currentPage = 1;
-            }
+            if (isNew) { main.innerHTML = ''; currentPage = 1; }
             isLoading = true;
             loader.style.display = 'block';
-            try {
-                const res = await fetch(`${url}&page=${currentPage}`);
-                const data = await res.json();
-                showMovies(data.results);
-            } catch (err) {
-                console.error("Xəta baş verdi:", err);
-            }
+            const res = await fetch(`${url}&page=${currentPage}`);
+            const data = await res.json();
+            showMovies(data.results);
             isLoading = false;
             loader.style.display = 'none';
         }
 
         function showMovies(movies) {
-            if(!movies || movies.length === 0) return;
+            if(!movies) return;
             movies.forEach(movie => {
                 const isFav = favorites.some(f => f.id === movie.id);
-                const releaseYear = movie.release_date ? movie.release_date.split('-')[0] : 'N/A';
-                
-                const genreNames = movie.genre_ids 
-                    ? movie.genre_ids.map(id => {
-                        const g = genres.find(genre => genre.id === id);
-                        return g ? g.name : null;
-                    }).filter(n => n).slice(0, 2).join(' | ')
-                    : '';
-
                 const el = document.createElement('div');
                 el.className = 'movie';
                 el.innerHTML = `
@@ -530,9 +494,8 @@
                         <h3>${movie.title}</h3>
                         <div class="rating">${movie.vote_average.toFixed(1)}</div>
                         <div class="quick-view-data">
-                            <span>🎭 ${genreNames || 'Film'}</span>
-                            <span>📅 İl: ${releaseYear}</span>
-                            <span style="color:var(--accent-gold); font-size: 10px; margin-top:5px;">İZLƏMƏK ÜÇÜN KLİKLƏ</span>
+                            <span>📅 İl: ${movie.release_date?.split('-')[0] || 'N/A'}</span>
+                            <span style="color:var(--accent-gold); font-size: 10px;">İZLƏMƏK ÜÇÜN KLİKLƏ</span>
                         </div>
                     </div>
                 `;
@@ -541,45 +504,10 @@
             });
         }
 
-        window.addEventListener('scroll', () => {
-            if (isFavoritesView || isLoading) return;
-            if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 800) {
-                currentPage++;
-                getMovies(currentApiUrl, false);
-            }
-        });
-
-        function filterByCountry(code, btn) {
-            isFavoritesView = false;
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            currentApiUrl = code === 'all' 
-                ? `${BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}&language=${LANG}`
-                : `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_origin_country=${code}&language=${LANG}`;
-            getMovies(currentApiUrl);
-        }
-
-        function renderGenres() {
-            const container = document.getElementById('genres');
-            genres.forEach(g => {
-                const tag = document.createElement('div');
-                tag.className = 'genre-tag';
-                tag.innerText = g.name;
-                tag.onclick = () => {
-                    isFavoritesView = false;
-                    document.querySelectorAll('.genre-tag').forEach(t => t.classList.remove('active'));
-                    tag.classList.add('active');
-                    currentApiUrl = `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${g.id}&language=${LANG}`;
-                    getMovies(currentApiUrl);
-                };
-                container.appendChild(tag);
-            });
-        }
-
         async function openDetails(id) {
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
-            modalContent.innerHTML = '<div style="padding:50px; text-align:center;">Yüklənir...</div>';
+            modalContent.innerHTML = '<div style="padding:50px; text-align:center;">Hazırlanır...</div>';
             
             const [mRes, vRes, cRes] = await Promise.all([
                 fetch(`${BASE_URL}/movie/${id}?api_key=${API_KEY}&language=${LANG}`),
@@ -590,56 +518,40 @@
             const videos = await vRes.json();
             const credits = await cRes.json();
 
-            // GÜCLƏNDİRİLMİŞ MƏNBƏLƏR
-            const sources = [
-                { name: 'Server 1 (No-Ads)', url: `https://vidsrc.cc/v2/embed/movie/${id}` },
-                { name: 'Server 2 (Stabil)', url: `https://vidsrc.me/embed/movie?tmdb=${id}` },
-                { name: 'Server 3 (Hızlı)', url: `https://vidsrc.pro/embed/movie/${id}` },
-                { name: 'Server 4 (Alternative)', url: `https://embed.su/embed/movie/${id}` }
-            ];
-
-            const driveSource = myDriveMovies[id] || "";
-
+            // REKLAM BLOKLAYAN STRATEJİ: sandbox "allow-popups" İÇƏRMİR!
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
-                <div class="video-container">
-                    <div class="ad-shield"></div>
+                <div class="video-container" id="player-wrapper">
+                    <div id="protection-overlay" onclick="removeShield()">
+                        <div class="shield-msg">Pleyeri başlatmaq üçün toxunun (Reklamlar Bloklanıb)</div>
+                    </div>
                     <iframe id="main-player" 
-                        src="${sources[0].url}" 
+                        src="https://vidsrc.pro/embed/movie/${id}" 
                         width="100%" height="100%" 
                         frameborder="0" allowfullscreen
                         sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts">
                     </iframe>
                 </div>
                 <div class="player-tabs">
-                    ${sources.map((s, i) => `
-                        <button class="player-btn ${i===0?'active':''}" onclick="changeSource('${s.url}', this)">${s.name}</button>
-                    `).join('')}
-                    ${driveSource ? `<button class="player-btn" onclick="changeSource('${driveSource}', this)">Drive İzlə</button>` : ''}
+                    <button class="player-btn active" onclick="changeSource('https://vidsrc.pro/embed/movie/${id}', this)">Server 1</button>
+                    <button class="player-btn" onclick="changeSource('https://vidsrc.cc/v2/embed/movie/${id}', this)">Server 2</button>
                     <button class="player-btn" onclick="changeSource('https://www.youtube.com/embed/${videos.results[0]?.key}', this)">Treyler</button>
                 </div>
                 <div class="details-grid">
-                    <img src="${movie.poster_path ? IMG_PATH + movie.poster_path : 'https://via.placeholder.com/300x450'}">
+                    <img src="${IMG_PATH + movie.poster_path}">
                     <div>
-                        <h2 style="font-size: 2.5rem; margin-top:0;">${movie.title}</h2>
-                        <p style="font-size: 1.1rem; line-height:1.6; color:var(--text-muted);">${movie.overview || "Məlumat yoxdur."}</p>
-                        <div style="margin: 20px 0; display:flex; gap:30px;">
-                            <span><strong>Janr:</strong> ${movie.genres.map(g => g.name).join(', ')}</span>
-                            <span><strong>İl:</strong> ${movie.release_date ? movie.release_date.split('-')[0] : 'N/A'}</span>
-                        </div>
-                        <h3>Aktyor Heyəti</h3>
+                        <h2>${movie.title}</h2>
+                        <p>${movie.overview}</p>
                         <div class="cast-container">
-                            ${credits.cast.slice(0, 10).map(c => `
+                            ${credits.cast.slice(0, 8).map(c => `
                                 <div class="cast-card">
-                                    <img src="${c.profile_path ? CAST_IMG_PATH + c.profile_path : 'https://via.placeholder.com/100x100?text=Yoxdur'}">
-                                    <div style="font-weight:bold; color:white; margin-top:5px;">${c.name}</div>
-                                    <div style="opacity:0.6; font-size:10px;">${c.character}</div>
+                                    <img src="${c.profile_path ? CAST_IMG_PATH + c.profile_path : 'https://via.placeholder.com/80x80'}">
+                                    <div>${c.name}</div>
                                 </div>
                             `).join('')}
                         </div>
                         <div class="comment-section">
-                            <h3>Rəy Bildir</h3>
-                            <textarea id="comment-text" class="comment-input" rows="4" placeholder="Fikirlərinizi yazın..."></textarea>
+                            <textarea id="comment-text" class="comment-input" placeholder="Rəyiniz..."></textarea>
                             <button class="comment-btn" onclick="addComment(${id})">Göndər</button>
                             <div id="comments-list-${id}" class="comments-list"></div>
                         </div>
@@ -649,39 +561,18 @@
             loadComments(id);
         }
 
+        function removeShield() {
+            document.getElementById('protection-overlay').style.display = 'none';
+        }
+
         function changeSource(url, btn) {
-            const player = document.getElementById('main-player');
-            player.src = url;
+            document.getElementById('main-player').src = url;
             document.querySelectorAll('.player-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
+            document.getElementById('protection-overlay').style.display = 'flex';
         }
 
-        function addComment(movieId) {
-            const text = document.getElementById('comment-text').value;
-            if(!text.trim()) return;
-            const comments = JSON.parse(localStorage.getItem(`comments_${movieId}`)) || [];
-            comments.unshift({ text: text, date: new Date().toLocaleString('az-AZ') });
-            localStorage.setItem(`comments_${movieId}`, JSON.stringify(comments));
-            document.getElementById('comment-text').value = '';
-            loadComments(movieId);
-        }
-
-        function loadComments(movieId) {
-            const container = document.getElementById(`comments-list-${movieId}`);
-            const comments = JSON.parse(localStorage.getItem(`comments_${movieId}`)) || [];
-            container.innerHTML = comments.map(c => `
-                <div class="comment-item">
-                    <div style="font-size: 0.75rem; color: #a855f7; margin-bottom: 5px; font-weight:bold;">${c.date}</div>
-                    <div>${c.text}</div>
-                </div>
-            `).join('') || '<p style="color:#666">Hələ rəy yazılmayıb.</p>';
-        }
-
-        function closeModal() {
-            modal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-            modalContent.innerHTML = '';
-        }
+        function closeModal() { modal.style.display = 'none'; document.body.style.overflow = 'auto'; }
 
         function toggleFav(movie, btn) {
             const index = favorites.findIndex(f => f.id === movie.id);
@@ -692,22 +583,66 @@
         }
 
         function updateWatchlistCount() { document.getElementById('watchlist-count').innerText = `Siyahım (${favorites.length})`; }
-        function showFavorites() { if(favorites.length === 0) { alert("Siyahınız boşdur!"); return; } isFavoritesView = true; main.innerHTML = ''; showMovies(favorites); }
+        
+        function showFavorites() { 
+            if(favorites.length === 0) return alert("Siyahı boşdur.");
+            isFavoritesView = true; main.innerHTML = ''; showMovies(favorites); 
+        }
+
+        function filterByCountry(code, btn) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentApiUrl = code === 'all' ? `${BASE_URL}/discover/movie?api_key=${API_KEY}&language=${LANG}` : `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_origin_country=${code}&language=${LANG}`;
+            getMovies(currentApiUrl);
+        }
+
+        function searchByMood(genreId, bgColor) {
+            bgOverlay.style.background = `radial-gradient(circle at center, ${bgColor} 0%, #05070a 100%)`;
+            currentApiUrl = `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${genreId}&language=${LANG}`;
+            getMovies(currentApiUrl);
+        }
+
+        function renderGenres() {
+            const container = document.getElementById('genres');
+            genres.forEach(g => {
+                const tag = document.createElement('div');
+                tag.className = 'genre-tag';
+                tag.innerText = g.name;
+                tag.onclick = () => {
+                    currentApiUrl = `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${g.id}&language=${LANG}`;
+                    getMovies(currentApiUrl);
+                };
+                container.appendChild(tag);
+            });
+        }
 
         document.getElementById('form').addEventListener('submit', (e) => {
             e.preventDefault();
             const q = document.getElementById('search').value;
-            if(q) { isFavoritesView = false; currentApiUrl = `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${q}&language=${LANG}`; getMovies(currentApiUrl); }
+            currentApiUrl = `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${q}&language=${LANG}`;
+            getMovies(currentApiUrl);
         });
 
         async function getRandomMovie() {
-            try {
-                const res = await fetch(`${BASE_URL}/movie/popular?api_key=${API_KEY}&page=${Math.floor(Math.random() * 20) + 1}`);
-                const data = await res.json();
-                openDetails(data.results[Math.floor(Math.random() * data.results.length)].id);
-            } catch (err) {
-                console.error(err);
-            }
+            const res = await fetch(`${BASE_URL}/movie/popular?api_key=${API_KEY}`);
+            const data = await res.json();
+            openDetails(data.results[Math.floor(Math.random() * 20)].id);
+        }
+
+        function addComment(id) {
+            const txt = document.getElementById('comment-text').value;
+            if(!txt) return;
+            const coms = JSON.parse(localStorage.getItem(`comments_${id}`)) || [];
+            coms.unshift({ text: txt, date: new Date().toLocaleString() });
+            localStorage.setItem(`comments_${id}`, JSON.stringify(coms));
+            document.getElementById('comment-text').value = '';
+            loadComments(id);
+        }
+
+        function loadComments(id) {
+            const list = document.getElementById(`comments-list-${id}`);
+            const coms = JSON.parse(localStorage.getItem(`comments_${id}`)) || [];
+            list.innerHTML = coms.map(c => `<div class="comment-item"><b>${c.date}</b><br>${c.text}</div>`).join('');
         }
 
         init();

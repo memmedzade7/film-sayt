@@ -350,16 +350,11 @@
         }
         .player-btn.active { background: #6366f1; border-color: #6366f1; }
         
-        /* Yeni Alternativ Düymələr Stili */
-        .player-btn.alt-source {
-            background: #fbbf24;
-            color: #000;
-            font-weight: bold;
-            border: none;
-        }
-        .player-btn.alt-source:hover {
-            background: #f59e0b;
-        }
+        /* Dublaj Düymələri Stili */
+        .player-btn.alt-source { background: #fbbf24; color: #000; font-weight: bold; border: none; }
+        .player-btn.az-dublaj { background: #ef4444; color: white; border: none; font-weight: bold; }
+        .player-btn.tr-dublaj { background: #3b82f6; color: white; border: none; font-weight: bold; }
+        .player-btn.alt-source:hover, .player-btn.az-dublaj:hover, .player-btn.tr-dublaj:hover { opacity: 0.9; transform: scale(1.05); }
 
         .details-grid { padding: 40px; display: grid; grid-template-columns: 300px 1fr; gap: 40px; }
         .details-grid img { width: 100%; border-radius: 20px; }
@@ -404,7 +399,6 @@
 
         .loader { grid-column: 1/-1; text-align: center; padding: 20px; display: none; }
         
-        /* Bildiriş Mesajı */
         .not-found-alert {
             background: rgba(251, 191, 36, 0.1);
             border-left: 4px solid #fbbf24;
@@ -543,6 +537,8 @@
             // Alternativ axtarış linkləri
             const youtubeSearch = `https://www.youtube.com/results?search_query=${encodeURIComponent(movie.title + " full izle")}`;
             const googleSearch = `https://www.google.com/search?q=${encodeURIComponent(movie.title + " izle")}`;
+            const dublajAZ = `https://www.google.com/search?q=${encodeURIComponent(movie.title + " azərbaycan dilində izlə")}`;
+            const dublajTR = `https://www.google.com/search?q=${encodeURIComponent(movie.title + " türkçe dublaj izle")}`;
 
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
@@ -559,15 +555,17 @@
                 </div>
                 <div class="player-tabs">
                     <button class="player-btn active" onclick="changeSource('https://vidsrc.cc/v2/embed/movie/${id}', this)">Film İzlə</button>
+                    <button class="player-btn" onclick="changeSource('https://vidsrc.to/embed/movie/${id}', this)">Alternativ Server</button>
+                    <button class="player-btn az-dublaj" onclick="window.open('${dublajAZ}', '_blank')">🇦🇿 AZ Dublaj Axtar</button>
+                    <button class="player-btn tr-dublaj" onclick="window.open('${dublajTR}', '_blank')">🇹🇷 TR Dublaj Axtar</button>
                     <button class="player-btn" onclick="changeSource('https://www.youtube.com/embed/${videos.results[0]?.key}', this)">Treyler</button>
                     <button class="player-btn alt-source" onclick="window.open('${youtubeSearch}', '_blank')">YouTube-da Tap 📺</button>
-                    <button class="player-btn alt-source" onclick="window.open('${googleSearch}', '_blank')">Google-da Axtar 🔍</button>
                 </div>
                 <div class="details-grid">
                     <img src="${IMG_PATH + movie.poster_path}">
                     <div>
                         <div class="not-found-alert">
-                            <b>Qeyd:</b> Azərbaycan və yerli Türk filmləri bəzən serverdə tapılmaya bilər. Əgər pleyer açılmırsa, yuxarıdakı <b>"YouTube-da Tap"</b> düyməsini istifadə edin.
+                            <b>Dublaj haqqında:</b> Əgər pleyer ingiliscədirsə, yuxarıdakı <b>TR Dublaj</b> və ya <b>AZ Dublaj</b> düymələri ilə filmi yerli saytlarda sürətli tapa bilərsiniz.
                         </div>
                         <h2>${movie.title}</h2>
                         <p>${movie.overview}</p>

@@ -440,6 +440,7 @@
 
     <div class="country-tabs">
         <button class="tab-btn active" onclick="filterByCountry('all', this)">Hamısı</button>
+        <button class="tab-btn" onclick="filterByCountry('AZ', this)">Azərbaycan</button>
         <button class="tab-btn" onclick="filterByCountry('TR', this)">Türkiyə</button>
         <button class="tab-btn" onclick="filterByCountry('IN', this)">Hindistan</button>
     </div>
@@ -484,7 +485,6 @@
             getMovies(currentApiUrl);
             updateWatchlistCount();
 
-            // Sonsuz Sürüşdürmə (Infinite Scroll)
             window.addEventListener('scroll', () => {
                 if (isLoading || isFavoritesView) return;
                 if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
@@ -552,7 +552,6 @@
             const videos = await vRes.json();
             const credits = await cRes.json();
 
-            // Alternativ axtarış linkləri
             const youtubeSearch = `https://www.youtube.com/results?search_query=${encodeURIComponent(movie.title + " full izle")}`;
             const googleSearch = `https://www.google.com/search?q=${encodeURIComponent(movie.title + " izle")}`;
             const dublajAZ = `https://www.google.com/search?q=${encodeURIComponent(movie.title + " azərbaycan dilində izlə")}`;
@@ -573,9 +572,9 @@
                 </div>
                 <div class="player-tabs">
                     <button class="player-btn active" onclick="changeSource('https://vidsrc.cc/v2/embed/movie/${id}', this)">Film İzlə</button>
+                    <button class="player-btn" onclick="changeSource('https://www.youtube.com/embed/${videos.results[0]?.key}', this)">Treyler</button>
                     <button class="player-btn az-dublaj" onclick="window.open('${dublajAZ}', '_blank')">🇦🇿 AZ Dublaj Axtar</button>
                     <button class="player-btn tr-dublaj" onclick="window.open('${dublajTR}', '_blank')">🇹🇷 TR Dublaj Axtar</button>
-                    <button class="player-btn" onclick="changeSource('https://www.youtube.com/embed/${videos.results[0]?.key}', this)">Treyler</button>
                     <button class="player-btn alt-source" onclick="window.open('${youtubeSearch}', '_blank')">YouTube-da Tap 📺</button>
                     <button class="player-btn" style="background:#4285F4" onclick="window.open('${googleSearch}', '_blank')">Google-da Axtar 🔍</button>
                 </div>

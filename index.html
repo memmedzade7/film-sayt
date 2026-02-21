@@ -63,8 +63,6 @@
             align-items: flex-start;
         }
 
-        .logo-area { display: flex; align-items: center; gap: 30px; }
-
         .logo {
             font-size: 2.4rem;
             font-weight: 900;
@@ -90,12 +88,28 @@
             animation: shine 3s linear infinite;
         }
 
-        .nav-links { display: flex; gap: 20px; }
-        .nav-item { color: #fff; text-decoration: none; font-weight: 600; cursor: pointer; transition: 0.3s; opacity: 0.7; }
-        .nav-item:hover, .nav-item.active { opacity: 1; color: #a855f7; }
-
         @keyframes shine {
             to { background-position: 200% center; }
+        }
+
+        /* YENİ: Naviqasiya Menyu */
+        .nav-menu {
+            display: flex;
+            gap: 20px;
+            margin-left: 30px;
+        }
+        .nav-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            padding: 8px 15px;
+            border-radius: 8px;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: white;
+            background: rgba(255,255,255,0.1);
         }
 
         .mood-section {
@@ -287,6 +301,22 @@
         .fav-btn:hover { transform: scale(1.2); }
         .fav-btn.active { color: #ff4757; background: white; }
 
+        /* AKTYORLAR BÖLMƏSİ ÜÇÜN STİLLƏR */
+        .actor-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            text-align: center;
+            padding-bottom: 15px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .actor-card:hover { transform: translateY(-10px); border-color: #a855f7; }
+        .actor-card img { width: 100%; height: 300px; object-fit: cover; }
+        .actor-card h3 { margin: 15px 0 5px; font-size: 1rem; }
+        .actor-card p { color: var(--text-muted); font-size: 0.8rem; margin: 0; }
+
         .modal {
             position: fixed; inset: 0;
             background: rgba(0, 0, 0, 0.95);
@@ -304,27 +334,7 @@
 
         .close-modal { position: absolute; top: 20px; right: 20px; font-size: 2.5rem; cursor: pointer; color: white; z-index: 100; }
         
-        /* MINI PLAYER CSS */
-        .mini-btn { position: absolute; top: 20px; right: 80px; font-size: 1.5rem; cursor: pointer; color: white; z-index: 100; background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 8px; }
-        .mini-btn:hover { background: var(--primary-gradient); }
-
-        #mini-player-container {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 400px;
-            aspect-ratio: 16/9;
-            z-index: 3000;
-            background: #000;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
-            border: 2px solid #6366f1;
-            display: none;
-        }
-        #mini-player-container iframe { width: 100%; height: 100%; border: none; }
-        .close-mini { position: absolute; top: 5px; right: 5px; background: red; color: #fff; border: none; border-radius: 50%; cursor: pointer; z-index: 3001; }
-
+        /* AD-SHIELD PROTECTOR */
         .video-container { 
             width: 100%; 
             aspect-ratio: 16/9; 
@@ -376,6 +386,7 @@
         }
         .player-btn.active { background: #6366f1; border-color: #6366f1; }
         
+        /* Dublaj Düymələri Stili */
         .player-btn.alt-source { background: #fbbf24; color: #000; font-weight: bold; border: none; }
         .player-btn.az-dublaj { background: #ef4444; color: white; border: none; font-weight: bold; }
         .player-btn.tr-dublaj { background: #3b82f6; color: white; border: none; font-weight: bold; }
@@ -400,7 +411,8 @@
         }
 
         .cast-container { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; margin-top: 20px;}
-        .cast-card { min-width: 100px; text-align: center; font-size: 0.8rem; }
+        .cast-card { min-width: 100px; text-align: center; font-size: 0.8rem; cursor: pointer; transition: 0.3s;}
+        .cast-card:hover { color: #a855f7; }
         .cast-card img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(168, 85, 247, 0.3);}
 
         .country-tabs { display: flex; justify-content: center; gap: 15px; margin: 30px 0; }
@@ -433,6 +445,12 @@
             border-radius: 4px;
             font-size: 0.9rem;
         }
+
+        /* AKTYOR DETAL SƏHİFƏSİ ÜÇÜN */
+        .actor-header { display: flex; gap: 30px; padding: 40px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .actor-header img { width: 250px; border-radius: 20px; }
+        .actor-bio h2 { margin-top: 0; }
+        .actor-movies-title { padding: 20px 40px 0; font-size: 1.5rem; }
     </style>
 </head>
 <body>
@@ -440,25 +458,28 @@
     <div id="bg-overlay"></div>
 
     <header>
-        <div class="brand">
-            <div class="logo-area">
+        <div style="display: flex; align-items: center;">
+            <div class="brand">
                 <h1 class="logo" onclick="location.reload()">RM Film</h1>
-                <nav class="nav-links">
-                    <a class="nav-item active" onclick="location.reload()">Filmlər</a>
-                    <a class="nav-item" onclick="loadTVChannels()">📺 Canlı TV</a>
-                </nav>
+                <span class="slogan">Minlərlə film, Tək Məkan</span>
             </div>
-            <span class="slogan">Minlərlə film, Tək Məkan</span>
-            <div id="watchlist-count" class="watchlist-pill" onclick="showFavorites()">Siyahım (0)</div>
-            <button class="random-btn" onclick="getRandomMovie()">🎲 Şansımı yoxla</button>
+            <nav class="nav-menu">
+                <div class="nav-link active" id="nav-home" onclick="switchTo('movies')">Filmlər</div>
+                <div class="nav-link" id="nav-actors" onclick="switchTo('actors')">Aktyorlar</div>
+            </nav>
         </div>
+        
         <div class="search-container">
             <div class="creator-text">Yaradıcı: Rəsul Məmmədzadə</div>
-            <form id="form"><input type="text" id="search" class="search" placeholder="Film axtar..."></form>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <div id="watchlist-count" class="watchlist-pill" onclick="showFavorites()">Siyahım (0)</div>
+                <button class="random-btn" onclick="getRandomMovie()">🎲 Şans</button>
+                <form id="form"><input type="text" id="search" class="search" placeholder="Film və ya Aktyor axtar..."></form>
+            </div>
         </div>
     </header>
 
-    <div id="top-content">
+    <div id="movie-content">
         <div class="mood-section">
             <div class="mood-title">BU GÜN ÖZÜNÜ NECƏ HİSS EDİRSƏN?</div>
             <div class="mood-container">
@@ -486,11 +507,6 @@
         <div class="modal-content" id="modal-content"></div>
     </div>
 
-    <div id="mini-player-container">
-        <button class="close-mini" onclick="closeMiniPlayer()">X</button>
-        <div id="mini-player-frame"></div>
-    </div>
-
     <script>
         const API_KEY = '34d4692f40f9b4827503c570ebda8db7';
         const BASE_URL = 'https://api.themoviedb.org/3';
@@ -503,10 +519,11 @@
         const modal = document.getElementById('modal');
         const modalContent = document.getElementById('modal-content');
         const bgOverlay = document.getElementById('bg-overlay');
-        const miniContainer = document.getElementById('mini-player-container');
+        const movieContent = document.getElementById('movie-content');
         
         let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
         let currentPage = 1;
+        let currentMode = 'movies'; // 'movies' və ya 'actors'
         let currentApiUrl = `${BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}&language=${LANG}`;
         let isFavoritesView = false;
         let isLoading = false;
@@ -519,15 +536,6 @@
             { id: 10749, name: 'Romantik' }
         ];
 
-        // TV KANALLARI DATA
-        const tvChannels = [
-            { name: "İctimai TV", logo: "https://upload.wikimedia.org/wikipedia/commons/4/4b/Ictimai_TV_logo.png", url: "https://itv.asoiu.edu.az/itv/live.m3u8" },
-            { name: "CBC Sport", logo: "https://upload.wikimedia.org/wikipedia/commons/0/07/CBC_Sport_Logo.png", url: "https://live.cbcsport.az/cbcsport/live.m3u8" },
-            { name: "TRT 1", logo: "https://upload.wikimedia.org/wikipedia/commons/8/82/TRT_1_logo.png", url: "https://tv-trt1.medya.trt.com.tr/master.m3u8" },
-            { name: "ATV Türkiye", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/ATV_logo.svg/1200px-ATV_logo.svg.png", url: "https://atv-live.daioncdn.net/atv/atv.m3u8" },
-            { name: "Kanal D", logo: "https://upload.wikimedia.org/wikipedia/commons/4/41/Kanal_D_logo_2011.png", url: "https://dogan-live.daioncdn.net/kanald/kanald.m3u8" }
-        ];
-
         function init() {
             renderGenres();
             getMovies(currentApiUrl);
@@ -537,28 +545,54 @@
                 if (isLoading || isFavoritesView) return;
                 if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
                     currentPage++;
-                    getMovies(currentApiUrl, false);
+                    if(currentMode === 'movies') getMovies(currentApiUrl, false);
+                    else getActors(currentApiUrl, false);
                 }
             });
         }
 
-        async function getMovies(url, isNew = true) {
-            if (isNew) { 
-                main.innerHTML = ''; 
-                currentPage = 1; 
-                isFavoritesView = false;
+        // Modlar arası keçid (Filmlər vs Aktyorlar)
+        function switchTo(mode) {
+            currentMode = mode;
+            currentPage = 1;
+            main.innerHTML = '';
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            
+            if(mode === 'movies') {
+                document.getElementById('nav-home').classList.add('active');
+                movieContent.style.display = 'block';
+                currentApiUrl = `${BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}&language=${LANG}`;
+                getMovies(currentApiUrl);
+            } else {
+                document.getElementById('nav-actors').classList.add('active');
+                movieContent.style.display = 'none';
+                currentApiUrl = `${BASE_URL}/person/popular?api_key=${API_KEY}&language=${LANG}`;
+                getActors(currentApiUrl);
             }
+        }
+
+        async function getMovies(url, isNew = true) {
+            if (isNew) { main.innerHTML = ''; currentPage = 1; isFavoritesView = false; }
             isLoading = true;
             loader.style.display = 'block';
             try {
                 const res = await fetch(`${url}&page=${currentPage}`);
                 const data = await res.json();
-                if (data.results) {
-                    showMovies(data.results);
-                }
-            } catch (error) {
-                console.error("Filmlər yüklənmədi:", error);
-            }
+                if (data.results) showMovies(data.results);
+            } catch (error) { console.error("Xəta:", error); }
+            isLoading = false;
+            loader.style.display = 'none';
+        }
+
+        async function getActors(url, isNew = true) {
+            if (isNew) { main.innerHTML = ''; currentPage = 1; }
+            isLoading = true;
+            loader.style.display = 'block';
+            try {
+                const res = await fetch(`${url}&page=${currentPage}`);
+                const data = await res.json();
+                if (data.results) showActors(data.results);
+            } catch (error) { console.error("Xəta:", error); }
             isLoading = false;
             loader.style.display = 'none';
         }
@@ -586,6 +620,56 @@
             });
         }
 
+        function showActors(actors) {
+            actors.forEach(actor => {
+                const el = document.createElement('div');
+                el.className = 'actor-card';
+                el.innerHTML = `
+                    <img src="${actor.profile_path ? CAST_IMG_PATH + actor.profile_path : 'https://via.placeholder.com/200x300'}" alt="${actor.name}">
+                    <h3>${actor.name}</h3>
+                    <p>${actor.known_for_department}</p>
+                `;
+                el.onclick = () => openActorDetails(actor.id);
+                main.appendChild(el);
+            });
+        }
+
+        async function openActorDetails(id) {
+            modal.style.display = 'flex';
+            modalContent.innerHTML = '<div style="padding:50px; text-align:center;">Yüklənir...</div>';
+            
+            const [pRes, mRes] = await Promise.all([
+                fetch(`${BASE_URL}/person/${id}?api_key=${API_KEY}&language=${LANG}`),
+                fetch(`${BASE_URL}/person/${id}/movie_credits?api_key=${API_KEY}&language=${LANG}`)
+            ]);
+            const person = await pRes.json();
+            const movies = await mRes.json();
+
+            modalContent.innerHTML = `
+                <span class="close-modal" onclick="closeModal()">&times;</span>
+                <div class="actor-header">
+                    <img src="${person.profile_path ? IMG_PATH + person.profile_path : 'https://via.placeholder.com/300x450'}">
+                    <div class="actor-bio">
+                        <h2>${person.name}</h2>
+                        <p><b>Doğum Tarixi:</b> ${person.birthday || 'Bilinmir'}</p>
+                        <p><b>Doğum Yeri:</b> ${person.place_of_birth || 'Bilinmir'}</p>
+                        <p>${person.biography || 'Bioqrafiya yoxdur.'}</p>
+                    </div>
+                </div>
+                <h3 class="actor-movies-title">Oynadığı Filmlər</h3>
+                <main style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));">
+                    ${movies.cast.slice(0, 12).map(m => `
+                        <div class="movie" onclick="closeModal(); setTimeout(() => openDetails(${m.id}), 300)">
+                            <img src="${m.poster_path ? IMG_PATH + m.poster_path : 'https://via.placeholder.com/200x300'}">
+                            <div class="movie-info" style="transform: translateY(0); background: rgba(0,0,0,0.7);">
+                                <h3 style="font-size: 0.9rem;">${m.title}</h3>
+                            </div>
+                        </div>
+                    `).join('')}
+                </main>
+            `;
+        }
+
         async function openDetails(id) {
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
@@ -607,7 +691,6 @@
 
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
-                <span class="mini-btn" onclick="switchToMini('${id}')" title="Mini Player">↘</span>
                 <div class="video-container" id="player-wrapper">
                     <div id="protection-overlay" onclick="removeShield()">
                         <div class="shield-msg">Pleyeri başlatmaq üçün toxunun (Reklamlar Bloklanıb)</div>
@@ -637,7 +720,7 @@
                         <p>${movie.overview}</p>
                         <div class="cast-container">
                             ${credits.cast.slice(0, 8).map(c => `
-                                <div class="cast-card">
+                                <div class="cast-card" onclick="openActorDetails(${c.id})">
                                     <img src="${c.profile_path ? CAST_IMG_PATH + c.profile_path : 'https://via.placeholder.com/80x80'}">
                                     <div>${c.name}</div>
                                 </div>
@@ -654,54 +737,9 @@
             loadComments(id);
         }
 
-        // MINI PLAYER LOGIC
-        function switchToMini(id) {
-            const currentSrc = document.getElementById('main-player').src;
-            document.getElementById('mini-player-frame').innerHTML = `<iframe src="${currentSrc}" frameborder="0" allowfullscreen></iframe>`;
-            miniContainer.style.display = 'block';
-            closeModal();
-        }
-
-        function closeMiniPlayer() {
-            miniContainer.style.display = 'none';
-            document.getElementById('mini-player-frame').innerHTML = '';
-        }
-
-        // TV CHANNELS LOGIC
-        function loadTVChannels() {
-            document.getElementById('top-content').style.display = 'none';
-            main.innerHTML = '';
-            tvChannels.forEach(ch => {
-                const el = document.createElement('div');
-                el.className = 'movie';
-                el.innerHTML = `
-                    <div style="height:380px; display:flex; align-items:center; justify-content:center; background:#1a1a1a;">
-                        <img src="${ch.logo}" style="width:70%; height:auto; object-fit:contain;">
-                    </div>
-                    <div class="movie-info" style="transform:translateY(0)">
-                        <h3>${ch.name}</h3>
-                        <div class="rating" style="color:#4caf50">CANLI YAYIM</div>
-                    </div>
-                `;
-                el.onclick = () => {
-                    modal.style.display = 'flex';
-                    modalContent.innerHTML = `
-                        <span class="close-modal" onclick="closeModal()">&times;</span>
-                        <div class="video-container">
-                             <iframe src="${ch.url}" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
-                        </div>
-                        <div style="padding:40px; text-align:center;">
-                            <h2>${ch.name} - Canlı İzlə</h2>
-                            <p>M3U8 yayım dəstəyi pleyerinizdən asılıdır.</p>
-                        </div>
-                    `;
-                };
-                main.appendChild(el);
-            });
-        }
-
         function removeShield() {
-            document.getElementById('protection-overlay').style.display = 'none';
+            const shield = document.getElementById('protection-overlay');
+            if(shield) shield.style.display = 'none';
         }
 
         function changeSource(url, btn) {
@@ -760,8 +798,13 @@
         document.getElementById('form').addEventListener('submit', (e) => {
             e.preventDefault();
             const q = document.getElementById('search').value;
-            currentApiUrl = `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${q}&language=${LANG}`;
-            getMovies(currentApiUrl);
+            if(currentMode === 'movies') {
+                currentApiUrl = `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${q}&language=${LANG}`;
+                getMovies(currentApiUrl);
+            } else {
+                currentApiUrl = `${BASE_URL}/search/person?api_key=${API_KEY}&query=${q}&language=${LANG}`;
+                getActors(currentApiUrl);
+            }
         });
 
         async function getRandomMovie() {

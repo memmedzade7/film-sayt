@@ -440,7 +440,6 @@
 
     <div class="country-tabs">
         <button class="tab-btn active" onclick="filterByCountry('all', this)">Hamısı</button>
-        <button class="tab-btn" onclick="filterByCountry('AZ', this)">Azərbaycan</button>
         <button class="tab-btn" onclick="filterByCountry('TR', this)">Türkiyə</button>
         <button class="tab-btn" onclick="filterByCountry('IN', this)">Hindistan</button>
     </div>
@@ -484,15 +483,34 @@
             renderGenres();
             getMovies(currentApiUrl);
             updateWatchlistCount();
+
+            // Sonsuz Sürüşdürmə (Infinite Scroll)
+            window.addEventListener('scroll', () => {
+                if (isLoading || isFavoritesView) return;
+                if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
+                    currentPage++;
+                    getMovies(currentApiUrl, false);
+                }
+            });
         }
 
         async function getMovies(url, isNew = true) {
-            if (isNew) { main.innerHTML = ''; currentPage = 1; }
+            if (isNew) { 
+                main.innerHTML = ''; 
+                currentPage = 1; 
+                isFavoritesView = false;
+            }
             isLoading = true;
             loader.style.display = 'block';
-            const res = await fetch(`${url}&page=${currentPage}`);
-            const data = await res.json();
-            showMovies(data.results);
+            try {
+                const res = await fetch(`${url}&page=${currentPage}`);
+                const data = await res.json();
+                if (data.results) {
+                    showMovies(data.results);
+                }
+            } catch (error) {
+                console.error("Filmlər yüklənmədi:", error);
+            }
             isLoading = false;
             loader.style.display = 'none';
         }
@@ -555,11 +573,11 @@
                 </div>
                 <div class="player-tabs">
                     <button class="player-btn active" onclick="changeSource('https://vidsrc.cc/v2/embed/movie/${id}', this)">Film İzlə</button>
-                    <button class="player-btn" onclick="changeSource('https://vidsrc.to/embed/movie/${id}', this)">Alternativ Server</button>
                     <button class="player-btn az-dublaj" onclick="window.open('${dublajAZ}', '_blank')">🇦🇿 AZ Dublaj Axtar</button>
                     <button class="player-btn tr-dublaj" onclick="window.open('${dublajTR}', '_blank')">🇹🇷 TR Dublaj Axtar</button>
                     <button class="player-btn" onclick="changeSource('https://www.youtube.com/embed/${videos.results[0]?.key}', this)">Treyler</button>
                     <button class="player-btn alt-source" onclick="window.open('${youtubeSearch}', '_blank')">YouTube-da Tap 📺</button>
+                    <button class="player-btn" style="background:#4285F4" onclick="window.open('${googleSearch}', '_blank')">Google-da Axtar 🔍</button>
                 </div>
                 <div class="details-grid">
                     <img src="${IMG_PATH + movie.poster_path}">
@@ -596,7 +614,9 @@
             document.getElementById('main-player').src = url;
             document.querySelectorAll('.player-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            document.getElementById('protection-overlay').style.display = 'flex';
+            if(document.getElementById('protection-overlay')) {
+                document.getElementById('protection-overlay').style.display = 'flex';
+            }
         }
 
         function closeModal() { modal.style.display = 'none'; document.body.style.overflow = 'auto'; }

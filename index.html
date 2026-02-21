@@ -92,6 +92,7 @@
             to { background-position: 200% center; }
         }
 
+        /* YENİ: Naviqasiya Menyu */
         .nav-menu {
             display: flex;
             gap: 20px;
@@ -300,6 +301,7 @@
         .fav-btn:hover { transform: scale(1.2); }
         .fav-btn.active { color: #ff4757; background: white; }
 
+        /* AKTYORLAR BÖLMƏSİ ÜÇÜN STİLLƏR */
         .actor-card {
             background: var(--card-bg);
             border-radius: 20px;
@@ -339,19 +341,6 @@
             background: #000; 
             position: relative; 
             overflow: hidden;
-            transition: all 0.5s ease;
-        }
-
-        /* YENİ: Mini Player Rejimi */
-        .video-container.mini-mode {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 400px;
-            z-index: 3000;
-            border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.8), var(--neon-glow);
-            border: 2px solid #6366f1;
         }
 
         #protection-overlay {
@@ -397,11 +386,11 @@
         }
         .player-btn.active { background: #6366f1; border-color: #6366f1; }
         
+        /* Dublaj Düymələri Stili */
         .player-btn.alt-source { background: #fbbf24; color: #000; font-weight: bold; border: none; }
         .player-btn.az-dublaj { background: #ef4444; color: white; border: none; font-weight: bold; }
         .player-btn.tr-dublaj { background: #3b82f6; color: white; border: none; font-weight: bold; }
-        .player-btn.mini-btn { background: #10b981; color: white; border: none; font-weight: bold; }
-        .player-btn:hover { opacity: 0.9; transform: scale(1.05); }
+        .player-btn.alt-source:hover, .player-btn.az-dublaj:hover, .player-btn.tr-dublaj:hover { opacity: 0.9; transform: scale(1.05); }
 
         .details-grid { padding: 40px; display: grid; grid-template-columns: 300px 1fr; gap: 40px; }
         .details-grid img { width: 100%; border-radius: 20px; }
@@ -457,18 +446,11 @@
             font-size: 0.9rem;
         }
 
+        /* AKTYOR DETAL SƏHİFƏSİ ÜÇÜN */
         .actor-header { display: flex; gap: 30px; padding: 40px; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .actor-header img { width: 250px; border-radius: 20px; }
         .actor-bio h2 { margin-top: 0; }
         .actor-movies-title { padding: 20px 40px 0; font-size: 1.5rem; }
-
-        /* Mini pleyer bağlama düyməsi */
-        .close-mini {
-            position: absolute; top: 5px; right: 5px; 
-            background: rgba(255,0,0,0.8); color: white; 
-            border: none; border-radius: 50%; width: 25px; height: 25px;
-            cursor: pointer; z-index: 1001; display: none;
-        }
     </style>
 </head>
 <body>
@@ -521,8 +503,6 @@
     <main id="main"></main>
     <div id="loader" class="loader">Yüklənir...</div>
 
-    <div id="mini-player-container"></div>
-
     <div id="modal" class="modal">
         <div class="modal-content" id="modal-content"></div>
     </div>
@@ -543,11 +523,10 @@
         
         let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
         let currentPage = 1;
-        let currentMode = 'movies';
+        let currentMode = 'movies'; // 'movies' və ya 'actors'
         let currentApiUrl = `${BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}&language=${LANG}`;
         let isFavoritesView = false;
         let isLoading = false;
-        let isMiniPlayerActive = false;
 
         const genres = [
             { id: 28, name: 'Aksiyon' }, { id: 12, name: 'Macəra' },
@@ -572,6 +551,7 @@
             });
         }
 
+        // Modlar arası keçid (Filmlər vs Aktyorlar)
         function switchTo(mode) {
             currentMode = mode;
             currentPage = 1;
@@ -691,9 +671,6 @@
         }
 
         async function openDetails(id) {
-            // Əgər mini pleyer bu filmdirsə, modallı açmaq yerinə elə mini pleyeri böyüdə bilərik (sadəlik üçün yenidən açırıq)
-            if(isMiniPlayerActive) closeMiniPlayer();
-
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
             modalContent.innerHTML = '<div style="padding:50px; text-align:center;">Hazırlanır...</div>';
@@ -715,7 +692,6 @@
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
                 <div class="video-container" id="player-wrapper">
-                    <button class="close-mini" id="mini-close-btn" onclick="closeMiniPlayer()">×</button>
                     <div id="protection-overlay" onclick="removeShield()">
                         <div class="shield-msg">Pleyeri başlatmaq üçün toxunun (Reklamlar Bloklanıb)</div>
                     </div>
@@ -728,11 +704,11 @@
                 </div>
                 <div class="player-tabs">
                     <button class="player-btn active" onclick="changeSource('https://vidsrc.cc/v2/embed/movie/${id}', this)">Film İzlə</button>
-                    <button class="player-btn mini-btn" onclick="toggleMiniPlayer()">📺 Kiçilt (Mini-Player)</button>
                     <button class="player-btn" onclick="changeSource('https://www.youtube.com/embed/${videos.results[0]?.key}', this)">Treyler</button>
                     <button class="player-btn az-dublaj" onclick="window.open('${dublajAZ}', '_blank')">🇦🇿 AZ Dublaj Axtar</button>
                     <button class="player-btn tr-dublaj" onclick="window.open('${dublajTR}', '_blank')">🇹🇷 TR Dublaj Axtar</button>
-                    <button class="player-btn alt-source" onclick="window.open('${youtubeSearch}', '_blank')">YouTube-da Tap</button>
+                    <button class="player-btn alt-source" onclick="window.open('${youtubeSearch}', '_blank')">YouTube-da Tap 📺</button>
+                    <button class="player-btn" style="background:#4285F4" onclick="window.open('${googleSearch}', '_blank')">Google-da Axtar 🔍</button>
                 </div>
                 <div class="details-grid">
                     <img src="${IMG_PATH + movie.poster_path}">
@@ -761,26 +737,6 @@
             loadComments(id);
         }
 
-        // YENİ: Mini Player funksiyası
-        function toggleMiniPlayer() {
-            const playerWrapper = document.getElementById('player-wrapper');
-            const miniCloseBtn = document.getElementById('mini-close-btn');
-            
-            isMiniPlayerActive = true;
-            playerWrapper.classList.add('mini-mode');
-            miniCloseBtn.style.display = 'block';
-            
-            // Pleyeri modalın xaricinə çıxarırıq ki modal bağlananda o qalsın
-            document.body.appendChild(playerWrapper);
-            closeModal();
-        }
-
-        function closeMiniPlayer() {
-            const playerWrapper = document.getElementById('player-wrapper');
-            if(playerWrapper) playerWrapper.remove();
-            isMiniPlayerActive = false;
-        }
-
         function removeShield() {
             const shield = document.getElementById('protection-overlay');
             if(shield) shield.style.display = 'none';
@@ -795,10 +751,7 @@
             }
         }
 
-        function closeModal() { 
-            modal.style.display = 'none'; 
-            document.body.style.overflow = 'auto'; 
-        }
+        function closeModal() { modal.style.display = 'none'; document.body.style.overflow = 'auto'; }
 
         function toggleFav(movie, btn) {
             const index = favorites.findIndex(f => f.id === movie.id);
@@ -857,8 +810,7 @@
         async function getRandomMovie() {
             const res = await fetch(`${BASE_URL}/movie/popular?api_key=${API_KEY}`);
             const data = await res.json();
-            const randomMovie = data.results[Math.floor(Math.random() * 20)];
-            openDetails(randomMovie.id);
+            openDetails(data.results[Math.floor(Math.random() * 20)].id);
         }
 
         function addComment(id) {

@@ -349,6 +349,17 @@
             white-space: nowrap;
         }
         .player-btn.active { background: #6366f1; border-color: #6366f1; }
+        
+        /* Yeni Alternativ Düymələr Stili */
+        .player-btn.alt-source {
+            background: #fbbf24;
+            color: #000;
+            font-weight: bold;
+            border: none;
+        }
+        .player-btn.alt-source:hover {
+            background: #f59e0b;
+        }
 
         .details-grid { padding: 40px; display: grid; grid-template-columns: 300px 1fr; gap: 40px; }
         .details-grid img { width: 100%; border-radius: 20px; }
@@ -392,6 +403,17 @@
         .search-container { display: flex; flex-direction: column; align-items: flex-end; }
 
         .loader { grid-column: 1/-1; text-align: center; padding: 20px; display: none; }
+        
+        /* Bildiriş Mesajı */
+        .not-found-alert {
+            background: rgba(251, 191, 36, 0.1);
+            border-left: 4px solid #fbbf24;
+            color: #fbbf24;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
@@ -518,6 +540,10 @@
             const videos = await vRes.json();
             const credits = await cRes.json();
 
+            // Alternativ axtarış linkləri
+            const youtubeSearch = `https://www.youtube.com/results?search_query=${encodeURIComponent(movie.title + " full izle")}`;
+            const googleSearch = `https://www.google.com/search?q=${encodeURIComponent(movie.title + " izle")}`;
+
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
                 <div class="video-container" id="player-wrapper">
@@ -534,10 +560,15 @@
                 <div class="player-tabs">
                     <button class="player-btn active" onclick="changeSource('https://vidsrc.cc/v2/embed/movie/${id}', this)">Film İzlə</button>
                     <button class="player-btn" onclick="changeSource('https://www.youtube.com/embed/${videos.results[0]?.key}', this)">Treyler</button>
+                    <button class="player-btn alt-source" onclick="window.open('${youtubeSearch}', '_blank')">YouTube-da Tap 📺</button>
+                    <button class="player-btn alt-source" onclick="window.open('${googleSearch}', '_blank')">Google-da Axtar 🔍</button>
                 </div>
                 <div class="details-grid">
                     <img src="${IMG_PATH + movie.poster_path}">
                     <div>
+                        <div class="not-found-alert">
+                            <b>Qeyd:</b> Azərbaycan və yerli Türk filmləri bəzən serverdə tapılmaya bilər. Əgər pleyer açılmırsa, yuxarıdakı <b>"YouTube-da Tap"</b> düyməsini istifadə edin.
+                        </div>
                         <h2>${movie.title}</h2>
                         <p>${movie.overview}</p>
                         <div class="cast-container">

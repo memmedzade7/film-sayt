@@ -15,8 +15,8 @@
     <meta property="og:type" content="website">
     <meta property="og:image" content="https://image.tmdb.org/t/p/w500/wwemzKWzjKYJFfCeiB57q3r4Bcm.jpg">
 
-    <link rel="icon" type="image/png" href="https://img.icons8.com/external-flatart-icons-flat-flatarticons/64/external-r-alphabet-flatart-icons-flat-flatarticons.png">
-    <link rel="apple-touch-icon" href="https://img.icons8.com/external-flatart-icons-flat-flatarticons/64/external-r-alphabet-flatart-icons-flat-flatarticons.png">
+    <link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/r--v1.png">
+    <link rel="apple-touch-icon" href="https://img.icons8.com/fluency/48/r--v1.png">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -80,7 +80,7 @@
             align-items: flex-start;
         }
 
-        /* İstədiyin ilkin loqo stili */
+        /* Orijinal Loqo Stili */
         .logo {
             font-size: 2.4rem;
             font-weight: 900;
@@ -91,6 +91,7 @@
             -webkit-text-fill-color: transparent;
             cursor: pointer;
             line-height: 1;
+            display: inline-block;
         }
 
         .slogan {
@@ -534,7 +535,7 @@
         const CAST_IMG_PATH = 'https://image.tmdb.org/t/p/w200'; 
         const LANG = 'tr-TR'; 
 
-        const main = document.getElementById('main');
+        const main = document.body.querySelector('#main');
         const loader = document.getElementById('loader');
         const modal = document.getElementById('modal');
         const modalContent = document.getElementById('modal-content');

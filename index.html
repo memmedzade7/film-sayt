@@ -92,6 +92,7 @@
             to { background-position: 200% center; }
         }
 
+        /* YENİ: Naviqasiya Menyu */
         .nav-menu {
             display: flex;
             gap: 20px;
@@ -300,6 +301,7 @@
         .fav-btn:hover { transform: scale(1.2); }
         .fav-btn.active { color: #ff4757; background: white; }
 
+        /* AKTYORLAR BÖLMƏSİ ÜÇÜN STİLLƏR */
         .actor-card {
             background: var(--card-bg);
             border-radius: 20px;
@@ -332,6 +334,7 @@
 
         .close-modal { position: absolute; top: 20px; right: 20px; font-size: 2.5rem; cursor: pointer; color: white; z-index: 100; }
         
+        /* AD-SHIELD PROTECTOR */
         .video-container { 
             width: 100%; 
             aspect-ratio: 16/9; 
@@ -383,9 +386,11 @@
         }
         .player-btn.active { background: #6366f1; border-color: #6366f1; }
         
-        /* DİL DÜYMƏLƏRİ ÜÇÜN STİLLƏR */
-        .player-btn.lang-en { background: #3b82f6; color: white; border: none; font-weight: bold; }
-        .player-btn.lang-ru { background: #ef4444; color: white; border: none; font-weight: bold; }
+        /* Dublaj Düymələri Stili */
+        .player-btn.alt-source { background: #fbbf24; color: #000; font-weight: bold; border: none; }
+        .player-btn.az-dublaj { background: #ef4444; color: white; border: none; font-weight: bold; }
+        .player-btn.tr-dublaj { background: #3b82f6; color: white; border: none; font-weight: bold; }
+        .player-btn.alt-source:hover, .player-btn.az-dublaj:hover, .player-btn.tr-dublaj:hover { opacity: 0.9; transform: scale(1.05); }
 
         .details-grid { padding: 40px; display: grid; grid-template-columns: 300px 1fr; gap: 40px; }
         .details-grid img { width: 100%; border-radius: 20px; }
@@ -431,6 +436,17 @@
 
         .loader { grid-column: 1/-1; text-align: center; padding: 20px; display: none; }
         
+        .not-found-alert {
+            background: rgba(251, 191, 36, 0.1);
+            border-left: 4px solid #fbbf24;
+            color: #fbbf24;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        /* AKTYOR DETAL SƏHİFƏSİ ÜÇÜN */
         .actor-header { display: flex; gap: 30px; padding: 40px; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .actor-header img { width: 250px; border-radius: 20px; }
         .actor-bio h2 { margin-top: 0; }
@@ -496,6 +512,7 @@
         const BASE_URL = 'https://api.themoviedb.org/3';
         const IMG_PATH = 'https://image.tmdb.org/t/p/w1280';
         const CAST_IMG_PATH = 'https://image.tmdb.org/t/p/w200'; 
+        const LANG = 'tr-TR'; 
 
         const main = document.getElementById('main');
         const loader = document.getElementById('loader');
@@ -506,8 +523,8 @@
         
         let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
         let currentPage = 1;
-        let currentMode = 'movies';
-        let currentApiUrl = `${BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}`;
+        let currentMode = 'movies'; // 'movies' və ya 'actors'
+        let currentApiUrl = `${BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}&language=${LANG}`;
         let isFavoritesView = false;
         let isLoading = false;
 
@@ -534,6 +551,7 @@
             });
         }
 
+        // Modlar arası keçid (Filmlər vs Aktyorlar)
         function switchTo(mode) {
             currentMode = mode;
             currentPage = 1;
@@ -543,12 +561,12 @@
             if(mode === 'movies') {
                 document.getElementById('nav-home').classList.add('active');
                 movieContent.style.display = 'block';
-                currentApiUrl = `${BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}`;
+                currentApiUrl = `${BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}&language=${LANG}`;
                 getMovies(currentApiUrl);
             } else {
                 document.getElementById('nav-actors').classList.add('active');
                 movieContent.style.display = 'none';
-                currentApiUrl = `${BASE_URL}/person/popular?api_key=${API_KEY}`;
+                currentApiUrl = `${BASE_URL}/person/popular?api_key=${API_KEY}&language=${LANG}`;
                 getActors(currentApiUrl);
             }
         }
@@ -621,8 +639,8 @@
             modalContent.innerHTML = '<div style="padding:50px; text-align:center;">Yüklənir...</div>';
             
             const [pRes, mRes] = await Promise.all([
-                fetch(`${BASE_URL}/person/${id}?api_key=${API_KEY}`),
-                fetch(`${BASE_URL}/person/${id}/movie_credits?api_key=${API_KEY}`)
+                fetch(`${BASE_URL}/person/${id}?api_key=${API_KEY}&language=${LANG}`),
+                fetch(`${BASE_URL}/person/${id}/movie_credits?api_key=${API_KEY}&language=${LANG}`)
             ]);
             const person = await pRes.json();
             const movies = await mRes.json();
@@ -658,17 +676,18 @@
             modalContent.innerHTML = '<div style="padding:50px; text-align:center;">Hazırlanır...</div>';
             
             const [mRes, vRes, cRes] = await Promise.all([
-                fetch(`${BASE_URL}/movie/${id}?api_key=${API_KEY}`),
+                fetch(`${BASE_URL}/movie/${id}?api_key=${API_KEY}&language=${LANG}`),
                 fetch(`${BASE_URL}/movie/${id}/videos?api_key=${API_KEY}`),
-                fetch(`${BASE_URL}/movie/${id}/credits?api_key=${API_KEY}`)
+                fetch(`${BASE_URL}/movie/${id}/credits?api_key=${API_KEY}&language=${LANG}`)
             ]);
             const movie = await mRes.json();
             const videos = await vRes.json();
             const credits = await cRes.json();
 
-            // Pleyer URL-ləri
-            const vidsrcEN = `https://vidsrc.cc/v2/embed/movie/${id}`;
-            const vidsrcRU = `https://vidsrc.me/embed/movie?tmdb=${id}`; // Alternativ Rus dili üçün server
+            const youtubeSearch = `https://www.youtube.com/results?search_query=${encodeURIComponent(movie.title + " full izle")}`;
+            const googleSearch = `https://www.google.com/search?q=${encodeURIComponent(movie.title + " izle")}`;
+            const dublajAZ = `https://www.google.com/search?q=${encodeURIComponent(movie.title + " azərbaycan dilində izlə")}`;
+            const dublajTR = `https://www.google.com/search?q=${encodeURIComponent(movie.title + " türkçe dublaj izle")}`;
 
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
@@ -677,21 +696,26 @@
                         <div class="shield-msg">Pleyeri başlatmaq üçün toxunun (Reklamlar Bloklanıb)</div>
                     </div>
                     <iframe id="main-player" 
-                        src="${vidsrcEN}" 
+                        src="https://vidsrc.cc/v2/embed/movie/${id}" 
                         width="100%" height="100%" 
                         frameborder="0" allowfullscreen
                         sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts">
                     </iframe>
                 </div>
                 <div class="player-tabs">
-                    <button class="player-btn lang-en active" onclick="changeSource('${vidsrcEN}', this)">🇺🇸 English Player</button>
-                    <button class="player-btn lang-ru" onclick="changeSource('${vidsrcRU}', this)">🇷🇺 Русский Плеер (Dub)</button>
+                    <button class="player-btn active" onclick="changeSource('https://vidsrc.cc/v2/embed/movie/${id}', this)">Film İzlə</button>
                     <button class="player-btn" onclick="changeSource('https://www.youtube.com/embed/${videos.results[0]?.key}', this)">Treyler</button>
-                    <button class="player-btn" style="background:#4285F4" onclick="window.open('https://www.google.com/search?q=${encodeURIComponent(movie.title + " izle")}', '_blank')">Google-da Axtar 🔍</button>
+                    <button class="player-btn az-dublaj" onclick="window.open('${dublajAZ}', '_blank')">🇦🇿 AZ Dublaj Axtar</button>
+                    <button class="player-btn tr-dublaj" onclick="window.open('${dublajTR}', '_blank')">🇹🇷 TR Dublaj Axtar</button>
+                    <button class="player-btn alt-source" onclick="window.open('${youtubeSearch}', '_blank')">YouTube-da Tap 📺</button>
+                    <button class="player-btn" style="background:#4285F4" onclick="window.open('${googleSearch}', '_blank')">Google-da Axtar 🔍</button>
                 </div>
                 <div class="details-grid">
                     <img src="${IMG_PATH + movie.poster_path}">
                     <div>
+                        <div class="not-found-alert">
+                            <b>Dublaj haqqında:</b> Əgər pleyer ingiliscədirsə, yuxarıdakı <b>TR Dublaj</b> və ya <b>AZ Dublaj</b> düymələri ilə filmi yerli saytlarda sürətli tapa bilərsiniz.
+                        </div>
                         <h2>${movie.title}</h2>
                         <p>${movie.overview}</p>
                         <div class="cast-container">
@@ -747,13 +771,13 @@
         function filterByCountry(code, btn) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            currentApiUrl = code === 'all' ? `${BASE_URL}/discover/movie?api_key=${API_KEY}` : `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_origin_country=${code}`;
+            currentApiUrl = code === 'all' ? `${BASE_URL}/discover/movie?api_key=${API_KEY}&language=${LANG}` : `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_origin_country=${code}&language=${LANG}`;
             getMovies(currentApiUrl);
         }
 
         function searchByMood(genreId, bgColor) {
             bgOverlay.style.background = `radial-gradient(circle at center, ${bgColor} 0%, #05070a 100%)`;
-            currentApiUrl = `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${genreId}`;
+            currentApiUrl = `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${genreId}&language=${LANG}`;
             getMovies(currentApiUrl);
         }
 
@@ -764,7 +788,7 @@
                 tag.className = 'genre-tag';
                 tag.innerText = g.name;
                 tag.onclick = () => {
-                    currentApiUrl = `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${g.id}`;
+                    currentApiUrl = `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${g.id}&language=${LANG}`;
                     getMovies(currentApiUrl);
                 };
                 container.appendChild(tag);
@@ -775,10 +799,10 @@
             e.preventDefault();
             const q = document.getElementById('search').value;
             if(currentMode === 'movies') {
-                currentApiUrl = `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${q}`;
+                currentApiUrl = `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${q}&language=${LANG}`;
                 getMovies(currentApiUrl);
             } else {
-                currentApiUrl = `${BASE_URL}/search/person?api_key=${API_KEY}&query=${q}`;
+                currentApiUrl = `${BASE_URL}/search/person?api_key=${API_KEY}&query=${q}&language=${LANG}`;
                 getActors(currentApiUrl);
             }
         });

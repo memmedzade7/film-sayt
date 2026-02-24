@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=1200"> 
+    <meta name="description" content="RM Film - Minlərlə film və serialı bir məkanda izləyin. Yaradıcı: Rəsul Məmmədzadə">
     <title>RM Film | Minlərlə film, Tək Məkan</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         /* Mood-a görə dəyişən dinamik arxa fon təbəqəsi */
         #bg-overlay {
@@ -42,6 +44,7 @@
             margin: 0;
             overflow-x: auto;
             min-width: 1200px;
+            scroll-behavior: smooth;
         }
 
         header {
@@ -223,6 +226,12 @@
             cursor: pointer;
             border: 1px solid rgba(255, 255, 255, 0.03);
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            animation: slideUp 0.5s ease forwards;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .movie:hover {
@@ -330,7 +339,8 @@
             position: relative; border: 1px solid rgba(255,255,255,0.1);
         }
 
-        .close-modal { position: absolute; top: 20px; right: 20px; font-size: 2.5rem; cursor: pointer; color: white; z-index: 100; }
+        .close-modal { position: absolute; top: 20px; right: 20px; font-size: 2.5rem; cursor: pointer; color: white; z-index: 100; transition: 0.3s;}
+        .close-modal:hover { transform: rotate(90deg); color: #ff4757; }
         
         .video-container { 
             width: 100%; 
@@ -447,7 +457,7 @@
         }
         .search-container { display: flex; flex-direction: column; align-items: flex-end; }
 
-        .loader { grid-column: 1/-1; text-align: center; padding: 20px; display: none; }
+        .loader { grid-column: 1/-1; text-align: center; padding: 20px; display: none; color: #a855f7; font-weight: bold; }
         
         .not-found-alert {
             background: rgba(251, 191, 36, 0.1);
@@ -630,12 +640,13 @@
 
         function showMovies(items, isTV = false) {
             if(!items) return;
-            items.forEach(item => {
+            items.forEach((item, index) => {
                 const isFav = favorites.some(f => f.id === item.id);
                 const title = item.title || item.name;
                 const date = item.release_date || item.first_air_date;
                 const el = document.createElement('div');
                 el.className = 'movie';
+                el.style.animationDelay = `${(index % 20) * 0.05}s`;
                 el.innerHTML = `
                     <button class="fav-btn ${isFav ? 'active' : ''}" onclick="event.stopPropagation(); toggleFav(${JSON.stringify(item).replace(/"/g, '&quot;')}, this)">❤</button>
                     <img src="${item.poster_path ? IMG_PATH + item.poster_path : 'https://via.placeholder.com/300x450'}" alt="${title}">
@@ -764,7 +775,6 @@
             const credits = await cRes.json();
 
             const youtubeSearch = `https://www.youtube.com/results?search_query=${encodeURIComponent(movie.title + " full izle")}`;
-            const googleSearch = `https://www.google.com/search?q=${encodeURIComponent(movie.title + " izle")}`;
 
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
@@ -789,7 +799,8 @@
                 <div class="details-grid">
                     <img src="${IMG_PATH + movie.poster_path}">
                     <div>
-                        <h2>${movie.title}</h2>
+                        <h2>${movie.title} (${movie.release_date.split('-')[0]})</h2>
+                        <p>⏱ Müddət: <b>${movie.runtime} dəq.</b></p>
                         <p>${movie.overview}</p>
                         <div class="cast-container">
                             ${credits.cast.slice(0, 8).map(c => `
@@ -856,10 +867,8 @@
         }
 
         function closeModal() { 
-            // Video səsini dayandırmaq üçün pleyerin içini təmizləyirik
             const player = document.getElementById('main-player');
             if(player) player.src = ''; 
-            
             modal.style.display = 'none'; 
             document.body.style.overflow = 'auto'; 
         }

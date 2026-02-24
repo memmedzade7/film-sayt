@@ -2,8 +2,30 @@
 <html lang="az">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=1200"> 
+    <meta name="viewport" content="width=1200, initial-scale=1.0"> 
+    
     <title>RM Film | Minlərlə film, Tək Məkan</title>
+    <meta name="description" content="RM Film - Ən son filmlər, seriallar və aktyorlar haqqında məlumat platforması. Rəsul Məmmədzadə tərəfindən yaradılmış peşəkar film izləmə və axtarış sistemi.">
+    <meta name="keywords" content="RM Film, film izle, serial izle, aktyorlar, azərbaycan dublaj, türkçe dublaj, film axtarışı">
+    <meta name="author" content="Rəsul Məmmədzadə">
+    <meta name="robots" content="index, follow">
+
+    <meta property="og:title" content="RM Film | Minlərlə film, Tək Məkan">
+    <meta property="og:description" content="Ən populyar filmləri və serialları RM Film-də kəşf edin.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://rmfilm.az"> <meta property="og:image" content="https://image.tmdb.org/t/p/w500/wwemzKWzjKYJFfCeiB57q3r4Bcm.jpg">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="RM Film | Film Platforması">
+    <meta name="twitter:description" content="Film, serial və aktyor dünyasına RM Film ilə daxil olun.">
+
+    <link rel="icon" type="image/png" sizes="32x32" href="https://cdn-icons-png.flaticon.com/512/3163/3163478.png">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3163/3163478.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+
     <style>
         /* Mood-a görə dəyişən dinamik arxa fon təbəqəsi */
         #bg-overlay {
@@ -390,7 +412,6 @@
         .details-grid { padding: 40px; display: grid; grid-template-columns: 300px 1fr; gap: 40px; }
         .details-grid img { width: 100%; border-radius: 20px; }
 
-        /* TV Series Selectors */
         .tv-controls {
             display: flex;
             gap: 15px;
@@ -764,7 +785,6 @@
             const credits = await cRes.json();
 
             const youtubeSearch = `https://www.youtube.com/results?search_query=${encodeURIComponent(movie.title + " full izle")}`;
-            const googleSearch = `https://www.google.com/search?q=${encodeURIComponent(movie.title + " izle")}`;
 
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
@@ -856,10 +876,8 @@
         }
 
         function closeModal() { 
-            // Video səsini dayandırmaq üçün pleyerin içini təmizləyirik
             const player = document.getElementById('main-player');
             if(player) player.src = ''; 
-            
             modal.style.display = 'none'; 
             document.body.style.overflow = 'auto'; 
         }

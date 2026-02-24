@@ -92,7 +92,6 @@
             to { background-position: 200% center; }
         }
 
-        /* YENİ: Naviqasiya Menyu */
         .nav-menu {
             display: flex;
             gap: 20px;
@@ -110,6 +109,31 @@
         .nav-link:hover, .nav-link.active {
             color: white;
             background: rgba(255,255,255,0.1);
+        }
+
+        /* DİL KEÇİD DÜYMƏLƏRİ */
+        .lang-switch {
+            display: flex;
+            gap: 5px;
+            margin-right: 15px;
+            background: rgba(255,255,255,0.05);
+            padding: 5px;
+            border-radius: 10px;
+        }
+        .lang-btn {
+            padding: 5px 10px;
+            font-size: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .lang-btn.active {
+            background: var(--primary-gradient);
+            color: white;
         }
 
         .mood-section {
@@ -301,7 +325,6 @@
         .fav-btn:hover { transform: scale(1.2); }
         .fav-btn.active { color: #ff4757; background: white; }
 
-        /* AKTYORLAR BÖLMƏSİ ÜÇÜN STİLLƏR */
         .actor-card {
             background: var(--card-bg);
             border-radius: 20px;
@@ -334,7 +357,6 @@
 
         .close-modal { position: absolute; top: 20px; right: 20px; font-size: 2.5rem; cursor: pointer; color: white; z-index: 100; }
         
-        /* AD-SHIELD PROTECTOR */
         .video-container { 
             width: 100%; 
             aspect-ratio: 16/9; 
@@ -386,7 +408,6 @@
         }
         .player-btn.active { background: #6366f1; border-color: #6366f1; }
         
-        /* Dublaj Düymələri Stili */
         .player-btn.alt-source { background: #fbbf24; color: #000; font-weight: bold; border: none; }
         .player-btn.az-dublaj { background: #ef4444; color: white; border: none; font-weight: bold; }
         .player-btn.tr-dublaj { background: #3b82f6; color: white; border: none; font-weight: bold; }
@@ -446,7 +467,6 @@
             font-size: 0.9rem;
         }
 
-        /* AKTYOR DETAL SƏHİFƏSİ ÜÇÜN */
         .actor-header { display: flex; gap: 30px; padding: 40px; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .actor-header img { width: 250px; border-radius: 20px; }
         .actor-bio h2 { margin-top: 0; }
@@ -472,6 +492,10 @@
         <div class="search-container">
             <div class="creator-text">Yaradıcı: Rəsul Məmmədzadə</div>
             <div style="display: flex; gap: 10px; align-items: center;">
+                <div class="lang-switch">
+                    <button class="lang-btn active" id="lang-en" onclick="changeLang('en-US')">EN</button>
+                    <button class="lang-btn" id="lang-ru" onclick="changeLang('ru-RU')">RU</button>
+                </div>
                 <div id="watchlist-count" class="watchlist-pill" onclick="showFavorites()">Siyahım (0)</div>
                 <button class="random-btn" onclick="getRandomMovie()">🎲 Şans</button>
                 <form id="form"><input type="text" id="search" class="search" placeholder="Film və ya Aktyor axtar..."></form>
@@ -512,7 +536,8 @@
         const BASE_URL = 'https://api.themoviedb.org/3';
         const IMG_PATH = 'https://image.tmdb.org/t/p/w1280';
         const CAST_IMG_PATH = 'https://image.tmdb.org/t/p/w200'; 
-        const LANG = 'tr-TR'; 
+        
+        let LANG = 'en-US'; // Default artıq İngilisdir
 
         const main = document.getElementById('main');
         const loader = document.getElementById('loader');
@@ -523,7 +548,7 @@
         
         let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
         let currentPage = 1;
-        let currentMode = 'movies'; // 'movies' və ya 'actors'
+        let currentMode = 'movies';
         let currentApiUrl = `${BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}&language=${LANG}`;
         let isFavoritesView = false;
         let isLoading = false;
@@ -535,6 +560,18 @@
             { id: 27, name: 'Qorxu' }, { id: 878, name: 'Fantastika' },
             { id: 10749, name: 'Romantik' }
         ];
+
+        // DİL DƏYİŞMƏ FUNKSİYASI
+        function changeLang(l) {
+            LANG = l;
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+            if(l === 'en-US') document.getElementById('lang-en').classList.add('active');
+            else document.getElementById('lang-ru').classList.add('active');
+            
+            // Mövcud URL-i yeni dillə yenilə və filmləri yenidən çək
+            currentApiUrl = currentApiUrl.replace(/language=[^&]*/, `language=${LANG}`);
+            getMovies(currentApiUrl);
+        }
 
         function init() {
             renderGenres();
@@ -551,7 +588,6 @@
             });
         }
 
-        // Modlar arası keçid (Filmlər vs Aktyorlar)
         function switchTo(mode) {
             currentMode = mode;
             currentPage = 1;
@@ -684,8 +720,8 @@
             const videos = await vRes.json();
             const credits = await cRes.json();
 
-            const youtubeSearch = `https://www.youtube.com/results?search_query=${encodeURIComponent(movie.title + " full izle")}`;
-            const googleSearch = `https://www.google.com/search?q=${encodeURIComponent(movie.title + " izle")}`;
+            const youtubeSearch = `https://www.youtube.com/results?search_query=${encodeURIComponent(movie.title + " full movie")}`;
+            const googleSearch = `https://www.google.com/search?q=${encodeURIComponent(movie.title + " watch online")}`;
             const dublajAZ = `https://www.google.com/search?q=${encodeURIComponent(movie.title + " azərbaycan dilində izlə")}`;
             const dublajTR = `https://www.google.com/search?q=${encodeURIComponent(movie.title + " türkçe dublaj izle")}`;
 
@@ -714,7 +750,7 @@
                     <img src="${IMG_PATH + movie.poster_path}">
                     <div>
                         <div class="not-found-alert">
-                            <b>Dublaj haqqında:</b> Əgər pleyer ingiliscədirsə, yuxarıdakı <b>TR Dublaj</b> və ya <b>AZ Dublaj</b> düymələri ilə filmi yerli saytlarda sürətli tapa bilərsiniz.
+                            <b>Dil haqqında:</b> Əgər film ingilis və ya rus dilindədirsə, digər pleyer və ya dublaj düymələri ilə fərqli dillərdə tapa bilərsiniz.
                         </div>
                         <h2>${movie.title}</h2>
                         <p>${movie.overview}</p>
@@ -808,7 +844,7 @@
         });
 
         async function getRandomMovie() {
-            const res = await fetch(`${BASE_URL}/movie/popular?api_key=${API_KEY}`);
+            const res = await fetch(`${BASE_URL}/movie/popular?api_key=${API_KEY}&language=${LANG}`);
             const data = await res.json();
             openDetails(data.results[Math.floor(Math.random() * 20)].id);
         }

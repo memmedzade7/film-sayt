@@ -910,7 +910,6 @@
             bgOverlay.style.background = `radial-gradient(circle at center, ${bgColor} 0%, #05070a 100%)`;
             currentApiUrl = `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${genreId}&language=${LANG}`;
             switchTo('movies');
-            getMovies(currentApiUrl);
         }
 
         function renderGenres() {

@@ -89,27 +89,6 @@
             background: rgba(255,255,255,0.1);
         }
 
-        .mood-section {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px 0;
-            background: rgba(255, 255, 255, 0.02);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        .mood-container { display: flex; gap: 15px; justify-content: center; }
-        .mood-btn {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            color: #d1d5db;
-            padding: 10px 20px;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .mood-btn:hover { transform: scale(1.05); }
-
         .search {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -157,7 +136,6 @@
 
         .movie img { width: 100%; height: 380px; object-fit: cover; }
 
-        /* SEVİMLİLƏR DÜYMƏSİ - BƏRPA OLUNDU */
         .fav-btn {
             position: absolute;
             top: 15px;
@@ -181,7 +159,7 @@
 
         .movie-info { 
             padding: 20px; 
-            background: linear-gradient(to top, rgba(17, 24, 39, 0.95) 70%, transparent);
+            background: linear-gradient(to top, rgba(17, 24, 39, 0.95) 85%, transparent);
             position: absolute;
             bottom: 0; width: 100%;
             transform: translateY(70%);
@@ -189,6 +167,7 @@
             box-sizing: border-box;
         }
         .movie:hover .movie-info { transform: translateY(0); }
+        .movie-meta { font-size: 0.85rem; color: var(--accent-gold); margin-top: 5px; }
 
         .modal {
             position: fixed; inset: 0; background: rgba(0, 0, 0, 0.95);
@@ -209,30 +188,25 @@
             display: flex; gap: 20px; padding: 15px 40px; background: rgba(0,0,0,0.3); border-bottom: 1px solid rgba(255,255,255,0.05);
         }
         .series-select {
-            background: #1f2937; color: white; border: 1px solid #374151; padding: 10px; border-radius: 8px; outline: none; cursor: pointer; width: 100%;
+            background: #1f2937; color: white; border: 1px solid #374151; padding: 10px; border-radius: 8px; width: 100%;
         }
-
-        .player-tabs { display: flex; background: #111; padding: 15px; gap: 10px; }
-        .player-btn {
-            background: #1a1a1a; color: white; border: 1px solid #333; padding: 10px 20px; border-radius: 8px; cursor: pointer;
-        }
-        .player-btn.active { background: #6366f1; }
 
         .details-grid { padding: 40px; display: grid; grid-template-columns: 300px 1fr; gap: 40px; }
         .details-grid img { width: 100%; border-radius: 20px; }
 
-        .watchlist-pill, .random-btn { padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; }
-        .watchlist-pill { background: rgba(99, 102, 241, 0.15); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.3); }
-        .random-btn { background: var(--primary-gradient); color: white; border: none; }
-        
-        .creator-text { color: var(--text-muted); font-size: 10px; text-align: right; margin-bottom: 5px; }
-
-        .actor-card { background: var(--card-bg); border-radius: 20px; padding: 15px; text-align: center; cursor: pointer; transition: 0.3s; }
-        .actor-card:hover { transform: scale(1.05); background: #1f2937; }
-        .actor-card img { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; }
+        .cast-section { padding: 0 40px 40px; }
+        .cast-container { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; }
+        .cast-card { min-width: 120px; text-align: center; }
+        .cast-card img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; }
+        .cast-card p { font-size: 0.8rem; margin-top: 5px; }
 
         .tab-btn { background: #111; color: #999; border: 1px solid #333; padding: 10px 25px; cursor: pointer; border-radius: 12px; margin: 0 5px; }
         .tab-btn.active { background: #fff; color: #000; }
+
+        .watchlist-pill, .random-btn { padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; }
+        .watchlist-pill { background: rgba(99, 102, 241, 0.15); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.3); }
+        .random-btn { background: var(--primary-gradient); color: white; border: none; }
+        .creator-text { color: var(--text-muted); font-size: 10px; text-align: right; margin-bottom: 5px; }
     </style>
 </head>
 <body>
@@ -246,7 +220,7 @@
                 <span class="slogan">Minlərlə film, Tək Məkan</span>
             </div>
             <nav class="nav-menu">
-                <div class="nav-link active" id="nav-home" onclick="switchTo('movies')">Filmlər</div>
+                <div class="nav-link active" id="nav-movies" onclick="switchTo('movies')">Filmlər</div>
                 <div class="nav-link" id="nav-series" onclick="switchTo('series')">Seriallar</div>
                 <div class="nav-link" id="nav-actors" onclick="switchTo('actors')">Aktyorlar</div>
             </nav>
@@ -263,26 +237,11 @@
     </header>
 
     <div id="movie-content">
-        <div class="mood-section">
-            <div class="mood-container">
-                <button class="mood-btn" onclick="searchByMood(35, '#2d2401')">😊 Şən</button>
-                <button class="mood-btn" onclick="searchByMood(28, '#01162d')">😎 Güclü</button>
-                <button class="mood-btn" onclick="searchByMood(18, '#1a1a1a')">😢 Kədərli</button>
-                <button class="mood-btn" onclick="searchByMood(27, '#2d0101')">😱 Həyəcanlı</button>
-                <button class="mood-btn" onclick="searchByMood(10749, '#2d011a')">😍 Sevgi</button>
-            </div>
-        </div>
-
-        <div style="text-align: center; margin: 20px;">
-            <button class="tab-btn active" onclick="filterByCountry('all', this)">Hamısı</button>
-            <button class="tab-btn" onclick="filterByCountry('AZ', this)">Azərbaycan</button>
-            <button class="tab-btn" onclick="filterByCountry('TR', this)">Türkiyə</button>
-        </div>
         <div id="genres" class="genres-container"></div>
     </div>
 
     <main id="main"></main>
-    <div id="loader" style="text-align:center; display:none; padding:20px;">Yüklənir...</div>
+    <div id="loader" style="text-align:center; padding:40px; color:white; font-weight:bold;">Yüklənir...</div>
 
     <div id="modal" class="modal">
         <div class="modal-content" id="modal-content"></div>
@@ -301,57 +260,52 @@
         
         let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
         let currentMode = 'movies'; 
-        let currentApiUrl = `${BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}&language=${LANG}`;
+        let currentPage = 1;
+        let isLoading = false;
+        let currentQuery = '';
 
-        const genres = [
-            { id: 28, name: 'Aksiyon' }, { id: 12, name: 'Macəra' },
-            { id: 16, name: 'Animasiya' }, { id: 35, name: 'Komediya' },
-            { id: 18, name: 'Dram' }, { id: 27, name: 'Qorxu' }
-        ];
+        const genreMap = {
+            28: 'Aksiyon', 12: 'Macəra', 16: 'Animasiya', 35: 'Komediya', 
+            18: 'Dram', 27: 'Qorxu', 10749: 'Sevgi', 80: 'Cinayət'
+        };
 
         function init() {
             renderGenres();
-            getMovies(currentApiUrl);
+            loadContent();
             updateWatchlistCount();
+            window.addEventListener('scroll', handleScroll);
         }
 
-        function switchTo(mode) {
-            currentMode = mode;
-            main.innerHTML = '';
-            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+        async function loadContent(reset = true) {
+            if (isLoading) return;
+            isLoading = true;
+            if (reset) { currentPage = 1; main.innerHTML = ''; }
+
+            let url = '';
+            const type = currentMode === 'series' ? 'tv' : (currentMode === 'actors' ? 'person' : 'movie');
             
-            if(mode === 'movies') {
-                document.getElementById('nav-home').classList.add('active');
-                currentApiUrl = `${BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}&language=${LANG}`;
-                getMovies(currentApiUrl);
-            } else if (mode === 'series') {
-                document.getElementById('nav-series').classList.add('active');
-                currentApiUrl = `${BASE_URL}/discover/tv?sort_by=popularity.desc&api_key=${API_KEY}&language=${LANG}`;
-                getMovies(currentApiUrl);
+            if (currentQuery) {
+                url = `${BASE_URL}/search/${type}?api_key=${API_KEY}&query=${currentQuery}&page=${currentPage}&language=${LANG}`;
             } else {
-                document.getElementById('nav-actors').classList.add('active');
-                currentApiUrl = `${BASE_URL}/person/popular?api_key=${API_KEY}&language=${LANG}`;
-                getActors(currentApiUrl);
+                const endpoint = currentMode === 'actors' ? 'person/popular' : `discover/${type}`;
+                url = `${BASE_URL}/${endpoint}?api_key=${API_KEY}&sort_by=popularity.desc&page=${currentPage}&language=${LANG}`;
             }
-        }
 
-        async function getMovies(url) {
             const res = await fetch(url);
             const data = await res.json();
-            showMovies(data.results);
-        }
+            
+            if (currentMode === 'actors') showActors(data.results);
+            else showMovies(data.results);
 
-        async function getActors(url) {
-            const res = await fetch(url);
-            const data = await res.json();
-            showActors(data.results);
+            isLoading = false;
         }
 
         function showMovies(items) {
-            main.innerHTML = '';
             items.forEach(item => {
                 const isFav = favorites.some(f => f.id === item.id);
                 const title = item.title || item.name;
+                const date = (item.release_date || item.first_air_date || '').split('-')[0];
+                const genreNames = item.genre_ids ? item.genre_ids.slice(0, 2).map(id => genreMap[id] || '').filter(n => n).join(', ') : '';
                 const type = item.title ? 'movie' : 'tv';
 
                 const el = document.createElement('div');
@@ -361,7 +315,8 @@
                     <img src="${item.poster_path ? IMG_PATH + item.poster_path : 'https://via.placeholder.com/300x450'}">
                     <div class="movie-info">
                         <h3>${title}</h3>
-                        <div style="color:#fbbf24">★ ${item.vote_average.toFixed(1)}</div>
+                        <div class="movie-meta">${date} • ${genreNames}</div>
+                        <div style="color:#fbbf24; margin-top:5px;">★ ${item.vote_average.toFixed(1)}</div>
                     </div>
                 `;
                 el.onclick = () => openDetails(item.id, type);
@@ -370,13 +325,15 @@
         }
 
         function showActors(actors) {
-            main.innerHTML = '';
             actors.forEach(actor => {
                 const el = document.createElement('div');
-                el.className = 'actor-card';
+                el.className = 'movie'; // Reuse movie style for simplicity
                 el.innerHTML = `
                     <img src="${actor.profile_path ? CAST_IMG_PATH + actor.profile_path : 'https://via.placeholder.com/200x300'}">
-                    <h3>${actor.name}</h3>
+                    <div class="movie-info" style="transform:translateY(0); background: rgba(0,0,0,0.7);">
+                        <h3>${actor.name}</h3>
+                        <p style="font-size:0.8rem; color:#999">${actor.known_for_department}</p>
+                    </div>
                 `;
                 main.appendChild(el);
             });
@@ -384,41 +341,73 @@
 
         async function openDetails(id, type) {
             modal.style.display = 'flex';
-            modalContent.innerHTML = '<div style="color:white; padding:50px;">Yüklənir...</div>';
+            modalContent.innerHTML = '<div style="color:white; padding:50px; text-align:center;">Yüklənir...</div>';
             
-            const mRes = await fetch(`${BASE_URL}/${type}/${id}?api_key=${API_KEY}&language=${LANG}`);
-            const movie = await mRes.json();
-            
-            const embedUrl = type === 'movie' 
-                ? `https://vidsrc.cc/v2/embed/movie/${id}` 
-                : `https://vidsrc.pro/embed/tv/${id}/1/1`;
+            try {
+                const [mRes, vRes, cRes] = await Promise.all([
+                    fetch(`${BASE_URL}/${type}/${id}?api_key=${API_KEY}&language=${LANG}`),
+                    fetch(`${BASE_URL}/${type}/${id}/videos?api_key=${API_KEY}`),
+                    fetch(`${BASE_URL}/${type}/${id}/credits?api_key=${API_KEY}&language=${LANG}`)
+                ]);
 
-            let controls = '';
-            if(type === 'tv') {
-                let seasons = '';
-                for(let i=1; i<=movie.number_of_seasons; i++) seasons += `<option value="${i}">Sezon ${i}</option>`;
-                controls = `
-                    <div class="series-controls">
-                        <select class="series-select" id="s-sel" onchange="loadEpisodes(${id}, this.value)">${seasons}</select>
-                        <select class="series-select" id="e-sel" onchange="changeEp(${id})"></select>
-                    </div>`;
-            }
+                const movie = await mRes.json();
+                const videos = await vRes.json();
+                const credits = await cRes.json();
+                
+                const trailer = videos.results.find(v => v.type === 'Trailer') || videos.results[0];
+                const trailerHtml = trailer ? 
+                    `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${trailer.key}" frameborder="0" allowfullscreen></iframe>` : 
+                    `<div style="display:flex; align-items:center; justify-content:center; height:100%;">Treyler tapılmadı</div>`;
 
-            modalContent.innerHTML = `
-                <span class="close-modal" onclick="closeModal()">&times;</span>
-                <div class="video-container">
-                    <iframe id="player" src="${embedUrl}" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
-                </div>
-                ${controls}
-                <div class="details-grid">
-                    <img src="${IMG_PATH + movie.poster_path}">
-                    <div>
-                        <h2>${movie.title || movie.name}</h2>
-                        <p>${movie.overview}</p>
+                const embedUrl = type === 'movie' ? `https://vidsrc.cc/v2/embed/movie/${id}` : `https://vidsrc.pro/embed/tv/${id}/1/1`;
+
+                let controls = '';
+                if(type === 'tv') {
+                    let seasons = '';
+                    for(let i=1; i<=movie.number_of_seasons; i++) seasons += `<option value="${i}">Sezon ${i}</option>`;
+                    controls = `
+                        <div class="series-controls">
+                            <select class="series-select" id="s-sel" onchange="loadEpisodes(${id}, this.value)">${seasons}</select>
+                            <select class="series-select" id="e-sel" onchange="changeEp(${id})"></select>
+                        </div>`;
+                }
+
+                modalContent.innerHTML = `
+                    <span class="close-modal" onclick="closeModal()">&times;</span>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; background:#000;">
+                        <div class="video-container" title="Film Player">${trailerHtml}</div>
+                        <div class="video-container">
+                            <iframe id="player" src="${embedUrl}" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
+                        </div>
                     </div>
-                </div>
-            `;
-            if(type === 'tv') loadEpisodes(id, 1);
+                    ${controls}
+                    <div class="details-grid">
+                        <img src="${IMG_PATH + movie.poster_path}">
+                        <div>
+                            <h1>${movie.title || movie.name}</h1>
+                            <p style="font-size:1.1rem; line-height:1.6; color:#ccc;">${movie.overview || 'Məlumat yoxdur.'}</p>
+                            <div style="margin-top:20px; color:var(--accent-gold)">
+                                <strong>Reytinq:</strong> ★ ${movie.vote_average.toFixed(1)} | <strong>Tarix:</strong> ${movie.release_date || movie.first_air_date}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cast-section">
+                        <h3>Aktyorlar</h3>
+                        <div class="cast-container">
+                            ${credits.cast.slice(0, 10).map(c => `
+                                <div class="cast-card">
+                                    <img src="${c.profile_path ? CAST_IMG_PATH + c.profile_path : 'https://via.placeholder.com/100'}">
+                                    <p><strong>${c.name}</strong></p>
+                                    <p style="color:#777">${c.character}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                if(type === 'tv') loadEpisodes(id, 1);
+            } catch (err) {
+                modalContent.innerHTML = '<div style="color:white; padding:50px;">Xəta baş verdi.</div>';
+            }
         }
 
         async function loadEpisodes(id, s) {
@@ -435,9 +424,24 @@
             document.getElementById('player').src = `https://vidsrc.pro/embed/tv/${id}/${s}/${e}`;
         }
 
+        function switchTo(mode) {
+            currentMode = mode;
+            currentQuery = '';
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            document.getElementById('nav-' + mode).classList.add('active');
+            loadContent(true);
+        }
+
+        function handleScroll() {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500 && !isLoading) {
+                currentPage++;
+                loadContent(false);
+            }
+        }
+
         function closeModal() {
-            document.getElementById('player').src = '';
             modal.style.display = 'none';
+            modalContent.innerHTML = '';
         }
 
         function toggleFav(m, btn) {
@@ -459,25 +463,30 @@
 
         function showFavorites() {
             if(favorites.length === 0) return alert("Siyahı boşdur.");
+            main.innerHTML = '';
             showMovies(favorites);
         }
 
         function renderGenres() {
             const container = document.getElementById('genres');
-            genres.forEach(g => {
+            Object.keys(genreMap).forEach(id => {
                 const tag = document.createElement('div');
                 tag.className = 'genre-tag';
-                tag.innerText = g.name;
-                tag.onclick = () => getMovies(`${BASE_URL}/discover/${currentMode === 'series' ? 'tv' : 'movie'}?api_key=${API_KEY}&with_genres=${g.id}&language=${LANG}`);
+                tag.innerText = genreMap[id];
+                tag.onclick = () => {
+                    const type = currentMode === 'series' ? 'tv' : 'movie';
+                    main.innerHTML = '';
+                    const url = `${BASE_URL}/discover/${type}?api_key=${API_KEY}&with_genres=${id}&language=${LANG}`;
+                    fetch(url).then(res => res.json()).then(data => showMovies(data.results));
+                };
                 container.appendChild(tag);
             });
         }
 
         document.getElementById('form').addEventListener('submit', (e) => {
             e.preventDefault();
-            const q = document.getElementById('search').value;
-            const type = currentMode === 'series' ? 'tv' : (currentMode === 'actors' ? 'person' : 'movie');
-            getMovies(`${BASE_URL}/search/${type}?api_key=${API_KEY}&query=${q}&language=${LANG}`);
+            currentQuery = document.getElementById('search').value;
+            loadContent(true);
         });
 
         async function getRandomMovie() {

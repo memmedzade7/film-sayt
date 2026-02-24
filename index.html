@@ -301,7 +301,21 @@
         .fav-btn:hover { transform: scale(1.2); }
         .fav-btn.active { color: #ff4757; background: white; }
 
-        /* MODAL */
+        .actor-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            text-align: center;
+            padding-bottom: 15px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .actor-card:hover { transform: translateY(-10px); border-color: #a855f7; }
+        .actor-card img { width: 100%; height: 300px; object-fit: cover; }
+        .actor-card h3 { margin: 15px 0 5px; font-size: 1rem; }
+        .actor-card p { color: var(--text-muted); font-size: 0.8rem; margin: 0; }
+
         .modal {
             position: fixed; inset: 0;
             background: rgba(0, 0, 0, 0.95);
@@ -319,27 +333,27 @@
 
         .close-modal { position: absolute; top: 20px; right: 20px; font-size: 2.5rem; cursor: pointer; color: white; z-index: 100; }
         
-        /* PLEYER SEÇİMİ ÜÇÜN YENİ STİL */
+        .video-container { 
+            width: 100%; 
+            aspect-ratio: 16/9; 
+            background: #000; 
+            position: relative; 
+            overflow: hidden;
+        }
+
         .player-tabs {
             display: flex;
-            background: #000;
+            background: #111;
             padding: 15px;
-            gap: 12px;
-            border-bottom: 2px solid #222;
+            gap: 10px;
+            border-bottom: 1px solid #222;
         }
         .player-btn {
-            background: #1a1a1a;
-            color: white;
-            border: 1px solid #333;
-            padding: 12px 24px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.3s;
+            background: #1a1a1a; color: white; border: 1px solid #333;
+            padding: 10px 20px; border-radius: 8px; cursor: pointer;
+            font-size: 0.85rem; transition: 0.3s;
         }
-        .player-btn.active { background: var(--primary-gradient); border-color: transparent; }
-
-        .video-container { width: 100%; aspect-ratio: 16/9; background: #000; }
+        .player-btn.active { background: #6366f1; border-color: #6366f1; }
 
         .details-grid { padding: 40px; display: grid; grid-template-columns: 300px 1fr; gap: 40px; }
         .details-grid img { width: 100%; border-radius: 20px; }
@@ -392,7 +406,6 @@
     </style>
 </head>
 <body>
-
     <div id="bg-overlay"></div>
 
     <header>
@@ -573,14 +586,12 @@
         async function openActorDetails(id) {
             modal.style.display = 'flex';
             modalContent.innerHTML = '<div style="padding:50px; text-align:center;">Yüklənir...</div>';
-            
             const [pRes, mRes] = await Promise.all([
                 fetch(`${BASE_URL}/person/${id}?api_key=${API_KEY}`),
                 fetch(`${BASE_URL}/person/${id}/movie_credits?api_key=${API_KEY}`)
             ]);
             const person = await pRes.json();
             const movies = await mRes.json();
-
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
                 <div class="actor-header">
@@ -606,12 +617,10 @@
             `;
         }
 
-        // BURADA HEÇ NƏYİ SİLMƏDİM, SİSTEMİ GÜCLƏNDİRDİM
         async function openDetails(id) {
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
-            modalContent.innerHTML = '<div style="padding:50px; text-align:center;">Yüklənir...</div>';
-            
+            modalContent.innerHTML = '<div style="padding:50px; text-align:center;">Hazırlanır...</div>';
             const [mRes, vRes, cRes] = await Promise.all([
                 fetch(`${BASE_URL}/movie/${id}?api_key=${API_KEY}`),
                 fetch(`${BASE_URL}/movie/${id}/videos?api_key=${API_KEY}`),
@@ -621,23 +630,19 @@
             const videos = await vRes.json();
             const credits = await cRes.json();
 
-            // Sənin pleyer bazan + Rus dili bazası
-            const playerEN = `https://vidsrc.to/embed/movie/${id}`;
-            const playerRU = `https://vidsrc.me/embed/movie?tmdb=${id}`;
+            const pEN = `https://vidsrc.to/embed/movie/${id}`;
+            const pRU = `https://vidsrc.me/embed/movie?tmdb=${id}`;
 
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
-                
                 <div class="player-tabs">
-                    <button class="player-btn active" onclick="switchPlayer('${playerEN}', this)">🇺🇸 English Player</button>
-                    <button class="player-btn" onclick="switchPlayer('${playerRU}', this)">🇷🇺 Russian Player</button>
+                    <button class="player-btn active" onclick="switchPlayer('${pEN}', this)">🇺🇸 English</button>
+                    <button class="player-btn" onclick="switchPlayer('${pRU}', this)">🇷🇺 Russian</button>
                     <button class="player-btn" onclick="switchPlayer('https://www.youtube.com/embed/${videos.results[0]?.key}', this)">Treyler</button>
                 </div>
-
                 <div class="video-container">
-                    <iframe id="main-player" src="${playerEN}" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
+                    <iframe id="main-player" src="${pEN}" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
                 </div>
-
                 <div class="details-grid">
                     <img src="${IMG_PATH + movie.poster_path}">
                     <div>

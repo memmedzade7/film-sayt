@@ -855,7 +855,14 @@
             btn.classList.add('active');
         }
 
-        function closeModal() { modal.style.display = 'none'; document.body.style.overflow = 'auto'; }
+        function closeModal() { 
+            // Video səsini dayandırmaq üçün pleyerin içini təmizləyirik
+            const player = document.getElementById('main-player');
+            if(player) player.src = ''; 
+            
+            modal.style.display = 'none'; 
+            document.body.style.overflow = 'auto'; 
+        }
 
         function toggleFav(item, btn) {
             const index = favorites.findIndex(f => f.id === item.id);

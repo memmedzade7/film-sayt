@@ -2,8 +2,25 @@
 <html lang="az">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=1200"> 
+    <meta name="viewport" content="width=1200">
+    
     <title>RM Film | Minlərlə film, Tək Məkan</title>
+    <meta name="description" content="RM Film - Ən son filmlər, seriallar və aktyorlar haqqında məlumat, onlayn izləmə imkanı və şəxsi izləmə siyahısı.">
+    <meta name="keywords" content="film izlə, serial izlə, yeni filmlər, RM Film, Rəsul Məmmədzadə, sinema, HD film">
+    <meta name="author" content="Rəsul Məmmədzadə">
+    <meta name="robots" content="index, follow">
+    
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://rmfilm.az/">
+    <meta property="og:title" content="RM Film | Minlərlə film, Tək Məkan">
+    <meta property="og:description" content="Ən son filmləri və serialları kəşf et. Öz siyahını yarat və onlayn izlə.">
+    <meta property="og:image" content="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_square_2-d537fb4ad4cf457d3979da396a873822fb30165a.svg">
+
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/4221/4221419.png">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/4221/4221419.png">
+
+    <script data-goatcounter="https://rmfilm.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+
     <style>
         /* Mood-a görə dəyişən dinamik arxa fon təbəqəsi */
         #bg-overlay {
@@ -563,6 +580,11 @@
                     else getActors(currentApiUrl, false);
                 }
             });
+
+            // GoatCounter sayfa geçiş takibi fix
+            if (window.goatcounter) {
+                window.goatcounter.count({ path: location.pathname + location.search + location.hash });
+            }
         }
 
         function switchTo(mode) {
@@ -856,10 +878,8 @@
         }
 
         function closeModal() { 
-            // Video səsini dayandırmaq üçün pleyerin içini təmizləyirik
             const player = document.getElementById('main-player');
             if(player) player.src = ''; 
-            
             modal.style.display = 'none'; 
             document.body.style.overflow = 'auto'; 
         }

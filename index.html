@@ -222,6 +222,28 @@
         .rating { color: var(--accent-gold); font-weight: 800; display: flex; align-items: center; gap: 5px; margin-top: 5px; }
         .rating::before { content: '★'; }
 
+        /* Yeni Axtarış Düymələri */
+        .quick-search-btns {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .q-btn {
+            flex: 1;
+            padding: 6px;
+            border-radius: 6px;
+            font-size: 10px;
+            text-align: center;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            background: rgba(255,255,255,0.1);
+            transition: 0.3s;
+        }
+        .q-btn:hover { background: rgba(255,255,255,0.2); }
+        .btn-google:hover { color: #4285F4; }
+        .btn-youtube:hover { color: #FF0000; }
+
         .fav-btn {
             position: absolute;
             top: 15px; right: 15px;
@@ -235,7 +257,6 @@
         }
         .fav-btn.active { color: #ff4757; background: white; }
 
-        /* AKTYORLAR BÖLMƏSİ ÜÇÜN STİLLƏR */
         .actor-card {
             background: var(--card-bg);
             border-radius: 20px;
@@ -287,13 +308,6 @@
         .details-grid { padding: 40px; display: grid; grid-template-columns: 300px 1fr; gap: 40px; }
         .details-grid img { width: 100%; border-radius: 20px; }
 
-        .comment-section { margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; }
-        .comment-input {
-            width: 100%; background: rgba(255,255,255,0.05); border: 1px solid #333;
-            color: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; font-family: inherit;
-        }
-        .comment-btn { background: var(--primary-gradient); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        
         .cast-container { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; margin-top: 20px;}
         .cast-card { min-width: 100px; text-align: center; font-size: 0.8rem; cursor: pointer; }
         .cast-card img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(168, 85, 247, 0.3);}
@@ -306,7 +320,6 @@
         .search-container { display: flex; flex-direction: column; align-items: flex-end; }
         .loader { grid-column: 1/-1; text-align: center; padding: 20px; display: none; }
         
-        /* Seriallar üçün əlavə */
         .quick-view-data {
             opacity: 0; transition: opacity 0.3s ease; margin-top: 10px; font-size: 0.85rem; color: var(--text-muted);
             border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 10px; display: flex; flex-direction: column; gap: 4px;
@@ -481,7 +494,11 @@
                         <div class="rating">${item.vote_average.toFixed(1)}</div>
                         <div class="quick-view-data">
                             <span>📅 İl: ${releaseDate?.split('-')[0] || 'N/A'}</span>
-                            <span style="color:var(--accent-gold); font-size: 10px;">${type === 'tv' ? 'SERIALI İZLƏ' : 'FİLMİ İZLƏ'}</span>
+                            <div class="quick-search-btns">
+                                <a href="https://www.google.com/search?q=${encodeURIComponent(title + ' izle')}" target="_blank" class="q-btn btn-google" onclick="event.stopPropagation()">Google</a>
+                                <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(title + ' fragman')}" target="_blank" class="q-btn btn-youtube" onclick="event.stopPropagation()">YouTube</a>
+                            </div>
+                            <span style="color:var(--accent-gold); font-size: 10px; margin-top:5px; text-align:center;">${type === 'tv' ? 'SERIALI İZLƏ (SEZONLAR)' : 'FİLMİ İZLƏ'}</span>
                         </div>
                     </div>
                 `;
@@ -519,7 +536,8 @@
             const credits = await cRes.json();
 
             const title = movie.title || movie.name;
-            const embedUrl = type === 'movie' ? `https://vidsrc.cc/v2/embed/movie/${id}` : `https://vidsrc.cc/v2/embed/tv/${id}`;
+            // Seriallar üçün sezon seçimli pleyer: vidsrc.pro daha yaxşıdır
+            const embedUrl = type === 'movie' ? `https://vidsrc.cc/v2/embed/movie/${id}` : `https://vidsrc.pro/embed/tv/${id}`;
 
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
@@ -530,7 +548,7 @@
                     <iframe id="main-player" src="${embedUrl}" width="100%" height="100%" frameborder="0" allowfullscreen sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts"></iframe>
                 </div>
                 <div class="player-tabs">
-                    <button class="player-btn active" onclick="changeSource('${embedUrl}', this)">${type === 'tv' ? 'Serialı İzlə' : 'Film İzlə'}</button>
+                    <button class="player-btn active" onclick="changeSource('${embedUrl}', this)">${type === 'tv' ? 'Sezon və Bölümlər' : 'Film İzlə'}</button>
                     <button class="player-btn" onclick="changeSource('https://www.youtube.com/embed/${videos.results[0]?.key}', this)">Treyler</button>
                     <button class="player-btn az-dublaj" onclick="window.open('https://www.google.com/search?q=${encodeURIComponent(title + " azərbaycan dilində izlə")}', '_blank')">🇦🇿 AZ Dublaj</button>
                     <button class="player-btn tr-dublaj" onclick="window.open('https://www.google.com/search?q=${encodeURIComponent(title + " türkçe dublaj izle")}', '_blank')">🇹🇷 TR Dublaj</button>
@@ -540,6 +558,7 @@
                     <div>
                         <h2>${title}</h2>
                         <p>${movie.overview}</p>
+                        ${type === 'tv' ? `<p style="color:var(--accent-gold)"><b>Məlumat:</b> Serialın sezon və bölümlərini pleyerin daxilindəki siyahıdan seçə bilərsiniz.</p>` : ''}
                         <div class="cast-container">
                             ${credits.cast.slice(0, 8).map(c => `
                                 <div class="cast-card" onclick="openActorDetails(${c.id})">
@@ -587,7 +606,6 @@
             `;
         }
 
-        // Digər köməkçi funksiyalar (removeShield, changeSource, closeModal, toggleFav, searchByMood, renderGenres, və s.) eynilə saxlanılıb.
         function removeShield() { const s = document.getElementById('protection-overlay'); if(s) s.style.display = 'none'; }
         function changeSource(u, b) { document.getElementById('main-player').src = u; document.querySelectorAll('.player-btn').forEach(x => x.classList.remove('active')); b.classList.add('active'); }
         function closeModal() { modal.style.display = 'none'; document.body.style.overflow = 'auto'; }

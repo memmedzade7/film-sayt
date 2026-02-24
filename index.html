@@ -907,9 +907,18 @@
         }
 
         function searchByMood(genreId, bgColor) {
+            // Arxa fon rəngini dəyiş
             bgOverlay.style.background = `radial-gradient(circle at center, ${bgColor} 0%, #05070a 100%)`;
-            currentApiUrl = `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${genreId}&language=${LANG}`;
-            switchTo('movies');
+            
+            // Rejimi filmə keçir (çünki əhval filtrləri əsasən filmlər üçündür)
+            currentMode = 'movies';
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            document.getElementById('nav-home').classList.add('active');
+            movieContent.style.display = 'block';
+
+            // URL-i yenilə və filmləri gətir
+            currentApiUrl = `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${genreId}&language=${LANG}&sort_by=popularity.desc`;
+            getMovies(currentApiUrl, true);
         }
 
         function renderGenres() {

@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="az">
 <head>
@@ -478,64 +479,6 @@
         .actor-header img { width: 250px; border-radius: 20px; }
         .actor-bio h2 { margin-top: 0; }
         .actor-movies-title { padding: 20px 40px 0; font-size: 1.5rem; }
-
-        /* Watch Together Styles */
-        .watch-together-section {
-            background: #0a0a14;
-            border-radius: 25px;
-            padding: 20px;
-            margin-top: 10px;
-            border: 2px solid #6366f1;
-            box-shadow: 0 0 30px rgba(99, 102, 241, 0.3);
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        .wt-layout { display: grid; grid-template-columns: 1fr 350px; gap: 20px; }
-        .wt-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 15px; }
-        .wt-title { font-size: 1.4rem; font-weight: 900; color: #fff; display: flex; align-items: center; gap: 10px; }
-        .wt-btn {
-            background: var(--primary-gradient);
-            border: none; color: #fff; padding: 12px 24px;
-            border-radius: 12px; cursor: pointer; font-weight: bold;
-            transition: 0.3s;
-        }
-        .wt-btn:hover { transform: scale(1.05); box-shadow: 0 0 15px #a855f7; }
-        
-        .wt-chat-container {
-            display: flex; flex-direction: column; height: 500px;
-            background: #11111f; border-radius: 15px; border: 1px solid #333;
-            overflow: hidden;
-        }
-        #wt-messages { flex: 1; padding: 15px; overflow-y: auto; font-size: 0.9rem; background: rgba(0,0,0,0.2); }
-        .wt-msg { margin-bottom: 10px; padding: 10px 14px; background: #1e1e35; border-radius: 15px; border-bottom-left-radius: 2px; width: fit-content; max-width: 85%; line-height: 1.4; border: 1px solid rgba(255,255,255,0.05); }
-        .wt-msg b { color: #a855f7; display: block; font-size: 0.75rem; margin-bottom: 3px; }
-        
-        .wt-input-area { display: flex; padding: 15px; gap: 10px; background: #161625; border-top: 1px solid #333; }
-        .wt-input {
-            flex: 1; background: #000; border: 1px solid #444;
-            color: #fff; padding: 12px; border-radius: 10px; outline: none; transition: 0.3s;
-        }
-        .wt-input:focus { border-color: #6366f1; }
-        
-        .room-link-box {
-            background: #1a1a2e; padding: 10px 15px; border-radius: 10px; display: flex; align-items: center; gap: 10px; border: 1px dashed #6366f1;
-        }
-
-        @media (max-width: 1024px) {
-            .wt-layout { grid-template-columns: 1fr; }
-            .wt-chat-container { height: 400px; }
-        }
-
-        @media (max-width: 768px) {
-            body { min-width: auto; overflow-x: hidden; }
-            .details-grid { grid-template-columns: 1fr; padding: 20px; }
-            header { flex-direction: column; gap: 15px; padding: 1rem; }
-            .nav-menu { margin-left: 0; font-size: 0.9rem; }
-            .search { width: 100%; }
-            .search:focus { width: 100%; }
-            .movie img { height: 280px; }
-        }
     </style>
 </head>
 <body>
@@ -552,7 +495,6 @@
                 <div class="nav-link active" id="nav-home" onclick="switchTo('movies')">Filmlər</div>
                 <div class="nav-link" id="nav-series" onclick="switchTo('series')">Seriallar</div>
                 <div class="nav-link" id="nav-actors" onclick="switchTo('actors')">Aktyorlar</div>
-                <div class="nav-link" id="nav-wt" onclick="switchTo('watch-together')">Birlikdə İzlə 🍿</div>
             </nav>
         </div>
         
@@ -614,8 +556,6 @@
         let currentApiUrl = `${BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}&language=${LANG}`;
         let isFavoritesView = false;
         let isLoading = false;
-        let userNickname = localStorage.getItem('wt_nickname') || "";
-        let currentRoomData = null;
 
         const genres = [
             { id: 28, name: 'Aksiyon' }, { id: 12, name: 'Macəra' },
@@ -625,31 +565,32 @@
             { id: 10749, name: 'Romantik' }
         ];
 
+        // Umami SPA İzləmə Funksiyası
+        function trackUmami() {
+            if (window.umami) {
+                umami.track(props => ({
+                    ...props,
+                    url: location.pathname + location.search + location.hash,
+                    title: document.title
+                }));
+            }
+        }
+
         function init() {
             renderGenres();
-            // Check if user is joining a room via URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const roomId = urlParams.get('room');
-            const mediaId = urlParams.get('id');
-            const mediaType = urlParams.get('type');
-
-            if(roomId && mediaId) {
-                switchTo('watch-together');
-                startWatchTogether(mediaId, "Yüklənən Film...", mediaType, true);
-            } else {
-                getMovies(currentApiUrl);
-            }
+            getMovies(currentApiUrl);
             updateWatchlistCount();
 
             window.addEventListener('scroll', () => {
-                if (isLoading || isFavoritesView || currentMode === 'watch-together') return;
+                if (isLoading || isFavoritesView) return;
                 if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
                     currentPage++;
                     if(currentMode === 'movies') getMovies(currentApiUrl, false);
                     else if(currentMode === 'series') getSeries(currentApiUrl, false);
-                    else if(currentMode === 'actors') getActors(currentApiUrl, false);
+                    else getActors(currentApiUrl, false);
                 }
             });
+            trackUmami(); // İlk yüklənmədə izlə
         }
 
         function switchTo(mode) {
@@ -668,16 +609,13 @@
                 movieContent.style.display = 'block';
                 currentApiUrl = `${BASE_URL}/discover/tv?sort_by=popularity.desc&api_key=${API_KEY}&language=${LANG}`;
                 getSeries(currentApiUrl);
-            } else if(mode === 'actors') {
+            } else {
                 document.getElementById('nav-actors').classList.add('active');
                 movieContent.style.display = 'none';
                 currentApiUrl = `${BASE_URL}/person/popular?api_key=${API_KEY}&language=${LANG}`;
                 getActors(currentApiUrl);
-            } else if(mode === 'watch-together') {
-                document.getElementById('nav-wt').classList.add('active');
-                movieContent.style.display = 'none';
-                if(!currentRoomData) renderWatchTogetherNoRoom();
             }
+            trackUmami(); // Bölmə dəyişəndə izlə
         }
 
         async function getMovies(url, isNew = true) {
@@ -797,7 +735,6 @@
                             <option value="1">Bölüm 1</option>
                         </select>
                     </div>
-                    <button class="player-btn wt-btn" onclick="startWatchTogether(${id}, '${tv.name.replace(/'/g, "\\'")}', 'tv')">👥 Birlikdə İzlə</button>
                     <button class="player-btn az-dublaj" onclick="window.open('https://www.google.com/search?q=${encodeURIComponent(tv.name + " azərbaycan dilində izlə")}', '_blank')">🇦🇿 AZ Dublaj</button>
                     <button class="player-btn tr-dublaj" onclick="window.open('https://www.google.com/search?q=${encodeURIComponent(tv.name + " türkçe dublaj izle")}', '_blank')">🇹🇷 TR Dublaj</button>
                 </div>
@@ -818,11 +755,11 @@
                 </div>
             `;
             updateEpisodeList(id, 1);
+            trackUmami();
         }
 
         async function updateEpisodeList(tvId, seasonNum) {
             const epSelect = document.getElementById('episode-select');
-            if(!epSelect) return;
             epSelect.innerHTML = "<option>Yüklənir...</option>";
             const res = await fetch(`${BASE_URL}/tv/${tvId}/season/${seasonNum}?api_key=${API_KEY}&language=${LANG}`);
             const data = await res.json();
@@ -857,6 +794,7 @@
             const credits = await cRes.json();
 
             const youtubeSearch = `https://www.youtube.com/results?search_query=${encodeURIComponent(movie.title + " full izle")}`;
+            const googleSearch = `https://www.google.com/search?q=${encodeURIComponent(movie.title + " izle")}`;
 
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
@@ -874,7 +812,6 @@
                 <div class="player-tabs">
                     <button class="player-btn active" onclick="changeSource('https://vidsrc.cc/v2/embed/movie/${id}', this)">Film İzlə</button>
                     <button class="player-btn" onclick="changeSource('https://www.youtube.com/embed/${videos.results[0]?.key}', this)">Treyler</button>
-                    <button class="player-btn wt-btn" onclick="startWatchTogether(${id}, '${movie.title.replace(/'/g, "\\'")}', 'movie')">👥 Birlikdə İzlə</button>
                     <button class="player-btn az-dublaj" onclick="window.open('https://www.google.com/search?q=${encodeURIComponent(movie.title + " azərbaycan dilində izlə")}', '_blank')">🇦🇿 AZ Dublaj</button>
                     <button class="player-btn tr-dublaj" onclick="window.open('https://www.google.com/search?q=${encodeURIComponent(movie.title + " türkçe dublaj izle")}', '_blank')">🇹🇷 TR Dublaj</button>
                     <button class="player-btn alt-source" onclick="window.open('${youtubeSearch}', '_blank')">YouTube 📺</button>
@@ -892,9 +829,16 @@
                                 </div>
                             `).join('')}
                         </div>
+                        <div class="comment-section">
+                            <textarea id="comment-text" class="comment-input" placeholder="Rəyiniz..."></textarea>
+                            <button class="comment-btn" onclick="addComment(${id})">Göndər</button>
+                            <div id="comments-list-${id}" class="comments-list"></div>
+                        </div>
                     </div>
                 </div>
             `;
+            loadComments(id);
+            trackUmami();
         }
 
         async function openActorDetails(id) {
@@ -929,6 +873,7 @@
                     `).join('')}
                 </main>
             `;
+            trackUmami();
         }
 
         function removeShield() {
@@ -984,7 +929,6 @@
 
         function renderGenres() {
             const container = document.getElementById('genres');
-            if(!container) return;
             container.innerHTML = "";
             genres.forEach(g => {
                 const tag = document.createElement('div');
@@ -999,108 +943,6 @@
             });
         }
 
-        // --- Watch Together Enhanced ---
-
-        function renderWatchTogetherNoRoom() {
-            main.innerHTML = `
-                <div style="grid-column: 1/-1; padding: 40px; text-align:center;">
-                    <div style="font-size: 5rem;">🍿</div>
-                    <h2>Birlikdə İzləməyə Başla!</h2>
-                    <p style="color:var(--text-muted); max-width: 600px; margin: 20px auto;">
-                        Hər hansı bir film və ya serialı açın, aşağıdakı "Birlikdə İzlə" düyməsinə basın və dostlarınızı dəvət edin.
-                    </p>
-                    <button class="wt-btn" onclick="switchTo('movies')">Film Seç</button>
-                </div>
-            `;
-        }
-
-        function startWatchTogether(id, title, type, isJoining = false) {
-            if(!userNickname) {
-                const nick = prompt("Mesaj yazmaq üçün ləqəbinizi daxil edin:");
-                userNickname = nick || "Anonim Qonaq";
-                localStorage.setItem('wt_nickname', userNickname);
-            }
-
-            const roomId = isJoining ? new URLSearchParams(window.location.search).get('room') : Math.random().toString(36).substring(7);
-            const playerUrl = type === 'tv' ? `https://vidsrc.cc/v2/embed/tv/${id}/1/1` : `https://vidsrc.cc/v2/embed/movie/${id}`;
-            const joinLink = `${window.location.origin}${window.location.pathname}?room=${roomId}&id=${id}&type=${type}`;
-
-            currentRoomData = { id, title, type, roomId, joinLink, playerUrl };
-            
-            closeModal();
-            switchTo('watch-together');
-            
-            main.innerHTML = `
-                <div style="grid-column: 1/-1;">
-                    <div class="watch-together-section">
-                        <div class="wt-header">
-                            <div class="wt-title">🍿 Sinema Zalı: ${title}</div>
-                            <div class="room-link-box">
-                                <span style="font-size:0.7rem; color:#6366f1;">Otaq Linki:</span>
-                                <input type="text" readonly value="${joinLink}" style="background:transparent; border:none; color:#fff; font-size:0.7rem; width:200px;" id="wt-link-input">
-                                <button onclick="copyWTLink()" style="background:#6366f1; border:none; color:#fff; padding:5px 10px; border-radius:5px; cursor:pointer; font-size:0.7rem;">Kopyala</button>
-                            </div>
-                        </div>
-                        
-                        <div class="wt-layout">
-                            <div class="video-container" style="border-radius:15px; border:1px solid #333;">
-                                <div id="protection-overlay" onclick="removeShield()">
-                                    <div class="shield-msg">Filmi başlatmaq üçün toxunun</div>
-                                </div>
-                                <iframe id="main-player" src="${playerUrl}" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
-                            </div>
-                            
-                            <div class="wt-chat-container">
-                                <div id="wt-messages">
-                                    <div class="wt-msg" style="background:rgba(99,102,241,0.1); width:100%; text-align:center;">
-                                        Otaq hazır! Linki dostlarına göndər və birlikdə izləyin.
-                                    </div>
-                                </div>
-                                <div class="wt-input-area">
-                                    <input type="text" id="wt-msg-input" class="wt-input" placeholder="Dostlarınla danış..." onkeypress="if(event.key==='Enter') sendWTMessage()">
-                                    <button class="wt-btn" onclick="sendWTMessage()">✉</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            if(isJoining) {
-                addSystemMessage(`Siz otağa qoşuldunuz. Xoş izləmələr!`);
-            }
-        }
-
-        function sendWTMessage() {
-            const input = document.getElementById('wt-msg-input');
-            const msgBox = document.getElementById('wt-messages');
-            if(!input.value.trim()) return;
-            
-            const div = document.createElement('div');
-            div.className = 'wt-msg';
-            div.innerHTML = `<b>${userNickname}</b> ${input.value}`;
-            msgBox.appendChild(div);
-            msgBox.scrollTop = msgBox.scrollHeight;
-            input.value = '';
-        }
-
-        function addSystemMessage(text) {
-            const msgBox = document.getElementById('wt-messages');
-            const div = document.createElement('div');
-            div.className = 'wt-msg';
-            div.style.background = "rgba(251, 191, 36, 0.1)";
-            div.style.width = "100%";
-            div.innerHTML = `<i style="font-size:0.8rem; color:#fbbf24;">${text}</i>`;
-            msgBox.appendChild(div);
-        }
-
-        function copyWTLink() {
-            const copyText = document.getElementById("wt-link-input");
-            copyText.select();
-            document.execCommand("copy");
-            alert("Otaq linki kopyalandı! İndi bu linki dostunuza göndərə bilərsiniz.");
-        }
-
         document.getElementById('form').addEventListener('submit', (e) => {
             e.preventDefault();
             const q = document.getElementById('search').value;
@@ -1110,7 +952,7 @@
             } else if(currentMode === 'series') {
                 currentApiUrl = `${BASE_URL}/search/tv?api_key=${API_KEY}&query=${q}&language=${LANG}`;
                 getSeries(currentApiUrl);
-            } else if(currentMode === 'actors') {
+            } else {
                 currentApiUrl = `${BASE_URL}/search/person?api_key=${API_KEY}&query=${q}&language=${LANG}`;
                 getActors(currentApiUrl);
             }
@@ -1124,7 +966,27 @@
             type === 'tv' ? openTVDetails(id) : openDetails(id);
         }
 
+        function addComment(id) {
+            const txt = document.getElementById('comment-text').value;
+            if(!txt) return;
+            const coms = JSON.parse(localStorage.getItem(`comments_${id}`)) || [];
+            coms.unshift({ text: txt, date: new Date().toLocaleString() });
+            localStorage.setItem(`comments_${id}`, JSON.stringify(coms));
+            document.getElementById('comment-text').value = '';
+            loadComments(id);
+        }
+
+        function loadComments(id) {
+            const list = document.getElementById(`comments-list-${id}`);
+            if(!list) return;
+            const coms = JSON.parse(localStorage.getItem(`comments_${id}`)) || [];
+            list.innerHTML = coms.map(c => `<div class="comment-item"><b>${c.date}</b><br>${c.text}</div>`).join('');
+        }
+
         init();
     </script>
+
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="0e532785-a35d-49f1-87d2-f45f5906d166"></script>
+
 </body>
 </html>

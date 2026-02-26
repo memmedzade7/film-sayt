@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="az">
 <head>
@@ -48,7 +49,6 @@
             --text-main: #ffffff;
             --text-muted: #9ca3af;
             --neon-glow: 0 0 20px rgba(168, 85, 247, 0.4);
-            --live-red: #ff4757;
         }
 
         body {
@@ -121,22 +121,10 @@
             transition: 0.3s;
             padding: 8px 15px;
             border-radius: 8px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
         }
         .nav-link:hover, .nav-link.active {
             color: white;
             background: rgba(255,255,255,0.1);
-        }
-
-        .nav-link.live-btn {
-            color: var(--live-red);
-            border: 1px solid rgba(255, 71, 87, 0.3);
-        }
-        .nav-link.live-btn.active {
-            background: var(--live-red);
-            color: white;
         }
 
         .mood-section {
@@ -415,19 +403,6 @@
         .player-btn.az-dublaj { background: #ef4444; color: white; border: none; font-weight: bold; }
         .player-btn.tr-dublaj { background: #3b82f6; color: white; border: none; font-weight: bold; }
 
-        /* Otaq Yarat Düyməsi */
-        .player-btn.room-btn { 
-            background: #10b981; 
-            border: none; 
-            font-weight: bold;
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-        }
-
         .details-grid { padding: 40px; display: grid; grid-template-columns: 300px 1fr; gap: 40px; }
         .details-grid img { width: 100%; border-radius: 20px; }
 
@@ -504,25 +479,6 @@
         .actor-header img { width: 250px; border-radius: 20px; }
         .actor-bio h2 { margin-top: 0; }
         .actor-movies-title { padding: 20px 40px 0; font-size: 1.5rem; }
-
-        /* Watch Together Styles */
-        #room-overlay {
-            position: fixed; inset: 0; background: #05070a; z-index: 5000; display: none;
-            grid-template-columns: 1fr 350px;
-        }
-        .room-chat { background: #111827; border-left: 1px solid #1f2937; display: flex; flex-direction: column; }
-        .chat-header { padding: 20px; background: #1f2937; font-weight: bold; display: flex; justify-content: space-between; align-items: center;}
-        .chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        .chat-input-area { padding: 15px; border-top: 1px solid #1f2937; display: flex; gap: 10px; }
-        .msg-bubble { background: #374151; padding: 8px 12px; border-radius: 12px; font-size: 0.9rem; max-width: 85%; }
-        .msg-bubble b { color: #a855f7; display: block; font-size: 0.75rem; }
-        .live-rooms-list { padding: 40px; }
-        .room-item { background: #111827; border: 1px solid #1f2937; padding: 20px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;}
-        .nickname-modal {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 6000; display: none;
-            justify-content: center; align-items: center;
-        }
-        .nick-box { background: #111827; padding: 40px; border-radius: 20px; width: 400px; text-align: center;}
     </style>
 </head>
 <body>
@@ -539,7 +495,6 @@
                 <div class="nav-link active" id="nav-home" onclick="switchTo('movies')">Filmlər</div>
                 <div class="nav-link" id="nav-series" onclick="switchTo('series')">Seriallar</div>
                 <div class="nav-link" id="nav-actors" onclick="switchTo('actors')">Aktyorlar</div>
-                <div class="nav-link live-btn" id="nav-rooms" onclick="switchTo('rooms')"><span>📡</span> Otaqlar</div>
             </nav>
         </div>
         
@@ -581,32 +536,6 @@
         <div class="modal-content" id="modal-content"></div>
     </div>
 
-    <div id="room-overlay">
-        <div style="display: flex; flex-direction: column;">
-            <div class="video-container" id="room-video-container" style="height: 100%;"></div>
-        </div>
-        <div class="room-chat">
-            <div class="chat-header">
-                <span>Canlı Çat</span>
-                <button class="comment-btn" style="background: #ef4444; padding: 5px 10px;" onclick="closeRoom()">Çıx</button>
-            </div>
-            <div id="chat-msgs" class="chat-messages"></div>
-            <div class="chat-input-area">
-                <input type="text" id="chat-input" class="comment-input" style="margin:0" placeholder="Mesaj yazın...">
-                <button class="comment-btn" onclick="sendRoomMsg()">></button>
-            </div>
-        </div>
-    </div>
-
-    <div id="nick-modal" class="nickname-modal">
-        <div class="nick-box">
-            <h2>Xoş Gəldin!</h2>
-            <p>Otağa daxil olmaq üçün bir ləqəb seç:</p>
-            <input type="text" id="nickname-input" class="comment-input" placeholder="Ləqəbiniz...">
-            <button class="comment-btn" style="width: 100%; margin-top: 15px;" onclick="saveNickname()">Daxil Ol</button>
-        </div>
-    </div>
-
     <script>
         const API_KEY = '34d4692f40f9b4827503c570ebda8db7';
         const BASE_URL = 'https://api.themoviedb.org/3';
@@ -628,10 +557,6 @@
         let isFavoritesView = false;
         let isLoading = false;
 
-        // Otaq Dəyişənləri
-        let currentRoomId = null;
-        let userNickname = localStorage.getItem('rm_nickname');
-
         const genres = [
             { id: 28, name: 'Aksiyon' }, { id: 12, name: 'Macəra' },
             { id: 16, name: 'Animasiya' }, { id: 35, name: 'Komediya' },
@@ -640,6 +565,7 @@
             { id: 10749, name: 'Romantik' }
         ];
 
+        // Umami SPA İzləmə Funksiyası
         function trackUmami() {
             if (window.umami) {
                 umami.track(props => ({
@@ -652,16 +578,11 @@
 
         function init() {
             renderGenres();
-            const urlParams = new URLSearchParams(window.location.search);
-            if(urlParams.has('room')) {
-                joinRoom(urlParams.get('room'));
-            } else {
-                getMovies(currentApiUrl);
-            }
+            getMovies(currentApiUrl);
             updateWatchlistCount();
 
             window.addEventListener('scroll', () => {
-                if (isLoading || isFavoritesView || currentMode === 'rooms') return;
+                if (isLoading || isFavoritesView) return;
                 if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
                     currentPage++;
                     if(currentMode === 'movies') getMovies(currentApiUrl, false);
@@ -669,6 +590,7 @@
                     else getActors(currentApiUrl, false);
                 }
             });
+            trackUmami(); // İlk yüklənmədə izlə
         }
 
         function switchTo(mode) {
@@ -687,17 +609,13 @@
                 movieContent.style.display = 'block';
                 currentApiUrl = `${BASE_URL}/discover/tv?sort_by=popularity.desc&api_key=${API_KEY}&language=${LANG}`;
                 getSeries(currentApiUrl);
-            } else if(mode === 'actors') {
+            } else {
                 document.getElementById('nav-actors').classList.add('active');
                 movieContent.style.display = 'none';
                 currentApiUrl = `${BASE_URL}/person/popular?api_key=${API_KEY}&language=${LANG}`;
                 getActors(currentApiUrl);
-            } else if(mode === 'rooms') {
-                document.getElementById('nav-rooms').classList.add('active');
-                movieContent.style.display = 'none';
-                renderRoomsPage();
             }
-            trackUmami();
+            trackUmami(); // Bölmə dəyişəndə izlə
         }
 
         async function getMovies(url, isNew = true) {
@@ -819,7 +737,6 @@
                     </div>
                     <button class="player-btn az-dublaj" onclick="window.open('https://www.google.com/search?q=${encodeURIComponent(tv.name + " azərbaycan dilində izlə")}', '_blank')">🇦🇿 AZ Dublaj</button>
                     <button class="player-btn tr-dublaj" onclick="window.open('https://www.google.com/search?q=${encodeURIComponent(tv.name + " türkçe dublaj izle")}', '_blank')">🇹🇷 TR Dublaj</button>
-                    <button class="player-btn room-btn" onclick="createRoom('${id}', 'tv', '${tv.name}')">👥 Birlikdə İzlə</button>
                 </div>
                 <div class="details-grid">
                     <img src="${IMG_PATH + tv.poster_path}">
@@ -877,6 +794,7 @@
             const credits = await cRes.json();
 
             const youtubeSearch = `https://www.youtube.com/results?search_query=${encodeURIComponent(movie.title + " full izle")}`;
+            const googleSearch = `https://www.google.com/search?q=${encodeURIComponent(movie.title + " izle")}`;
 
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
@@ -897,7 +815,6 @@
                     <button class="player-btn az-dublaj" onclick="window.open('https://www.google.com/search?q=${encodeURIComponent(movie.title + " azərbaycan dilində izlə")}', '_blank')">🇦🇿 AZ Dublaj</button>
                     <button class="player-btn tr-dublaj" onclick="window.open('https://www.google.com/search?q=${encodeURIComponent(movie.title + " türkçe dublaj izle")}', '_blank')">🇹🇷 TR Dublaj</button>
                     <button class="player-btn alt-source" onclick="window.open('${youtubeSearch}', '_blank')">YouTube 📺</button>
-                    <button class="player-btn room-btn" onclick="createRoom('${id}', 'movie', '${movie.title}')">👥 Birlikdə İzlə</button>
                 </div>
                 <div class="details-grid">
                     <img src="${IMG_PATH + movie.poster_path}">
@@ -1035,7 +952,7 @@
             } else if(currentMode === 'series') {
                 currentApiUrl = `${BASE_URL}/search/tv?api_key=${API_KEY}&query=${q}&language=${LANG}`;
                 getSeries(currentApiUrl);
-            } else if(currentMode === 'actors') {
+            } else {
                 currentApiUrl = `${BASE_URL}/search/person?api_key=${API_KEY}&query=${q}&language=${LANG}`;
                 getActors(currentApiUrl);
             }
@@ -1066,100 +983,10 @@
             list.innerHTML = coms.map(c => `<div class="comment-item"><b>${c.date}</b><br>${c.text}</div>`).join('');
         }
 
-        // --- WATCH TOGETHER LOGIC ---
-        function createRoom(id, type, title) {
-            const roomId = Math.random().toString(36).substring(7);
-            const rooms = JSON.parse(localStorage.getItem('rm_rooms')) || [];
-            rooms.push({ id: roomId, mediaId: id, type: type, title: title, created: Date.now() });
-            localStorage.setItem('rm_rooms', JSON.stringify(rooms));
-            
-            const link = window.location.origin + window.location.pathname + "?room=" + roomId;
-            prompt("Otaq Yaradıldı! Dostuna bu linki göndər:", link);
-            joinRoom(roomId);
-        }
-
-        function joinRoom(roomId) {
-            if(!userNickname) {
-                document.getElementById('nick-modal').style.display = 'flex';
-                currentRoomId = roomId;
-                return;
-            }
-            const rooms = JSON.parse(localStorage.getItem('rm_rooms')) || [];
-            const room = rooms.find(r => r.id === roomId);
-            if(!room) return alert("Otaq tapılmadı.");
-
-            currentRoomId = roomId;
-            document.getElementById('room-overlay').style.display = 'grid';
-            closeModal();
-            
-            const playerUrl = room.type === 'movie' 
-                ? `https://vidsrc.cc/v2/embed/movie/${room.mediaId}` 
-                : `https://vidsrc.cc/v2/embed/tv/${room.mediaId}/1/1`;
-
-            document.getElementById('room-video-container').innerHTML = `
-                <iframe src="${playerUrl}" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
-            `;
-            loadRoomChat();
-        }
-
-        function saveNickname() {
-            const nick = document.getElementById('nickname-input').value;
-            if(!nick) return;
-            userNickname = nick;
-            localStorage.setItem('rm_nickname', nick);
-            document.getElementById('nick-modal').style.display = 'none';
-            if(currentRoomId) joinRoom(currentRoomId);
-        }
-
-        function sendRoomMsg() {
-            const inp = document.getElementById('chat-input');
-            if(!inp.value) return;
-            const msgs = JSON.parse(localStorage.getItem(`chat_${currentRoomId}`)) || [];
-            msgs.push({ nick: userNickname, text: inp.value });
-            localStorage.setItem(`chat_${currentRoomId}`, JSON.stringify(msgs));
-            inp.value = '';
-            loadRoomChat();
-        }
-
-        function loadRoomChat() {
-            const area = document.getElementById('chat-msgs');
-            const msgs = JSON.parse(localStorage.getItem(`chat_${currentRoomId}`)) || [];
-            area.innerHTML = msgs.map(m => `
-                <div class="msg-bubble"><b>${m.nick}</b>${m.text}</div>
-            `).join('');
-            area.scrollTop = area.scrollHeight;
-        }
-
-        function closeRoom() {
-            document.getElementById('room-overlay').style.display = 'none';
-            window.history.replaceState({}, '', window.location.pathname);
-            currentRoomId = null;
-        }
-
-        function renderRoomsPage() {
-            main.innerHTML = `<div class="live-rooms-list">
-                <h2 style="margin-bottom:30px">📡 Aktiv Otaqlar (Gizli olmayanlar)</h2>
-                <div id="rooms-grid"></div>
-            </div>`;
-            const rooms = JSON.parse(localStorage.getItem('rm_rooms')) || [];
-            const grid = document.getElementById('rooms-grid');
-            if(rooms.length === 0) grid.innerHTML = "<p>Hazırda aktiv otaq yoxdur.</p>";
-            rooms.forEach(r => {
-                const item = document.createElement('div');
-                item.className = 'room-item';
-                item.innerHTML = `
-                    <div>
-                        <h3>${r.title}</h3>
-                        <small>ID: ${r.id} | ${r.type.toUpperCase()}</small>
-                    </div>
-                    <button class="comment-btn" onclick="joinRoom('${r.id}')">Qoşul</button>
-                `;
-                grid.appendChild(item);
-            });
-        }
-
         init();
     </script>
+
     <script defer src="https://cloud.umami.is/script.js" data-website-id="0e532785-a35d-49f1-87d2-f45f5906d166"></script>
+
 </body>
 </html>

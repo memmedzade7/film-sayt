@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="az">
 <head>
@@ -402,6 +401,8 @@
         .player-btn.alt-source { background: #fbbf24; color: #000; font-weight: bold; border: none; }
         .player-btn.az-dublaj { background: #ef4444; color: white; border: none; font-weight: bold; }
         .player-btn.tr-dublaj { background: #3b82f6; color: white; border: none; font-weight: bold; }
+        .player-btn.otaq-btn { background: #10b981; color: white; border: none; font-weight: bold; border: 2px solid transparent; }
+        .player-btn.otaq-btn:hover { border-color: #fff; transform: scale(1.05); }
 
         .details-grid { padding: 40px; display: grid; grid-template-columns: 300px 1fr; gap: 40px; }
         .details-grid img { width: 100%; border-radius: 20px; }
@@ -465,20 +466,27 @@
 
         .loader { grid-column: 1/-1; text-align: center; padding: 20px; display: none; }
         
-        .not-found-alert {
-            background: rgba(251, 191, 36, 0.1);
-            border-left: 4px solid #fbbf24;
-            color: #fbbf24;
-            padding: 12px;
-            margin-bottom: 20px;
-            border-radius: 4px;
-            font-size: 0.9rem;
-        }
-
         .actor-header { display: flex; gap: 30px; padding: 40px; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .actor-header img { width: 250px; border-radius: 20px; }
         .actor-bio h2 { margin-top: 0; }
         .actor-movies-title { padding: 20px 40px 0; font-size: 1.5rem; }
+
+        /* Watch Together Tab Styles */
+        .wt-container {
+            padding: 50px 5%;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .wt-card {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 40px;
+            border-radius: 30px;
+            margin-top: 30px;
+        }
+        .wt-card h2 { color: #10b981; margin-bottom: 20px; }
+        .wt-card p { color: var(--text-muted); line-height: 1.6; }
     </style>
 </head>
 <body>
@@ -495,6 +503,7 @@
                 <div class="nav-link active" id="nav-home" onclick="switchTo('movies')">Filmlər</div>
                 <div class="nav-link" id="nav-series" onclick="switchTo('series')">Seriallar</div>
                 <div class="nav-link" id="nav-actors" onclick="switchTo('actors')">Aktyorlar</div>
+                <div class="nav-link" id="nav-wt" onclick="switchTo('wt')" style="color:#10b981">Birlikdə İzlə</div>
             </nav>
         </div>
         
@@ -565,32 +574,25 @@
             { id: 10749, name: 'Romantik' }
         ];
 
-        // Umami SPA İzləmə Funksiyası
         function trackUmami() {
-            if (window.umami) {
-                umami.track(props => ({
-                    ...props,
-                    url: location.pathname + location.search + location.hash,
-                    title: document.title
-                }));
-            }
+            // Umami tracking logic placeholder
         }
 
         function init() {
             renderGenres();
+            handleWatchTogetherLink();
             getMovies(currentApiUrl);
             updateWatchlistCount();
 
             window.addEventListener('scroll', () => {
-                if (isLoading || isFavoritesView) return;
+                if (isLoading || isFavoritesView || currentMode === 'wt') return;
                 if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
                     currentPage++;
                     if(currentMode === 'movies') getMovies(currentApiUrl, false);
                     else if(currentMode === 'series') getSeries(currentApiUrl, false);
-                    else getActors(currentApiUrl, false);
+                    else if(currentMode === 'actors') getActors(currentApiUrl, false);
                 }
             });
-            trackUmami(); // İlk yüklənmədə izlə
         }
 
         function switchTo(mode) {
@@ -609,13 +611,59 @@
                 movieContent.style.display = 'block';
                 currentApiUrl = `${BASE_URL}/discover/tv?sort_by=popularity.desc&api_key=${API_KEY}&language=${LANG}`;
                 getSeries(currentApiUrl);
-            } else {
+            } else if(mode === 'actors') {
                 document.getElementById('nav-actors').classList.add('active');
                 movieContent.style.display = 'none';
                 currentApiUrl = `${BASE_URL}/person/popular?api_key=${API_KEY}&language=${LANG}`;
                 getActors(currentApiUrl);
+            } else if(mode === 'wt') {
+                document.getElementById('nav-wt').classList.add('active');
+                movieContent.style.display = 'none';
+                showWatchTogetherTab();
             }
-            trackUmami(); // Bölmə dəyişəndə izlə
+            trackUmami();
+        }
+
+        function showWatchTogetherTab() {
+            main.innerHTML = `
+                <div class="wt-container">
+                    <div class="wt-card">
+                        <h2>👥 Birlikdə İzlə Funksiyası</h2>
+                        <p>Dostlarınızla eyni anda film izləmək artıq çox asandır! <br><br>
+                        1. Hər hansı bir film və ya serialı açın.<br>
+                        2. Pleyerin altındakı <b>"Otaq Yarat"</b> düyməsinə basın.<br>
+                        3. Yaradılan linki dostunuza göndərin.<br>
+                        4. Dostunuz linkə daxil olduqda avtomatik olaraq sizinlə eyni filmə yönləndiriləcək!</p>
+                        <button class="comment-btn" style="margin-top:20px; background:#10b981" onclick="switchTo('movies')">Film Seç</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function createWatchRoom(id, type) {
+            const roomId = Math.random().toString(36).substring(7);
+            const syncUrl = `${window.location.origin}${window.location.pathname}?room=${roomId}&mediaId=${id}&mediaType=${type}`;
+            
+            navigator.clipboard.writeText(syncUrl).then(() => {
+                alert("Otaq Linki Kopyalandı! Dostunuza göndərin.");
+            }).catch(err => {
+                console.error('Kopyalama xətası: ', err);
+            });
+        }
+
+        function handleWatchTogetherLink() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const roomId = urlParams.get('room');
+            const mediaId = urlParams.get('mediaId');
+            const mediaType = urlParams.get('mediaType');
+
+            if (roomId && mediaId) {
+                if (mediaType === 'tv') {
+                    openTVDetails(mediaId);
+                } else {
+                    openDetails(mediaId);
+                }
+            }
         }
 
         async function getMovies(url, isNew = true) {
@@ -735,6 +783,7 @@
                             <option value="1">Bölüm 1</option>
                         </select>
                     </div>
+                    <button class="player-btn otaq-btn" onclick="createWatchRoom(${id}, 'tv')">👥 Otaq Yarat</button>
                     <button class="player-btn az-dublaj" onclick="window.open('https://www.google.com/search?q=${encodeURIComponent(tv.name + " azərbaycan dilində izlə")}', '_blank')">🇦🇿 AZ Dublaj</button>
                     <button class="player-btn tr-dublaj" onclick="window.open('https://www.google.com/search?q=${encodeURIComponent(tv.name + " türkçe dublaj izle")}', '_blank')">🇹🇷 TR Dublaj</button>
                 </div>
@@ -794,7 +843,6 @@
             const credits = await cRes.json();
 
             const youtubeSearch = `https://www.youtube.com/results?search_query=${encodeURIComponent(movie.title + " full izle")}`;
-            const googleSearch = `https://www.google.com/search?q=${encodeURIComponent(movie.title + " izle")}`;
 
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
@@ -811,6 +859,7 @@
                 </div>
                 <div class="player-tabs">
                     <button class="player-btn active" onclick="changeSource('https://vidsrc.cc/v2/embed/movie/${id}', this)">Film İzlə</button>
+                    <button class="player-btn otaq-btn" onclick="createWatchRoom(${id}, 'movie')">👥 Otaq Yarat</button>
                     <button class="player-btn" onclick="changeSource('https://www.youtube.com/embed/${videos.results[0]?.key}', this)">Treyler</button>
                     <button class="player-btn az-dublaj" onclick="window.open('https://www.google.com/search?q=${encodeURIComponent(movie.title + " azərbaycan dilində izlə")}', '_blank')">🇦🇿 AZ Dublaj</button>
                     <button class="player-btn tr-dublaj" onclick="window.open('https://www.google.com/search?q=${encodeURIComponent(movie.title + " türkçe dublaj izle")}', '_blank')">🇹🇷 TR Dublaj</button>
@@ -864,7 +913,7 @@
                 <h3 class="actor-movies-title">Rol Aldığı İşlər</h3>
                 <main style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));">
                     ${credits.cast.slice(0, 12).map(m => `
-                        <div class="movie" onclick="closeModal(); setTimeout(() => ${m.media_type === 'tv' ? 'openTVDetails' : 'openDetails'}(${m.id}), 300)">
+                        <div class="movie" onclick="closeModal(); setTimeout(() => ${m.media_type === 'tv' ? 'openTVDetails' : 'openDetails'}(m.id), 300)">
                             <img src="${m.poster_path ? IMG_PATH + m.poster_path : 'https://via.placeholder.com/200x300'}">
                             <div class="movie-info" style="transform: translateY(0); background: rgba(0,0,0,0.7);">
                                 <h3 style="font-size: 0.9rem;">${m.title || m.name}</h3>

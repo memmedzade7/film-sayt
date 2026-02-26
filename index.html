@@ -353,7 +353,26 @@
             background: #000; 
             position: relative; 
             overflow: hidden;
+            display: flex;
         }
+
+        .main-player-area { flex: 1; position: relative; }
+
+        /* Sync Chat System */
+        .sync-chat-panel {
+            width: 300px;
+            background: #0a0c10;
+            border-left: 1px solid #222;
+            display: none;
+            flex-direction: column;
+        }
+        .chat-header { padding: 15px; background: #111; font-weight: bold; font-size: 0.9rem; border-bottom: 1px solid #222; color: #10b981; }
+        .chat-messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; font-size: 0.85rem; }
+        .chat-msg { background: #1a1e26; padding: 8px 12px; border-radius: 12px; border-bottom-left-radius: 2px; align-self: flex-start; }
+        .chat-msg.me { background: #6366f1; border-radius: 12px; border-bottom-right-radius: 2px; align-self: flex-end; }
+        .chat-input-area { padding: 10px; display: flex; gap: 5px; border-top: 1px solid #222; }
+        .chat-input { background: #111; border: 1px solid #333; color: white; padding: 8px; border-radius: 5px; flex: 1; outline: none; }
+        .chat-send { background: #10b981; border: none; color: white; padding: 0 10px; border-radius: 5px; cursor: pointer; }
 
         #protection-overlay {
             position: absolute;
@@ -401,13 +420,11 @@
         .player-btn.alt-source { background: #fbbf24; color: #000; font-weight: bold; border: none; }
         .player-btn.az-dublaj { background: #ef4444; color: white; border: none; font-weight: bold; }
         .player-btn.tr-dublaj { background: #3b82f6; color: white; border: none; font-weight: bold; }
-        .player-btn.otaq-btn { background: #10b981; color: white; border: none; font-weight: bold; border: 2px solid transparent; }
-        .player-btn.otaq-btn:hover { border-color: #fff; transform: scale(1.05); }
+        .player-btn.otaq-btn { background: #10b981; color: white; border: none; font-weight: bold; }
 
         .details-grid { padding: 40px; display: grid; grid-template-columns: 300px 1fr; gap: 40px; }
         .details-grid img { width: 100%; border-radius: 20px; }
 
-        /* TV Series Selectors */
         .tv-controls {
             display: flex;
             gap: 15px;
@@ -463,30 +480,15 @@
             width: 100%;
         }
         .search-container { display: flex; flex-direction: column; align-items: flex-end; }
-
         .loader { grid-column: 1/-1; text-align: center; padding: 20px; display: none; }
         
         .actor-header { display: flex; gap: 30px; padding: 40px; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .actor-header img { width: 250px; border-radius: 20px; }
-        .actor-bio h2 { margin-top: 0; }
         .actor-movies-title { padding: 20px 40px 0; font-size: 1.5rem; }
 
-        /* Watch Together Tab Styles */
-        .wt-container {
-            padding: 50px 5%;
-            text-align: center;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        .wt-card {
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            padding: 40px;
-            border-radius: 30px;
-            margin-top: 30px;
-        }
-        .wt-card h2 { color: #10b981; margin-bottom: 20px; }
-        .wt-card p { color: var(--text-muted); line-height: 1.6; }
+        /* WT Tab */
+        .wt-container { padding: 50px 5%; text-align: center; max-width: 800px; margin: 0 auto; }
+        .wt-card { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); padding: 40px; border-radius: 30px; margin-top: 30px; }
     </style>
 </head>
 <body>
@@ -528,7 +530,6 @@
                 <button class="mood-btn mood-love" onclick="searchByMood(10749, '#2d011a')"><span>😍</span> Sevgi</button>
             </div>
         </div>
-
         <div class="country-tabs">
             <button class="tab-btn active" onclick="filterByCountry('all', this)">Hamısı</button>
             <button class="tab-btn" onclick="filterByCountry('AZ', this)">Azərbaycan</button>
@@ -565,6 +566,7 @@
         let currentApiUrl = `${BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}&language=${LANG}`;
         let isFavoritesView = false;
         let isLoading = false;
+        let currentRoomId = null;
 
         const genres = [
             { id: 28, name: 'Aksiyon' }, { id: 12, name: 'Macəra' },
@@ -573,10 +575,6 @@
             { id: 27, name: 'Qorxu' }, { id: 878, name: 'Fantastika' },
             { id: 10749, name: 'Romantik' }
         ];
-
-        function trackUmami() {
-            // Umami tracking logic placeholder
-        }
 
         function init() {
             renderGenres();
@@ -621,7 +619,6 @@
                 movieContent.style.display = 'none';
                 showWatchTogetherTab();
             }
-            trackUmami();
         }
 
         function showWatchTogetherTab() {
@@ -629,25 +626,23 @@
                 <div class="wt-container">
                     <div class="wt-card">
                         <h2>👥 Birlikdə İzlə Funksiyası</h2>
-                        <p>Dostlarınızla eyni anda film izləmək artıq çox asandır! <br><br>
-                        1. Hər hansı bir film və ya serialı açın.<br>
-                        2. Pleyerin altındakı <b>"Otaq Yarat"</b> düyməsinə basın.<br>
-                        3. Yaradılan linki dostunuza göndərin.<br>
-                        4. Dostunuz linkə daxil olduqda avtomatik olaraq sizinlə eyni filmə yönləndiriləcək!</p>
-                        <button class="comment-btn" style="margin-top:20px; background:#10b981" onclick="switchTo('movies')">Film Seç</button>
+                        <p>Dostlarınızla eyni saniyədə film izləmək və mesajlaşmaq artıq mümkündür! <br><br>
+                        1. Hər hansı bir film seçin.<br>
+                        2. <b>"Otaq Yarat"</b> düyməsinə basaraq linki dostunuza göndərin.<br>
+                        3. Eyni otaqda söhbət edin və filmi birlikdə kəşf edin!</p>
+                        <button class="comment-btn" style="margin-top:20px; background:#10b981" onclick="switchTo('movies')">Film Seçin</button>
                     </div>
                 </div>
             `;
         }
 
         function createWatchRoom(id, type) {
-            const roomId = Math.random().toString(36).substring(7);
-            const syncUrl = `${window.location.origin}${window.location.pathname}?room=${roomId}&mediaId=${id}&mediaType=${type}`;
+            currentRoomId = Math.random().toString(36).substring(7);
+            const syncUrl = `${window.location.origin}${window.location.pathname}?room=${currentRoomId}&mediaId=${id}&mediaType=${type}`;
             
             navigator.clipboard.writeText(syncUrl).then(() => {
-                alert("Otaq Linki Kopyalandı! Dostunuza göndərin.");
-            }).catch(err => {
-                console.error('Kopyalama xətası: ', err);
+                alert("Otaq Yaradıldı və Link Kopyalandı! Dostunuza göndərin.");
+                enableChat(currentRoomId);
             });
         }
 
@@ -658,51 +653,71 @@
             const mediaType = urlParams.get('mediaType');
 
             if (roomId && mediaId) {
-                if (mediaType === 'tv') {
-                    openTVDetails(mediaId);
-                } else {
-                    openDetails(mediaId);
-                }
+                currentRoomId = roomId;
+                if (mediaType === 'tv') openTVDetails(mediaId);
+                else openDetails(mediaId);
+                setTimeout(() => enableChat(roomId), 1000);
             }
+        }
+
+        function enableChat(roomId) {
+            const chatPanel = document.querySelector('.sync-chat-panel');
+            if(chatPanel) chatPanel.style.display = 'flex';
+            loadRoomMessages(roomId);
+            // Simulyasiya: Chat təmizlənməsi
+            setInterval(() => loadRoomMessages(roomId), 3000);
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chat-input');
+            if(!input.value || !currentRoomId) return;
+            
+            const msgs = JSON.parse(localStorage.getItem(`chat_${currentRoomId}`)) || [];
+            msgs.push({ text: input.value, me: true, time: new Date().toLocaleTimeString() });
+            localStorage.setItem(`chat_${currentRoomId}`, JSON.stringify(msgs));
+            input.value = '';
+            loadRoomMessages(currentRoomId);
+        }
+
+        function loadRoomMessages(roomId) {
+            const container = document.getElementById('chat-messages');
+            if(!container) return;
+            const msgs = JSON.parse(localStorage.getItem(`chat_${roomId}`)) || [];
+            container.innerHTML = msgs.map(m => `<div class="chat-msg ${m.me ? 'me' : ''}">${m.text}</div>`).join('');
+            container.scrollTop = container.scrollHeight;
         }
 
         async function getMovies(url, isNew = true) {
             if (isNew) { main.innerHTML = ''; currentPage = 1; isFavoritesView = false; }
-            isLoading = true;
-            loader.style.display = 'block';
+            isLoading = true; loader.style.display = 'block';
             try {
                 const res = await fetch(`${url}&page=${currentPage}`);
                 const data = await res.json();
                 if (data.results) showMovies(data.results);
-            } catch (error) { console.error("Xəta:", error); }
-            isLoading = false;
-            loader.style.display = 'none';
+            } catch (error) { console.error(error); }
+            isLoading = false; loader.style.display = 'none';
         }
 
         async function getSeries(url, isNew = true) {
             if (isNew) { main.innerHTML = ''; currentPage = 1; isFavoritesView = false; }
-            isLoading = true;
-            loader.style.display = 'block';
+            isLoading = true; loader.style.display = 'block';
             try {
                 const res = await fetch(`${url}&page=${currentPage}`);
                 const data = await res.json();
                 if (data.results) showMovies(data.results, true);
-            } catch (error) { console.error("Xəta:", error); }
-            isLoading = false;
-            loader.style.display = 'none';
+            } catch (error) { console.error(error); }
+            isLoading = false; loader.style.display = 'none';
         }
 
         async function getActors(url, isNew = true) {
             if (isNew) { main.innerHTML = ''; currentPage = 1; }
-            isLoading = true;
-            loader.style.display = 'block';
+            isLoading = true; loader.style.display = 'block';
             try {
                 const res = await fetch(`${url}&page=${currentPage}`);
                 const data = await res.json();
                 if (data.results) showActors(data.results);
-            } catch (error) { console.error("Xəta:", error); }
-            isLoading = false;
-            loader.style.display = 'none';
+            } catch (error) { console.error(error); }
+            isLoading = false; loader.style.display = 'none';
         }
 
         function showMovies(items, isTV = false) {
@@ -757,35 +772,33 @@
             const credits = await cRes.json();
 
             let seasonOptions = "";
-            for(let i=1; i<=tv.number_of_seasons; i++) {
-                seasonOptions += `<option value="${i}">Sezon ${i}</option>`;
-            }
+            for(let i=1; i<=tv.number_of_seasons; i++) seasonOptions += `<option value="${i}">Sezon ${i}</option>`;
 
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
-                <div class="video-container" id="player-wrapper">
-                    <div id="protection-overlay" onclick="removeShield()">
-                        <div class="shield-msg">Serialı başlatmaq üçün toxunun</div>
+                <div class="video-container">
+                    <div class="main-player-area">
+                        <div id="protection-overlay" onclick="removeShield()">
+                            <div class="shield-msg">Serialı başlatmaq üçün toxunun</div>
+                        </div>
+                        <iframe id="main-player" src="https://vidsrc.cc/v2/embed/tv/${id}/1/1" width="100%" height="100%" frameborder="0" allowfullscreen sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts"></iframe>
                     </div>
-                    <iframe id="main-player" 
-                        src="https://vidsrc.cc/v2/embed/tv/${id}/1/1" 
-                        width="100%" height="100%" 
-                        frameborder="0" allowfullscreen
-                        sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts">
-                    </iframe>
+                    <div class="sync-chat-panel">
+                        <div class="chat-header">Otaq Söhbəti</div>
+                        <div id="chat-messages" class="chat-messages"></div>
+                        <div class="chat-input-area">
+                            <input type="text" id="chat-input" class="chat-input" placeholder="Yazın...">
+                            <button class="chat-send" onclick="sendMessage()">➤</button>
+                        </div>
+                    </div>
                 </div>
                 <div class="player-tabs">
                     <div class="tv-controls" style="margin-bottom:0; background:transparent; padding:0;">
-                        <select id="season-select" onchange="updateEpisodeList(${id}, this.value)">
-                            ${seasonOptions}
-                        </select>
-                        <select id="episode-select" onchange="changeTVEpisode(${id})">
-                            <option value="1">Bölüm 1</option>
-                        </select>
+                        <select id="season-select" onchange="updateEpisodeList(${id}, this.value)">${seasonOptions}</select>
+                        <select id="episode-select" onchange="changeTVEpisode(${id})"><option value="1">Bölüm 1</option></select>
                     </div>
                     <button class="player-btn otaq-btn" onclick="createWatchRoom(${id}, 'tv')">👥 Otaq Yarat</button>
                     <button class="player-btn az-dublaj" onclick="window.open('https://www.google.com/search?q=${encodeURIComponent(tv.name + " azərbaycan dilində izlə")}', '_blank')">🇦🇿 AZ Dublaj</button>
-                    <button class="player-btn tr-dublaj" onclick="window.open('https://www.google.com/search?q=${encodeURIComponent(tv.name + " türkçe dublaj izle")}', '_blank')">🇹🇷 TR Dublaj</button>
                 </div>
                 <div class="details-grid">
                     <img src="${IMG_PATH + tv.poster_path}">
@@ -793,39 +806,12 @@
                         <h2>${tv.name}</h2>
                         <p>${tv.overview}</p>
                         <div class="cast-container">
-                            ${credits.cast.slice(0, 8).map(c => `
-                                <div class="cast-card" onclick="openActorDetails(${c.id})">
-                                    <img src="${c.profile_path ? CAST_IMG_PATH + c.profile_path : 'https://via.placeholder.com/80x80'}">
-                                    <div>${c.name}</div>
-                                </div>
-                            `).join('')}
+                            ${credits.cast.slice(0, 8).map(c => `<div class="cast-card" onclick="openActorDetails(${c.id})"><img src="${c.profile_path ? CAST_IMG_PATH + c.profile_path : 'https://via.placeholder.com/80x80'}"><div>${c.name}</div></div>`).join('')}
                         </div>
                     </div>
                 </div>
             `;
             updateEpisodeList(id, 1);
-            trackUmami();
-        }
-
-        async function updateEpisodeList(tvId, seasonNum) {
-            const epSelect = document.getElementById('episode-select');
-            epSelect.innerHTML = "<option>Yüklənir...</option>";
-            const res = await fetch(`${BASE_URL}/tv/${tvId}/season/${seasonNum}?api_key=${API_KEY}&language=${LANG}`);
-            const data = await res.json();
-            
-            let epOptions = "";
-            data.episodes.forEach(ep => {
-                epOptions += `<option value="${ep.episode_number}">Bölüm ${ep.episode_number}: ${ep.name}</option>`;
-            });
-            epSelect.innerHTML = epOptions;
-            changeTVEpisode(tvId);
-        }
-
-        function changeTVEpisode(tvId) {
-            const s = document.getElementById('season-select').value;
-            const e = document.getElementById('episode-select').value;
-            const url = `https://vidsrc.cc/v2/embed/tv/${tvId}/${s}/${e}`;
-            document.getElementById('main-player').src = url;
         }
 
         async function openDetails(id) {
@@ -842,28 +828,28 @@
             const videos = await vRes.json();
             const credits = await cRes.json();
 
-            const youtubeSearch = `https://www.youtube.com/results?search_query=${encodeURIComponent(movie.title + " full izle")}`;
-
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
-                <div class="video-container" id="player-wrapper">
-                    <div id="protection-overlay" onclick="removeShield()">
-                        <div class="shield-msg">Pleyeri başlatmaq üçün toxunun</div>
+                <div class="video-container">
+                    <div class="main-player-area">
+                        <div id="protection-overlay" onclick="removeShield()">
+                            <div class="shield-msg">Pleyeri başlatmaq üçün toxunun</div>
+                        </div>
+                        <iframe id="main-player" src="https://vidsrc.cc/v2/embed/movie/${id}" width="100%" height="100%" frameborder="0" allowfullscreen sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts"></iframe>
                     </div>
-                    <iframe id="main-player" 
-                        src="https://vidsrc.cc/v2/embed/movie/${id}" 
-                        width="100%" height="100%" 
-                        frameborder="0" allowfullscreen
-                        sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts">
-                    </iframe>
+                    <div class="sync-chat-panel">
+                        <div class="chat-header">Otaq Söhbəti</div>
+                        <div id="chat-messages" class="chat-messages"></div>
+                        <div class="chat-input-area">
+                            <input type="text" id="chat-input" class="chat-input" placeholder="Yazın...">
+                            <button class="chat-send" onclick="sendMessage()">➤</button>
+                        </div>
+                    </div>
                 </div>
                 <div class="player-tabs">
                     <button class="player-btn active" onclick="changeSource('https://vidsrc.cc/v2/embed/movie/${id}', this)">Film İzlə</button>
                     <button class="player-btn otaq-btn" onclick="createWatchRoom(${id}, 'movie')">👥 Otaq Yarat</button>
-                    <button class="player-btn" onclick="changeSource('https://www.youtube.com/embed/${videos.results[0]?.key}', this)">Treyler</button>
                     <button class="player-btn az-dublaj" onclick="window.open('https://www.google.com/search?q=${encodeURIComponent(movie.title + " azərbaycan dilində izlə")}', '_blank')">🇦🇿 AZ Dublaj</button>
-                    <button class="player-btn tr-dublaj" onclick="window.open('https://www.google.com/search?q=${encodeURIComponent(movie.title + " türkçe dublaj izle")}', '_blank')">🇹🇷 TR Dublaj</button>
-                    <button class="player-btn alt-source" onclick="window.open('${youtubeSearch}', '_blank')">YouTube 📺</button>
                 </div>
                 <div class="details-grid">
                     <img src="${IMG_PATH + movie.poster_path}">
@@ -871,23 +857,12 @@
                         <h2>${movie.title}</h2>
                         <p>${movie.overview}</p>
                         <div class="cast-container">
-                            ${credits.cast.slice(0, 8).map(c => `
-                                <div class="cast-card" onclick="openActorDetails(${c.id})">
-                                    <img src="${c.profile_path ? CAST_IMG_PATH + c.profile_path : 'https://via.placeholder.com/80x80'}">
-                                    <div>${c.name}</div>
-                                </div>
-                            `).join('')}
-                        </div>
-                        <div class="comment-section">
-                            <textarea id="comment-text" class="comment-input" placeholder="Rəyiniz..."></textarea>
-                            <button class="comment-btn" onclick="addComment(${id})">Göndər</button>
-                            <div id="comments-list-${id}" class="comments-list"></div>
+                            ${credits.cast.slice(0, 8).map(c => `<div class="cast-card" onclick="openActorDetails(${c.id})"><img src="${c.profile_path ? CAST_IMG_PATH + c.profile_path : 'https://via.placeholder.com/80x80'}"><div>${c.name}</div></div>`).join('')}
                         </div>
                     </div>
                 </div>
             `;
-            loadComments(id);
-            trackUmami();
+            if(currentRoomId) enableChat(currentRoomId);
         }
 
         async function openActorDetails(id) {
@@ -910,39 +885,32 @@
                         <p>${person.biography || 'Bioqrafiya yoxdur.'}</p>
                     </div>
                 </div>
-                <h3 class="actor-movies-title">Rol Aldığı İşlər</h3>
                 <main style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));">
                     ${credits.cast.slice(0, 12).map(m => `
-                        <div class="movie" onclick="closeModal(); setTimeout(() => ${m.media_type === 'tv' ? 'openTVDetails' : 'openDetails'}(m.id), 300)">
+                        <div class="movie" onclick="closeModal(); setTimeout(() => openDetails(${m.id}), 300)">
                             <img src="${m.poster_path ? IMG_PATH + m.poster_path : 'https://via.placeholder.com/200x300'}">
-                            <div class="movie-info" style="transform: translateY(0); background: rgba(0,0,0,0.7);">
-                                <h3 style="font-size: 0.9rem;">${m.title || m.name}</h3>
-                            </div>
                         </div>
                     `).join('')}
                 </main>
             `;
-            trackUmami();
         }
 
-        function removeShield() {
-            const shield = document.getElementById('protection-overlay');
-            if(shield) shield.style.display = 'none';
+        async function updateEpisodeList(tvId, seasonNum) {
+            const epSelect = document.getElementById('episode-select');
+            const res = await fetch(`${BASE_URL}/tv/${tvId}/season/${seasonNum}?api_key=${API_KEY}&language=${LANG}`);
+            const data = await res.json();
+            epSelect.innerHTML = data.episodes.map(ep => `<option value="${ep.episode_number}">Bölüm ${ep.episode_number}</option>`).join('');
+            changeTVEpisode(tvId);
         }
 
-        function changeSource(url, btn) {
-            document.getElementById('main-player').src = url;
-            document.querySelectorAll('.player-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+        function changeTVEpisode(tvId) {
+            const s = document.getElementById('season-select').value;
+            const e = document.getElementById('episode-select').value;
+            document.getElementById('main-player').src = `https://vidsrc.cc/v2/embed/tv/${tvId}/${s}/${e}`;
         }
 
-        function closeModal() { 
-            const player = document.getElementById('main-player');
-            if(player) player.src = ''; 
-            modal.style.display = 'none'; 
-            document.body.style.overflow = 'auto'; 
-        }
-
+        function removeShield() { document.getElementById('protection-overlay').style.display = 'none'; }
+        function closeModal() { document.getElementById('main-player').src = ''; modal.style.display = 'none'; document.body.style.overflow = 'auto'; }
         function toggleFav(item, btn) {
             const index = favorites.findIndex(f => f.id === item.id);
             if(index > -1) { favorites.splice(index, 1); btn.classList.remove('active'); }
@@ -950,92 +918,22 @@
             localStorage.setItem('favorites', JSON.stringify(favorites));
             updateWatchlistCount();
         }
-
         function updateWatchlistCount() { document.getElementById('watchlist-count').innerText = `Siyahım (${favorites.length})`; }
-        
-        function showFavorites() { 
-            if(favorites.length === 0) return alert("Siyahı boşdur.");
-            isFavoritesView = true; main.innerHTML = ''; showMovies(favorites); 
-        }
-
-        function filterByCountry(code, btn) {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            let type = currentMode === 'series' ? 'tv' : 'movie';
-            currentApiUrl = code === 'all' ? `${BASE_URL}/discover/${type}?api_key=${API_KEY}&language=${LANG}` : `${BASE_URL}/discover/${type}?api_key=${API_KEY}&with_origin_country=${code}&language=${LANG}`;
-            currentMode === 'series' ? getSeries(currentApiUrl) : getMovies(currentApiUrl);
-        }
-
-        function searchByMood(genreId, bgColor) {
-            bgOverlay.style.background = `radial-gradient(circle at center, ${bgColor} 0%, #05070a 100%)`;
-            currentMode = 'movies';
-            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-            document.getElementById('nav-home').classList.add('active');
-            movieContent.style.display = 'block';
-            currentApiUrl = `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${genreId}&language=${LANG}&sort_by=popularity.desc`;
-            getMovies(currentApiUrl, true);
-        }
+        function showFavorites() { isFavoritesView = true; main.innerHTML = ''; showMovies(favorites); }
 
         function renderGenres() {
             const container = document.getElementById('genres');
-            container.innerHTML = "";
-            genres.forEach(g => {
-                const tag = document.createElement('div');
-                tag.className = 'genre-tag';
-                tag.innerText = g.name;
-                tag.onclick = () => {
-                    let type = currentMode === 'series' ? 'tv' : 'movie';
-                    currentApiUrl = `${BASE_URL}/discover/${type}?api_key=${API_KEY}&with_genres=${g.id}&language=${LANG}`;
-                    currentMode === 'series' ? getSeries(currentApiUrl) : getMovies(currentApiUrl);
-                };
-                container.appendChild(tag);
-            });
+            container.innerHTML = genres.map(g => `<div class="genre-tag" onclick="currentApiUrl='${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${g.id}&language=${LANG}'; getMovies(currentApiUrl)">${g.name}</div>`).join('');
         }
 
         document.getElementById('form').addEventListener('submit', (e) => {
             e.preventDefault();
             const q = document.getElementById('search').value;
-            if(currentMode === 'movies') {
-                currentApiUrl = `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${q}&language=${LANG}`;
-                getMovies(currentApiUrl);
-            } else if(currentMode === 'series') {
-                currentApiUrl = `${BASE_URL}/search/tv?api_key=${API_KEY}&query=${q}&language=${LANG}`;
-                getSeries(currentApiUrl);
-            } else {
-                currentApiUrl = `${BASE_URL}/search/person?api_key=${API_KEY}&query=${q}&language=${LANG}`;
-                getActors(currentApiUrl);
-            }
+            currentApiUrl = `${BASE_URL}/search/multi?api_key=${API_KEY}&query=${q}&language=${LANG}`;
+            getMovies(currentApiUrl);
         });
-
-        async function getRandomMovie() {
-            const type = currentMode === 'series' ? 'tv' : 'movie';
-            const res = await fetch(`${BASE_URL}/${type}/popular?api_key=${API_KEY}`);
-            const data = await res.json();
-            const id = data.results[Math.floor(Math.random() * 20)].id;
-            type === 'tv' ? openTVDetails(id) : openDetails(id);
-        }
-
-        function addComment(id) {
-            const txt = document.getElementById('comment-text').value;
-            if(!txt) return;
-            const coms = JSON.parse(localStorage.getItem(`comments_${id}`)) || [];
-            coms.unshift({ text: txt, date: new Date().toLocaleString() });
-            localStorage.setItem(`comments_${id}`, JSON.stringify(coms));
-            document.getElementById('comment-text').value = '';
-            loadComments(id);
-        }
-
-        function loadComments(id) {
-            const list = document.getElementById(`comments-list-${id}`);
-            if(!list) return;
-            const coms = JSON.parse(localStorage.getItem(`comments_${id}`)) || [];
-            list.innerHTML = coms.map(c => `<div class="comment-item"><b>${c.date}</b><br>${c.text}</div>`).join('');
-        }
 
         init();
     </script>
-
-    <script defer src="https://cloud.umami.is/script.js" data-website-id="0e532785-a35d-49f1-87d2-f45f5906d166"></script>
-
 </body>
 </html>

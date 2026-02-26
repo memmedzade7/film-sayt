@@ -564,6 +564,17 @@
             { id: 10749, name: 'Romantik' }
         ];
 
+        // Umami SPA İzləmə Funksiyası
+        function trackUmami() {
+            if (window.umami) {
+                umami.track(props => ({
+                    ...props,
+                    url: location.pathname + location.search + location.hash,
+                    title: document.title
+                }));
+            }
+        }
+
         function init() {
             renderGenres();
             getMovies(currentApiUrl);
@@ -578,19 +589,7 @@
                     else getActors(currentApiUrl, false);
                 }
             });
-
-            // GoatCounter sayğacını tetiklə
-            trackGoatCounter();
-        }
-
-        // Statistikaları SPA-da (tək səhifədə) izləmək üçün funksiya
-        function trackGoatCounter() {
-            if (window.goatcounter && window.goatcounter.count) {
-                window.goatcounter.count({
-                    path: location.pathname + location.search + location.hash,
-                    title: document.title,
-                });
-            }
+            trackUmami(); // İlk yüklənmədə izlə
         }
 
         function switchTo(mode) {
@@ -615,7 +614,7 @@
                 currentApiUrl = `${BASE_URL}/person/popular?api_key=${API_KEY}&language=${LANG}`;
                 getActors(currentApiUrl);
             }
-            trackGoatCounter(); // Hər bölmə dəyişəndə sayğacı yenilə
+            trackUmami(); // Bölmə dəyişəndə izlə
         }
 
         async function getMovies(url, isNew = true) {
@@ -755,7 +754,7 @@
                 </div>
             `;
             updateEpisodeList(id, 1);
-            trackGoatCounter();
+            trackUmami();
         }
 
         async function updateEpisodeList(tvId, seasonNum) {
@@ -838,7 +837,7 @@
                 </div>
             `;
             loadComments(id);
-            trackGoatCounter();
+            trackUmami();
         }
 
         async function openActorDetails(id) {
@@ -873,7 +872,7 @@
                     `).join('')}
                 </main>
             `;
-            trackGoatCounter();
+            trackUmami();
         }
 
         function removeShield() {
@@ -986,7 +985,7 @@
         init();
     </script>
 
-    <script data-goatcounter="https://rmfilm.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="0e532785-a35d-49f1-87d2-f45f5906d166"></script>
 
 </body>
 </html>

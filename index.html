@@ -19,8 +19,6 @@
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3507/3507102.png">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3507/3507102.png">
 
-    <script data-goatcounter="https://rmfilm.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
-
     <style>
         /* Mood-a görə dəyişən dinamik arxa fon təbəqəsi */
         #bg-overlay {
@@ -581,8 +579,17 @@
                 }
             });
 
-            if (window.goatcounter) {
-                window.goatcounter.count({ path: location.pathname + location.search + location.hash });
+            // GoatCounter sayğacını tetiklə
+            trackGoatCounter();
+        }
+
+        // Statistikaları SPA-da (tək səhifədə) izləmək üçün funksiya
+        function trackGoatCounter() {
+            if (window.goatcounter && window.goatcounter.count) {
+                window.goatcounter.count({
+                    path: location.pathname + location.search + location.hash,
+                    title: document.title,
+                });
             }
         }
 
@@ -608,6 +615,7 @@
                 currentApiUrl = `${BASE_URL}/person/popular?api_key=${API_KEY}&language=${LANG}`;
                 getActors(currentApiUrl);
             }
+            trackGoatCounter(); // Hər bölmə dəyişəndə sayğacı yenilə
         }
 
         async function getMovies(url, isNew = true) {
@@ -747,6 +755,7 @@
                 </div>
             `;
             updateEpisodeList(id, 1);
+            trackGoatCounter();
         }
 
         async function updateEpisodeList(tvId, seasonNum) {
@@ -829,6 +838,7 @@
                 </div>
             `;
             loadComments(id);
+            trackGoatCounter();
         }
 
         async function openActorDetails(id) {
@@ -863,6 +873,7 @@
                     `).join('')}
                 </main>
             `;
+            trackGoatCounter();
         }
 
         function removeShield() {
@@ -907,16 +918,11 @@
         }
 
         function searchByMood(genreId, bgColor) {
-            // Arxa fon rəngini dəyiş
             bgOverlay.style.background = `radial-gradient(circle at center, ${bgColor} 0%, #05070a 100%)`;
-            
-            // Rejimi filmə keçir (çünki əhval filtrləri əsasən filmlər üçündür)
             currentMode = 'movies';
             document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
             document.getElementById('nav-home').classList.add('active');
             movieContent.style.display = 'block';
-
-            // URL-i yenilə və filmləri gətir
             currentApiUrl = `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${genreId}&language=${LANG}&sort_by=popularity.desc`;
             getMovies(currentApiUrl, true);
         }
@@ -979,5 +985,8 @@
 
         init();
     </script>
+
+    <script data-goatcounter="https://rmfilm.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+
 </body>
 </html>

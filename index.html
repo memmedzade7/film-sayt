@@ -422,60 +422,76 @@
 
         .loader { grid-column: 1/-1; text-align: center; padding: 20px; display: none; }
         
-        /* --- DÜZƏLDİLMİŞ OTAQ LAYOUTU --- */
+        /* --- KƏSİN OTAQ STRUKTURU (FİLM SOLDAN GENİŞ, ÇAT SAĞDA SABİT) --- */
         .watch-party-layout {
-            display: flex; /* Yalnız Flexbox */
-            width: 100%;
-            height: calc(100vh - 85px); 
+            display: flex !important;
+            flex-direction: row !important;
+            width: 100vw !important;
+            height: calc(100vh - 85px) !important; 
             background: #000;
             overflow: hidden;
+            position: relative;
         }
         
         .video-side {
-            flex-grow: 1; /* Bütün sol tərəfi doldurur */
+            flex: 1 !important; /* Sol tərəf tam genişlənir */
             height: 100%;
             background: #000;
             display: flex;
             flex-direction: column;
-            border-right: 1px solid #1f2937;
+            order: 1; /* Birinci sol tərəf gəlir */
         }
 
         .chat-container {
-            width: 200px; /* Çatı daha da daraltdım ki film böyüsün */
-            min-width: 200px;
+            width: 300px !important; /* Çat sahəsi sabit 300px */
+            min-width: 300px;
             background: #0d1117;
             display: flex;
             flex-direction: column;
             height: 100%;
             border-left: 1px solid #30363d;
+            order: 2; /* İkinci sağ tərəf gəlir */
         }
 
         #party-player-container {
-            flex-grow: 1;
+            flex: 1;
             width: 100%;
             height: 100%;
+            position: relative;
         }
 
         #party-player-container iframe {
-            width: 100%;
-            height: 100%;
+            width: 100% !important;
+            height: 100% !important;
             border: none;
+            position: absolute;
+            top: 0;
+            left: 0;
         }
 
         .chat-header { 
-            padding: 10px; 
+            padding: 12px; 
             background: #161b22; 
             border-bottom: 1px solid #30363d; 
             text-align: center;
+            font-weight: bold;
+            font-size: 0.9rem;
         }
 
-        #chat-messages { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+        #chat-messages { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 15px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+        }
         
         .chat-msg { 
             background: #21262d; 
-            padding: 6px 10px; 
-            border-radius: 10px; 
-            font-size: 0.75rem; 
+            padding: 10px; 
+            border-radius: 12px; 
+            font-size: 0.85rem; 
             border: 1px solid #30363d; 
             max-width: 100%; 
             word-wrap: break-word;
@@ -483,31 +499,36 @@
 
         .chat-msg.mine { align-self: flex-end; background: #6366f1; border-color: transparent; }
         
-        .chat-input-area { padding: 10px; background: #161b22; }
+        .chat-input-area { 
+            padding: 15px; 
+            background: #161b22; 
+            border-top: 1px solid #30363d;
+        }
         
-        .chat-controls { display: flex; gap: 5px; }
+        .chat-controls { display: flex; gap: 8px; }
         
         .chat-input { 
             flex: 1; 
             background: #0d1117; 
             border: 1px solid #30363d; 
             color: white; 
-            padding: 6px; 
-            border-radius: 5px; 
-            font-size: 0.8rem; 
-            width: 50px;
+            padding: 10px; 
+            border-radius: 8px; 
+            font-size: 0.9rem;
         }
 
-        .room-setup-screen { padding: 100px 5%; text-align: center; }
-        .room-card { background: var(--card-bg); max-width: 500px; margin: 0 auto; padding: 40px; border-radius: 30px; border: 1px solid rgba(129, 140, 248, 0.2); }
-        .room-input { width: 100%; padding: 15px; margin: 10px 0; background: #000; border: 1px solid #333; color: white; border-radius: 10px; text-align: center; }
-        .room-btn-main { width: 100%; padding: 15px; margin-top: 15px; background: var(--primary-gradient); border: none; color: white; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        /* Setup Ekranı */
+        .room-setup-screen { padding: 80px 5%; text-align: center; }
+        .room-card { background: var(--card-bg); max-width: 450px; margin: 0 auto; padding: 40px; border-radius: 30px; border: 1px solid rgba(129, 140, 248, 0.2); box-shadow: 0 10px 50px rgba(0,0,0,0.5); }
+        .room-input { width: 100%; padding: 15px; margin: 10px 0; background: #05070a; border: 1px solid #30363d; color: white; border-radius: 12px; text-align: center; box-sizing: border-box; }
+        .room-btn-main { width: 100%; padding: 15px; margin-top: 15px; background: var(--primary-gradient); border: none; color: white; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 1rem; transition: 0.3s; }
+        .room-btn-main:hover { opacity: 0.9; transform: scale(1.02); }
 
         #party-catalog-overlay {
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.95);
+            background: rgba(0,0,0,0.98);
             z-index: 3000;
             padding: 30px 5%;
         }
@@ -515,22 +536,22 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             gap: 20px;
         }
         .catalog-search {
             flex: 1;
             background: rgba(255,255,255,0.05);
-            border: 1px solid #444;
-            padding: 12px 20px;
-            border-radius: 10px;
+            border: 1px solid #333;
+            padding: 12px 25px;
+            border-radius: 50px;
             color: white;
             outline: none;
         }
         #party-catalog-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 20px;
+            gap: 25px;
             max-height: 80vh;
             overflow-y: auto;
             padding-bottom: 100px;
@@ -595,9 +616,9 @@
 
     <div id="party-catalog-overlay">
         <div class="catalog-header">
-            <h2 style="color:white; margin:0;">Kataloq Seçimi</h2>
-            <input type="text" id="catalog-search-inp" class="catalog-search" placeholder="Kataloqda axtarış...">
-            <button class="player-btn" style="background:#ef4444;" onclick="document.getElementById('party-catalog-overlay').style.display='none'">Bağla</button>
+            <h2 style="color:white; margin:0;">🎬 Film Seçin</h2>
+            <input type="text" id="catalog-search-inp" class="catalog-search" placeholder="Filmlərdə axtar...">
+            <button class="player-btn" style="background:#ef4444;" onclick="document.getElementById('party-catalog-overlay').style.display='none'">Geri</button>
         </div>
         <div id="party-catalog-grid"></div>
     </div>
@@ -704,13 +725,13 @@
             main.innerHTML = `
                 <div class="room-setup-screen">
                     <div class="room-card">
-                        <h2 style="color:var(--party-color);">🤝 Birgə İzləmə Otağı</h2>
-                        <input type="text" id="party-username" class="room-input" placeholder="Adınızı daxil edin...">
+                        <h2 style="color:var(--party-color); margin-bottom:25px;">🤝 Watch Party</h2>
+                        <input type="text" id="party-username" class="room-input" placeholder="Adınız">
                         <div style="margin-top:20px;">
                             <button class="room-btn-main" onclick="initParty('host')">Yeni Otaq Yarat</button>
-                            <div style="margin: 15px 0; color:#444;">VƏ YA</div>
-                            <input type="text" id="join-room-id" class="room-input" placeholder="Otaq ID-si...">
-                            <button class="room-btn-main" style="background:#3b82f6;" onclick="initParty('join')">Otağa Qoşul</button>
+                            <div style="margin: 20px 0; color:#444; font-size:0.8rem; font-weight:bold;">VƏ YA</div>
+                            <input type="text" id="join-room-id" class="room-input" placeholder="Otaq ID-si">
+                            <button class="room-btn-main" style="background:#3b82f6;" onclick="initParty('join')">Qoşul</button>
                         </div>
                     </div>
                 </div>
@@ -746,28 +767,28 @@
             main.innerHTML = `
                 <div class="watch-party-layout">
                     <div class="video-side">
-                        <div style="padding:8px; background:#111; border-bottom:1px solid #30363d; display:flex; justify-content:space-between; align-items:center;">
-                            <span style="font-size:0.75rem;">ID: <b style="color:var(--party-color);">${roomId}</b></span>
-                            <div style="display:flex; gap:8px;">
-                                ${isHost ? '<button class="player-btn active" style="padding:4px 10px; font-size:0.75rem;" onclick="openPartyCatalog()">🎬 Seç</button>' : ''}
-                                <button class="player-btn" style="background:#ef4444; border:none; padding:4px 10px; font-size:0.75rem;" onclick="location.reload()">Çıx</button>
+                        <div style="padding:10px 20px; background:#111; border-bottom:1px solid #30363d; display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-size:0.8rem; color:#8b949e;">Otaq ID: <b style="color:var(--party-color);">${roomId}</b></span>
+                            <div style="display:flex; gap:10px;">
+                                ${isHost ? '<button class="player-btn active" onclick="openPartyCatalog()">🎬 Film Seç</button>' : '<span style="color:#6366f1; font-size:0.8rem; animation: pulse 2s infinite;">• Film gözlənilir</span>'}
+                                <button class="player-btn" style="background:#ef4444; border:none;" onclick="location.reload()">Bağla</button>
                             </div>
                         </div>
                         <div id="party-player-container">
-                            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:#444;">
-                                <div>Film seçilməsini gözləyirsiniz...</div>
+                            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:#555; background:#05070a;">
+                                <div style="font-size:3rem; margin-bottom:15px;">📽️</div>
+                                <div style="font-weight:bold;">Film hələ başladılmayıb</div>
                             </div>
                         </div>
                     </div>
+
                     <div class="chat-container">
-                        <div class="chat-header">
-                            <span style="color:var(--party-color); font-weight:bold; font-size:0.75rem;">ÇAT</span>
-                        </div>
+                        <div class="chat-header">Otaq Söhbəti</div>
                         <div id="chat-messages"></div>
                         <div class="chat-input-area">
                             <div class="chat-controls">
-                                <input type="text" id="chat-input" class="chat-input" placeholder="...">
-                                <button class="comment-btn" style="padding:4px 8px;" onclick="sendChatMessage()">></button>
+                                <input type="text" id="chat-input" class="chat-input" placeholder="Yazın...">
+                                <button class="comment-btn" style="padding:5px 12px;" onclick="sendChatMessage()">></button>
                             </div>
                         </div>
                     </div>
@@ -804,7 +825,7 @@
                     syncPartyPlayer(embed);
                     if(conn) conn.send({ type: 'sync-movie', embedUrl: embed });
                     document.getElementById('party-catalog-overlay').style.display = 'none';
-                    addChatMessage("Sistem", `"${m.title}" başladı!`, true);
+                    addChatMessage("Sistem", `"${m.title}" başladıldı!`, true);
                 };
                 grid.appendChild(div);
             });
@@ -815,7 +836,7 @@
             peer.on('connection', c => {
                 conn = c;
                 setupConnHandlers();
-                addChatMessage("Sistem", "Biri daxil oldu!", true);
+                addChatMessage("Sistem", "Yeni iştirakçı daxil oldu!", true);
             });
         }
 
@@ -841,13 +862,13 @@
             const div = document.createElement('div');
             div.className = `chat-msg ${isMine ? 'mine' : ''}`;
             if(isSystem) {
-                div.style.background = "rgba(129, 140, 248, 0.1)";
+                div.style.background = "rgba(129, 140, 248, 0.05)";
                 div.style.color = "var(--party-color)";
-                div.style.width = "100%";
                 div.style.textAlign = "center";
+                div.style.fontSize = "0.75rem";
                 div.innerHTML = `<i>${msg}</i>`;
             } else {
-                div.innerHTML = `<span style="font-weight:bold; color:#58a6ff;">${user}: </span><span>${msg}</span>`;
+                div.innerHTML = `<span style="font-weight:bold; font-size:0.7rem; color:#818cf8; display:block; margin-bottom:2px;">${user}</span><span>${msg}</span>`;
             }
             box.appendChild(div);
             box.scrollTop = box.scrollHeight;

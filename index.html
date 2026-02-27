@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="az">
 <head>
@@ -479,6 +478,20 @@
         .actor-header img { width: 250px; border-radius: 20px; }
         .actor-bio h2 { margin-top: 0; }
         .actor-movies-title { padding: 20px 40px 0; font-size: 1.5rem; }
+
+        /* Watch Party Styles */
+        .watch-party-btn { background: #10b981 !important; color: white !important; font-weight: bold; border: none; }
+        .watch-party-controls {
+            background: rgba(16, 185, 129, 0.1);
+            padding: 15px;
+            border-radius: 12px;
+            margin: 20px 40px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        .room-id-display { color: #10b981; font-weight: bold; font-family: monospace; background: #000; padding: 5px 10px; border-radius: 5px; }
     </style>
 </head>
 <body>
@@ -536,6 +549,8 @@
         <div class="modal-content" id="modal-content"></div>
     </div>
 
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+
     <script>
         const API_KEY = '34d4692f40f9b4827503c570ebda8db7';
         const BASE_URL = 'https://api.themoviedb.org/3';
@@ -556,6 +571,11 @@
         let currentApiUrl = `${BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}&language=${LANG}`;
         let isFavoritesView = false;
         let isLoading = false;
+
+        // Watch Party Variables
+        let peer = null;
+        let conn = null;
+        let isHost = false;
 
         const genres = [
             { id: 28, name: 'Aksiyon' }, { id: 12, name: 'Macəra' },
@@ -590,7 +610,7 @@
                     else getActors(currentApiUrl, false);
                 }
             });
-            trackUmami(); // İlk yüklənmədə izlə
+            trackUmami();
         }
 
         function switchTo(mode) {
@@ -615,7 +635,7 @@
                 currentApiUrl = `${BASE_URL}/person/popular?api_key=${API_KEY}&language=${LANG}`;
                 getActors(currentApiUrl);
             }
-            trackUmami(); // Bölmə dəyişəndə izlə
+            trackUmami();
         }
 
         async function getMovies(url, isNew = true) {
@@ -735,9 +755,10 @@
                             <option value="1">Bölüm 1</option>
                         </select>
                     </div>
-                    <button class="player-btn az-dublaj" onclick="window.open('https://www.google.com/search?q=${encodeURIComponent(tv.name + " azərbaycan dilində izlə")}', '_blank')">🇦🇿 AZ Dublaj</button>
-                    <button class="player-btn tr-dublaj" onclick="window.open('https://www.google.com/search?q=${encodeURIComponent(tv.name + " türkçe dublaj izle")}', '_blank')">🇹🇷 TR Dublaj</button>
+                    <button class="player-btn watch-party-btn" onclick="startWatchParty()">🤝 Otaq Yarat</button>
+                    <button class="player-btn tr-dublaj" onclick="joinWatchParty()">🎟️ Otağa Qoşul</button>
                 </div>
+                <div id="watch-party-status"></div>
                 <div class="details-grid">
                     <img src="${IMG_PATH + tv.poster_path}">
                     <div>
@@ -777,6 +798,9 @@
             const e = document.getElementById('episode-select').value;
             const url = `https://vidsrc.cc/v2/embed/tv/${tvId}/${s}/${e}`;
             document.getElementById('main-player').src = url;
+            if(isHost && conn) {
+                conn.send({ type: 'change', url: url });
+            }
         }
 
         async function openDetails(id) {
@@ -794,7 +818,6 @@
             const credits = await cRes.json();
 
             const youtubeSearch = `https://www.youtube.com/results?search_query=${encodeURIComponent(movie.title + " full izle")}`;
-            const googleSearch = `https://www.google.com/search?q=${encodeURIComponent(movie.title + " izle")}`;
 
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
@@ -811,11 +834,11 @@
                 </div>
                 <div class="player-tabs">
                     <button class="player-btn active" onclick="changeSource('https://vidsrc.cc/v2/embed/movie/${id}', this)">Film İzlə</button>
-                    <button class="player-btn" onclick="changeSource('https://www.youtube.com/embed/${videos.results[0]?.key}', this)">Treyler</button>
-                    <button class="player-btn az-dublaj" onclick="window.open('https://www.google.com/search?q=${encodeURIComponent(movie.title + " azərbaycan dilində izlə")}', '_blank')">🇦🇿 AZ Dublaj</button>
-                    <button class="player-btn tr-dublaj" onclick="window.open('https://www.google.com/search?q=${encodeURIComponent(movie.title + " türkçe dublaj izle")}', '_blank')">🇹🇷 TR Dublaj</button>
+                    <button class="player-btn watch-party-btn" onclick="startWatchParty()">🤝 Otaq Yarat</button>
+                    <button class="player-btn tr-dublaj" onclick="joinWatchParty()">🎟️ Otağa Qoşul</button>
                     <button class="player-btn alt-source" onclick="window.open('${youtubeSearch}', '_blank')">YouTube 📺</button>
                 </div>
+                <div id="watch-party-status"></div>
                 <div class="details-grid">
                     <img src="${IMG_PATH + movie.poster_path}">
                     <div>
@@ -839,6 +862,51 @@
             `;
             loadComments(id);
             trackUmami();
+        }
+
+        // Watch Party Logic
+        function startWatchParty() {
+            peer = new Peer();
+            peer.on('open', (id) => {
+                isHost = true;
+                document.getElementById('watch-party-status').innerHTML = `
+                    <div class="watch-party-controls">
+                        <span>Otaq Hazırdır! ID: <span class="room-id-display">${id}</span></span>
+                        <button class="player-btn" onclick="navigator.clipboard.writeText('${id}'); alert('ID Kopyalandı!')">Kopyala</button>
+                    </div>
+                `;
+            });
+
+            peer.on('connection', (c) => {
+                conn = c;
+                conn.on('open', () => {
+                    alert("Dostunuz otağa qoşuldu!");
+                });
+            });
+        }
+
+        function joinWatchParty() {
+            const roomId = prompt("Dostunuzun verdiyi Otaq ID-sini daxil edin:");
+            if(!roomId) return;
+
+            peer = new Peer();
+            peer.on('open', () => {
+                conn = peer.connect(roomId);
+                conn.on('open', () => {
+                    isHost = false;
+                    document.getElementById('watch-party-status').innerHTML = `
+                        <div class="watch-party-controls" style="background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.3);">
+                            <span style="color: #3b82f6;">Otağa Qoşuldunuz. Sinxronizasiya Aktivdir.</span>
+                        </div>
+                    `;
+                });
+
+                conn.on('data', (data) => {
+                    if(data.type === 'change') {
+                        document.getElementById('main-player').src = data.url;
+                    }
+                });
+            });
         }
 
         async function openActorDetails(id) {
@@ -885,13 +953,17 @@
             document.getElementById('main-player').src = url;
             document.querySelectorAll('.player-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
+            if(isHost && conn) {
+                conn.send({ type: 'change', url: url });
+            }
         }
 
         function closeModal() { 
             const player = document.getElementById('main-player');
             if(player) player.src = ''; 
             modal.style.display = 'none'; 
-            document.body.style.overflow = 'auto'; 
+            document.body.style.overflow = 'auto';
+            if(peer) peer.destroy();
         }
 
         function toggleFav(item, btn) {

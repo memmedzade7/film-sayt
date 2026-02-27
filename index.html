@@ -1034,5 +1034,19 @@
             }
         }
     });
+    // Otaqdakı hərəkətləri izləmək üçün sadə bildiriş sistemi
+function sendRoomAction(action) {
+    console.log("Otaq hərəkəti:", action);
+    // Burada gələcəkdə çat və ya sinxronizasiya əlavə edə bilərik
+}
+
+// Əgər otaq linki ilə daxil olubsa, xüsusi mesaj göstər
+if (window.location.search.includes('room=')) {
+    const statusDiv = document.createElement('div');
+    statusDiv.style = "position:fixed; top:20px; right:20px; background:#10b981; color:white; padding:10px; border-radius:5px; z-index:9999;";
+    statusDiv.innerHTML = "Otağa qoşuldunuz! Canlı izləmə aktivdir.";
+    document.body.appendChild(statusDiv);
+    setTimeout(() => statusDiv.remove(), 5000);
+}
 </script>
 </html>

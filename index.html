@@ -20,6 +20,7 @@
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3507/3507102.png">
 
     <style>
+        /* Mood-a görə dəyişən dinamik arxa fon təbəqəsi */
         #bg-overlay {
             position: fixed;
             top: 0;
@@ -47,7 +48,7 @@
             --text-main: #ffffff;
             --text-muted: #9ca3af;
             --neon-glow: 0 0 20px rgba(168, 85, 247, 0.4);
-            --party-color: #818cf8;
+            --party-color: #818cf8; /* Yaşıl deyil, daha peşəkar Indigo */
         }
 
         body {
@@ -126,6 +127,7 @@
             background: rgba(255,255,255,0.1);
         }
 
+        /* Otaq düyməsinin peşəkar rəngi */
         .nav-link.party-nav {
             color: var(--party-color);
             border: 1px solid rgba(129, 140, 248, 0.3);
@@ -366,6 +368,28 @@
             overflow: hidden;
         }
 
+        #protection-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 999;
+            cursor: pointer;
+            background: rgba(0,0,0,0.01);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .shield-msg {
+            background: var(--primary-gradient);
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-weight: bold;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            pointer-events: none;
+            opacity: 0;
+            transition: 0.3s;
+        }
+        #protection-overlay:hover .shield-msg { opacity: 1; }
+
         .player-tabs {
             display: flex;
             background: #111;
@@ -388,15 +412,56 @@
         .player-btn.active { background: #6366f1; border-color: #6366f1; }
         
         .player-btn.alt-source { background: #fbbf24; color: #000; font-weight: bold; border: none; }
+        .player-btn.az-dublaj { background: #ef4444; color: white; border: none; font-weight: bold; }
+        .player-btn.tr-dublaj { background: #3b82f6; color: white; border: none; font-weight: bold; }
 
         .details-grid { padding: 40px; display: grid; grid-template-columns: 300px 1fr; gap: 40px; }
         .details-grid img { width: 100%; border-radius: 20px; }
 
-        .watchlist-pill {
-            background: rgba(99, 102, 241, 0.15);
-            color: #a855f7;
-            border: 1px solid rgba(168, 85, 247, 0.3);
+        /* TV Series Selectors */
+        .tv-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 12px;
         }
+        .tv-controls select {
+            background: #1a1a1a;
+            color: white;
+            border: 1px solid #333;
+            padding: 8px;
+            border-radius: 5px;
+            flex: 1;
+        }
+
+        .comment-section { margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; }
+        .comment-input {
+            width: 100%; background: rgba(255,255,255,0.05); border: 1px solid #333;
+            color: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; font-family: inherit;
+        }
+        .comment-btn {
+            background: var(--primary-gradient); color: white; border: none;
+            padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold;
+        }
+        .comments-list { margin-top: 20px; }
+        .comment-item {
+            background: rgba(255,255,255,0.03); padding: 15px; border-radius: 10px; margin-bottom: 10px;
+            border-left: 3px solid #a855f7;
+        }
+
+        .cast-container { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; margin-top: 20px;}
+        .cast-card { min-width: 100px; text-align: center; font-size: 0.8rem; cursor: pointer; transition: 0.3s;}
+        .cast-card:hover { color: #a855f7; }
+        .cast-card img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(168, 85, 247, 0.3);}
+
+        .country-tabs { display: flex; justify-content: center; gap: 15px; margin: 30px 0; }
+        .tab-btn {
+            background: #111; color: #999; border: 1px solid #333;
+            padding: 10px 25px; cursor: pointer; border-radius: 12px; transition: 0.4s;
+        }
+        .tab-btn.active { background: #fff; color: #000; }
 
         .creator-text {
             color: var(--text-muted);
@@ -412,10 +477,10 @@
 
         .loader { grid-column: 1/-1; text-align: center; padding: 20px; display: none; }
         
-        /* --- YENİ OTAQ STİLLƏRİ (Genişləndirilmiş Pleyer) --- */
+        /* --- YENİ OTAQ STİLLƏRİ --- */
         .watch-party-layout {
             display: grid;
-            grid-template-columns: 1fr 320px; /* Video maksimum genişlikdə, chat yığcam */
+            grid-template-columns: 1fr 380px; /* Chat hissəsi bir az kiçildi ki video böyüsün */
             height: calc(100vh - 120px);
             background: #000;
         }
@@ -454,15 +519,19 @@
         #chat-messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; }
         .chat-msg { background: #21262d; padding: 10px 14px; border-radius: 15px; font-size: 0.9rem; border: 1px solid #30363d; max-width: 85%; }
         .chat-msg.mine { align-self: flex-end; background: #6366f1; border-color: transparent; }
-        .chat-input-area { padding: 15px; background: #161b22; display: flex; flex-direction: column; gap: 10px; }
-        .chat-controls { display: flex; gap: 8px; }
-        .chat-input { flex: 1; background: #0d1117; border: 1px solid #30363d; color: white; padding: 10px; border-radius: 8px; }
+        .chat-msg .user { font-weight: bold; color: #58a6ff; display: block; margin-bottom: 3px; font-size: 0.75rem; }
+        .chat-msg.mine .user { color: #fff; }
+        .chat-input-area { padding: 20px; background: #161b22; display: flex; flex-direction: column; gap: 10px; }
+        .emoji-bar { display: flex; gap: 8px; font-size: 1.2rem; cursor: pointer; padding-bottom: 5px; }
+        .chat-controls { display: flex; gap: 10px; }
+        .chat-input { flex: 1; background: #0d1117; border: 1px solid #30363d; color: white; padding: 12px; border-radius: 8px; }
         
         .room-setup-screen { padding: 100px 5%; text-align: center; }
         .room-card { background: var(--card-bg); max-width: 500px; margin: 0 auto; padding: 40px; border-radius: 30px; border: 1px solid rgba(129, 140, 248, 0.2); }
         .room-input { width: 100%; padding: 15px; margin: 10px 0; background: #000; border: 1px solid #333; color: white; border-radius: 10px; text-align: center; }
         .room-btn-main { width: 100%; padding: 15px; margin-top: 15px; background: var(--primary-gradient); border: none; color: white; border-radius: 10px; cursor: pointer; font-weight: bold; }
 
+        /* Otaq Film Seçimi Overlay */
         #party-catalog-overlay {
             display: none;
             position: fixed;
@@ -538,9 +607,10 @@
         </div>
 
         <div class="country-tabs">
-            <button class="tab-btn active" onclick="filterByCountry('all', this)" style="background: #111; color: #999; border: 1px solid #333; padding: 10px 25px; cursor: pointer; border-radius: 12px; margin: 30px 5px;">Hamısı</button>
-            <button class="tab-btn" onclick="filterByCountry('AZ', this)" style="background: #111; color: #999; border: 1px solid #333; padding: 10px 25px; cursor: pointer; border-radius: 12px; margin: 30px 5px;">Azərbaycan</button>
-            <button class="tab-btn" onclick="filterByCountry('TR', this)" style="background: #111; color: #999; border: 1px solid #333; padding: 10px 25px; cursor: pointer; border-radius: 12px; margin: 30px 5px;">Türkiyə</button>
+            <button class="tab-btn active" onclick="filterByCountry('all', this)">Hamısı</button>
+            <button class="tab-btn" onclick="filterByCountry('AZ', this)">Azərbaycan</button>
+            <button class="tab-btn" onclick="filterByCountry('TR', this)">Türkiyə</button>
+            <button class="tab-btn" onclick="filterByCountry('IN', this)">Hindistan</button>
         </div>
         <div id="genres" class="genres-container"></div>
     </div>
@@ -584,6 +654,7 @@
         let isFavoritesView = false;
         let isLoading = false;
 
+        // Party States
         let peer = null;
         let conn = null;
         let myUsername = "";
@@ -614,6 +685,7 @@
                 }
             });
 
+            // Kataloq sonsuz fırlanma (infinite scroll)
             document.getElementById('party-catalog-grid').addEventListener('scroll', e => {
                 const el = e.target;
                 if (el.scrollHeight - el.scrollTop <= el.clientHeight + 100) {
@@ -624,6 +696,7 @@
                 }
             });
 
+            // Kataloq axtarışı
             document.getElementById('catalog-search-inp').addEventListener('input', e => {
                 catalogQuery = e.target.value;
                 catalogPage = 1;
@@ -659,6 +732,7 @@
             }
         }
 
+        // --- PARTY SETUP ---
         function renderPartySetup() {
             main.innerHTML = `
                 <div class="room-setup-screen">
@@ -713,7 +787,7 @@
                                 <button class="player-btn" style="background:#ef4444; border:none;" onclick="location.reload()">Otaqdan Çıx</button>
                             </div>
                         </div>
-                        <div id="party-player-container" style="flex:1; background:#000; position:relative; overflow:hidden;">
+                        <div id="party-player-container" style="flex:1; background:#000; position:relative;">
                             <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:#444;">
                                 <div style="font-size:3rem; margin-bottom:10px;">🍿</div>
                                 <div>Film seçilməsini gözləyirsiniz...</div>
@@ -726,19 +800,31 @@
                             <span id="user-count" style="font-size:0.8rem; color:#8b949e;">● Aktiv</span>
                         </div>
                         <div class="user-list" id="user-list">
-                            <div class="user-tag">👤 ${myUsername}</div>
+                            <div class="user-tag">👤 ${myUsername} (Sən)</div>
                         </div>
                         <div id="chat-messages"></div>
                         <div class="chat-input-area">
+                            <div class="emoji-bar">
+                                <span onclick="addEmoji('😂')">😂</span> <span onclick="addEmoji('😍')">😍</span> 
+                                <span onclick="addEmoji('🔥')">🔥</span> <span onclick="addEmoji('😱')">😱</span> 
+                                <span onclick="addEmoji('👍')">👍</span> <span onclick="addEmoji('🎬')">🎬</span>
+                            </div>
                             <div class="chat-controls">
                                 <input type="text" id="chat-input" class="chat-input" placeholder="Mesaj yaz...">
-                                <button class="comment-btn" style="background:var(--primary-gradient); color:white; border:none; padding:10px; border-radius:8px; cursor:pointer;" onclick="sendChatMessage()">></button>
+                                <button class="comment-btn" onclick="sendChatMessage()">GÖNDƏR</button>
                             </div>
                         </div>
                     </div>
                 </div>
             `;
             document.getElementById('chat-input').addEventListener('keypress', e => { if(e.key === 'Enter') sendChatMessage(); });
+            
+            // Vaxt sinxronizasiyası üçün dinləyici (PostMessage API)
+            window.addEventListener('message', function(event) {
+                if (event.data && event.data.type === 'seek' && isHost) {
+                   if(conn) conn.send({ type: 'sync-time', time: event.data.time });
+                }
+            });
         }
 
         async function openPartyCatalog() {
@@ -751,11 +837,14 @@
             isCatalogLoading = true;
             const grid = document.getElementById('party-catalog-grid');
             if(isNew) grid.innerHTML = '';
+
             let url = catalogQuery 
                 ? `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${catalogQuery}&page=${catalogPage}&language=${LANG}`
                 : `${BASE_URL}/movie/popular?api_key=${API_KEY}&page=${catalogPage}&language=${LANG}`;
+
             const res = await fetch(url);
             const data = await res.json();
+
             data.results.forEach(m => {
                 const div = document.createElement('div');
                 div.className = 'movie';
@@ -776,6 +865,10 @@
             isCatalogLoading = false;
         }
 
+        function addEmoji(emoji) {
+            document.getElementById('chat-input').value += emoji;
+        }
+
         function listenForConnections() {
             peer.on('connection', c => {
                 conn = c;
@@ -788,6 +881,11 @@
             conn.on('data', data => {
                 if(data.type === 'chat') addChatMessage(data.user, data.msg);
                 if(data.type === 'sync-movie') syncPartyPlayer(data.embedUrl);
+                if(data.type === 'sync-time') {
+                    // İrəli/geri atma əmri gəldikdə iframe-ə siqnal göndər
+                    const ifr = document.querySelector('#party-player-container iframe');
+                    if(ifr) ifr.contentWindow.postMessage({ type: 'seek', time: data.time }, '*');
+                }
             });
         }
 
@@ -805,15 +903,21 @@
             if(!box) return;
             const div = document.createElement('div');
             div.className = `chat-msg ${isMine ? 'mine' : ''}`;
+            
             if(isSystem) {
                 div.style.background = "rgba(129, 140, 248, 0.1)";
                 div.style.color = "var(--party-color)";
                 div.style.width = "100%";
                 div.style.textAlign = "center";
+                div.style.maxWidth = "100%";
                 div.innerHTML = `<i>${msg}</i>`;
             } else {
-                div.innerHTML = `<span style="font-weight:bold; font-size:0.7rem; display:block; color:${isMine ? '#fff' : '#58a6ff'}">${user}</span><span>${msg}</span>`;
+                div.innerHTML = `
+                    <span class="user">${user}</span>
+                    <span>${msg}</span>
+                `;
             }
+            
             box.appendChild(div);
             box.scrollTop = box.scrollHeight;
         }
@@ -821,10 +925,11 @@
         function syncPartyPlayer(url) {
             const container = document.getElementById('party-player-container');
             container.innerHTML = `
-                <iframe src="${url}" width="100%" height="100%" frameborder="0" allowfullscreen style="position:absolute; top:0; left:0; border:none; outline:none;"></iframe>
+                <iframe src="${url}" width="100%" height="100%" frameborder="0" allowfullscreen style="position:absolute; top:0; left:0;"></iframe>
             `;
         }
 
+        // --- MOVIE LOGIC ---
         async function getMovies(url, isNew = true) {
             if (isNew) { main.innerHTML = ''; currentPage = 1; isFavoritesView = false; }
             isLoading = true;
@@ -863,6 +968,10 @@
                     <div class="movie-info">
                         <h3>${title}</h3>
                         <div class="rating">${item.vote_average.toFixed(1)}</div>
+                        <div class="quick-view-data">
+                            <span>📅 ${ (item.release_date || item.first_air_date || '').split('-')[0] }</span>
+                            <span style="color:var(--accent-gold); font-size: 10px;">DETALLARA BAX</span>
+                        </div>
                     </div>
                 `;
                 el.onclick = () => isTV ? openTVDetails(item.id) : openDetails(item.id);
@@ -879,17 +988,36 @@
                 fetch(`${BASE_URL}/movie/${id}/credits?api_key=${API_KEY}&language=${LANG}`)
             ]);
             const movie = await mRes.json();
+            const videos = await vRes.json();
             const credits = await cRes.json();
+            
+            const trailer = videos.results.find(v => v.type === 'Trailer') || videos.results[0];
+            const trailerUrl = trailer ? `https://www.youtube.com/watch?v=${trailer.key}` : `https://www.youtube.com/results?search_query=${encodeURIComponent(movie.title + " fragman")}`;
+            const googleSearch = `https://www.google.com/search?q=${encodeURIComponent(movie.title + " türkçe dublaj izle")}`;
+
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
                 <div class="video-container">
-                    <iframe src="https://vidsrc.cc/v2/embed/movie/${id}" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
+                    <iframe id="main-player" src="https://vidsrc.cc/v2/embed/movie/${id}" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
+                </div>
+                <div class="player-tabs">
+                    <button class="player-btn active">Film İzlə</button>
+                    <button class="player-btn tr-dublaj" onclick="window.open('${trailerUrl}', '_blank')">📽️ Treyler Bax</button>
+                    <button class="player-btn alt-source" onclick="window.open('${googleSearch}', '_blank')">🔍 Google-da Axtar (TR Dublaj)</button>
                 </div>
                 <div class="details-grid">
                     <img src="${IMG_PATH + movie.poster_path}">
                     <div>
                         <h2>${movie.title}</h2>
                         <p>${movie.overview}</p>
+                        <div class="cast-container">
+                            ${credits.cast.slice(0, 8).map(c => `
+                                <div class="cast-card" onclick="openActorDetails(${c.id})">
+                                    <img src="${c.profile_path ? CAST_IMG_PATH + c.profile_path : 'https://via.placeholder.com/80x80'}">
+                                    <div>${c.name}</div>
+                                </div>
+                            `).join('')}
+                        </div>
                     </div>
                 </div>
             `;
@@ -898,17 +1026,42 @@
         async function openTVDetails(id) {
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
-            const tvRes = await fetch(`${BASE_URL}/tv/${id}?api_key=${API_KEY}&language=${LANG}`);
+            const [tvRes, cRes] = await Promise.all([
+                fetch(`${BASE_URL}/tv/${id}?api_key=${API_KEY}&language=${LANG}`),
+                fetch(`${BASE_URL}/tv/${id}/credits?api_key=${API_KEY}&language=${LANG}`)
+            ]);
             const tv = await tvRes.json();
+            const credits = await cRes.json();
+            const googleSearch = `https://www.google.com/search?q=${encodeURIComponent(tv.name + " türkçe dublaj izle")}`;
+
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
                 <div class="video-container">
                     <iframe id="main-player" src="https://vidsrc.cc/v2/embed/tv/${id}/1/1" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
                 </div>
                 <div class="player-tabs">
-                    <select id="season-select" onchange="updateEpisodes(${id}, this.value)" style="background:#222; color:white; padding:10px; border-radius:5px;">
+                    <select id="season-select" onchange="updateEpisodes(${id}, this.value)" style="background:#222; color:white; border:none; padding:10px; border-radius:5px;">
                         ${Array.from({length: tv.number_of_seasons}, (_, i) => `<option value="${i+1}">Sezon ${i+1}</option>`).join('')}
                     </select>
+                    <select id="episode-select" onchange="changeEp(${id})" style="background:#222; color:white; border:none; padding:10px; border-radius:5px;">
+                        <option value="1">Bölüm 1</option>
+                    </select>
+                    <button class="player-btn alt-source" onclick="window.open('${googleSearch}', '_blank')">🔍 Google Axtar</button>
+                </div>
+                <div class="details-grid">
+                    <img src="${IMG_PATH + tv.poster_path}">
+                    <div>
+                        <h2>${tv.name}</h2>
+                        <p>${tv.overview}</p>
+                        <div class="cast-container">
+                            ${credits.cast.slice(0, 8).map(c => `
+                                <div class="cast-card" onclick="openActorDetails(${c.id})">
+                                    <img src="${c.profile_path ? CAST_IMG_PATH + c.profile_path : 'https://via.placeholder.com/80x80'}">
+                                    <div>${c.name}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
                 </div>
             `;
         }
@@ -916,7 +1069,14 @@
         async function updateEpisodes(tvId, s) {
             const res = await fetch(`${BASE_URL}/tv/${tvId}/season/${s}?api_key=${API_KEY}&language=${LANG}`);
             const data = await res.json();
-            document.getElementById('main-player').src = `https://vidsrc.cc/v2/embed/tv/${tvId}/${s}/1`;
+            document.getElementById('episode-select').innerHTML = data.episodes.map(e => `<option value="${e.episode_number}">Bölüm ${e.episode_number}</option>`).join('');
+            changeEp(tvId);
+        }
+
+        function changeEp(tvId) {
+            const s = document.getElementById('season-select').value;
+            const e = document.getElementById('episode-select').value;
+            document.getElementById('main-player').src = `https://vidsrc.cc/v2/embed/tv/${tvId}/${s}/${e}`;
         }
 
         async function getActors(url, isNew = true) {
@@ -929,7 +1089,12 @@
                 data.results.forEach(actor => {
                     const el = document.createElement('div');
                     el.className = 'actor-card';
-                    el.innerHTML = `<img src="${actor.profile_path ? CAST_IMG_PATH + actor.profile_path : 'https://via.placeholder.com/200x300'}"><h3>${actor.name}</h3>`;
+                    el.innerHTML = `
+                        <img src="${actor.profile_path ? CAST_IMG_PATH + actor.profile_path : 'https://via.placeholder.com/200x300'}" alt="${actor.name}">
+                        <h3>${actor.name}</h3>
+                        <p>${actor.known_for_department}</p>
+                    `;
+                    el.onclick = () => openActorDetails(actor.id);
                     main.appendChild(el);
                 });
             } catch (error) { console.error(error); }
@@ -937,7 +1102,37 @@
             loader.style.display = 'none';
         }
 
-        function closeModal() { modal.style.display = 'none'; document.body.style.overflow = 'auto'; }
+        async function openActorDetails(id) {
+            modal.style.display = 'flex';
+            const [pRes, mRes] = await Promise.all([
+                fetch(`${BASE_URL}/person/${id}?api_key=${API_KEY}&language=${LANG}`),
+                fetch(`${BASE_URL}/person/${id}/combined_credits?api_key=${API_KEY}&language=${LANG}`)
+            ]);
+            const person = await pRes.json();
+            const credits = await mRes.json();
+
+            modalContent.innerHTML = `
+                <span class="close-modal" onclick="closeModal()">&times;</span>
+                <div class="actor-header">
+                    <img src="${person.profile_path ? IMG_PATH + person.profile_path : 'https://via.placeholder.com/300x450'}">
+                    <div class="actor-bio">
+                        <h2>${person.name}</h2>
+                        <p>${person.biography || 'Məlumat yoxdur.'}</p>
+                    </div>
+                </div>
+                <h3 style="padding:20px 40px;">Rol aldığı işlər:</h3>
+                <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap:20px; padding:0 40px 40px;">
+                    ${credits.cast.slice(0, 10).map(m => `
+                        <div class="movie" onclick="closeModal(); setTimeout(() => openDetails(${m.id}), 300)">
+                            <img src="${m.poster_path ? CAST_IMG_PATH + m.poster_path : 'https://via.placeholder.com/150x225'}">
+                            <h4 style="font-size:0.8rem; padding:10px; margin:0;">${m.title || m.name}</h4>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function closeModal() { modal.style.display = 'none'; document.body.style.overflow = 'auto'; if(document.getElementById('main-player')) document.getElementById('main-player').src = ''; }
         
         function toggleFav(item, btn) {
             const idx = favorites.findIndex(f => f.id === item.id);
@@ -948,6 +1143,7 @@
         }
 
         function updateWatchlistCount() { document.getElementById('watchlist-count').innerText = `Siyahım (${favorites.length})`; }
+
         function showFavorites() { isFavoritesView = true; main.innerHTML = ''; showMovies(favorites); }
 
         function filterByCountry(code, btn) {

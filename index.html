@@ -178,8 +178,6 @@
         .mood-scary:hover { background: #ef4444 !important; color: #fff !important; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); border-color: transparent; }
         .mood-love:hover { background: #f472b6 !important; color: #fff !important; box-shadow: 0 0 15px rgba(244, 114, 182, 0.4); border-color: transparent; }
 
-        .mood-btn:hover { transform: scale(1.05); }
-
         .watchlist-pill, .random-btn {
             margin-top: 8px;
             padding: 4px 12px;
@@ -424,16 +422,18 @@
 
         .loader { grid-column: 1/-1; text-align: center; padding: 20px; display: none; }
         
-        /* --- YENİ OTAQ STİLLƏRİ (VİDEO MAKSİMUM, ÇAT SAĞDA) --- */
+        /* --- DÜZƏLDİLMİŞ OTAQ LAYOUTU --- */
         .watch-party-layout {
-            display: flex; /* Flexbox ilə film və çat yan-yana */
+            display: flex; /* Yalnız Flexbox */
+            width: 100%;
             height: calc(100vh - 85px); 
             background: #000;
             overflow: hidden;
         }
         
         .video-side {
-            flex: 1; /* Videonun bütün qalan boşluğu tutmasını təmin edir */
+            flex-grow: 1; /* Bütün sol tərəfi doldurur */
+            height: 100%;
             background: #000;
             display: flex;
             flex-direction: column;
@@ -441,38 +441,49 @@
         }
 
         .chat-container {
-            width: 250px; /* Çat sahəsi 250px sabitləndi */
+            width: 200px; /* Çatı daha da daraltdım ki film böyüsün */
+            min-width: 200px;
             background: #0d1117;
-            border-left: 1px solid #30363d;
             display: flex;
             flex-direction: column;
             height: 100%;
+            border-left: 1px solid #30363d;
+        }
+
+        #party-player-container {
+            flex-grow: 1;
+            width: 100%;
+            height: 100%;
+        }
+
+        #party-player-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
         }
 
         .chat-header { 
-            padding: 10px 15px; 
+            padding: 10px; 
             background: #161b22; 
             border-bottom: 1px solid #30363d; 
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            text-align: center;
         }
 
-        #chat-messages { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+        #chat-messages { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
         
         .chat-msg { 
             background: #21262d; 
-            padding: 8px 12px; 
-            border-radius: 12px; 
-            font-size: 0.8rem; 
+            padding: 6px 10px; 
+            border-radius: 10px; 
+            font-size: 0.75rem; 
             border: 1px solid #30363d; 
-            max-width: 95%; 
+            max-width: 100%; 
+            word-wrap: break-word;
         }
 
         .chat-msg.mine { align-self: flex-end; background: #6366f1; border-color: transparent; }
-        .chat-msg .user { font-weight: bold; color: #58a6ff; display: block; margin-bottom: 2px; font-size: 0.7rem; }
         
-        .chat-input-area { padding: 10px; background: #161b22; display: flex; flex-direction: column; gap: 8px; }
+        .chat-input-area { padding: 10px; background: #161b22; }
         
         .chat-controls { display: flex; gap: 5px; }
         
@@ -481,22 +492,10 @@
             background: #0d1117; 
             border: 1px solid #30363d; 
             color: white; 
-            padding: 8px; 
-            border-radius: 8px; 
-            font-size: 0.85rem; 
-        }
-        
-        #party-player-container {
-            flex: 1;
-            width: 100%;
-            height: 100%;
-            position: relative;
-        }
-
-        #party-player-container iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
+            padding: 6px; 
+            border-radius: 5px; 
+            font-size: 0.8rem; 
+            width: 50px;
         }
 
         .room-setup-screen { padding: 100px 5%; text-align: center; }
@@ -747,11 +746,11 @@
             main.innerHTML = `
                 <div class="watch-party-layout">
                     <div class="video-side">
-                        <div style="padding:10px; background:#111; border-bottom:1px solid #30363d; display:flex; justify-content:space-between; align-items:center;">
-                            <span style="font-size:0.8rem;">Otaq ID: <b style="color:var(--party-color);">${roomId}</b></span>
-                            <div style="display:flex; gap:10px;">
-                                ${isHost ? '<button class="player-btn active" onclick="openPartyCatalog()">🎬 Film Seç</button>' : '<span style="color:#8b949e; font-size:0.8rem;">🎥 Host film seçir...</span>'}
-                                <button class="player-btn" style="background:#ef4444; border:none; padding:5px 10px;" onclick="location.reload()">X</button>
+                        <div style="padding:8px; background:#111; border-bottom:1px solid #30363d; display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-size:0.75rem;">ID: <b style="color:var(--party-color);">${roomId}</b></span>
+                            <div style="display:flex; gap:8px;">
+                                ${isHost ? '<button class="player-btn active" style="padding:4px 10px; font-size:0.75rem;" onclick="openPartyCatalog()">🎬 Seç</button>' : ''}
+                                <button class="player-btn" style="background:#ef4444; border:none; padding:4px 10px; font-size:0.75rem;" onclick="location.reload()">Çıx</button>
                             </div>
                         </div>
                         <div id="party-player-container">
@@ -762,13 +761,13 @@
                     </div>
                     <div class="chat-container">
                         <div class="chat-header">
-                            <span style="color:var(--party-color); font-weight:bold; font-size:0.8rem;">SÖHBƏT</span>
+                            <span style="color:var(--party-color); font-weight:bold; font-size:0.75rem;">ÇAT</span>
                         </div>
                         <div id="chat-messages"></div>
                         <div class="chat-input-area">
                             <div class="chat-controls">
-                                <input type="text" id="chat-input" class="chat-input" placeholder="Yazın...">
-                                <button class="comment-btn" style="padding:5px 10px;" onclick="sendChatMessage()">></button>
+                                <input type="text" id="chat-input" class="chat-input" placeholder="...">
+                                <button class="comment-btn" style="padding:4px 8px;" onclick="sendChatMessage()">></button>
                             </div>
                         </div>
                     </div>
@@ -805,7 +804,7 @@
                     syncPartyPlayer(embed);
                     if(conn) conn.send({ type: 'sync-movie', embedUrl: embed });
                     document.getElementById('party-catalog-overlay').style.display = 'none';
-                    addChatMessage("Sistem", `"${m.title}" başladıldı!`, true);
+                    addChatMessage("Sistem", `"${m.title}" başladı!`, true);
                 };
                 grid.appendChild(div);
             });
@@ -816,7 +815,7 @@
             peer.on('connection', c => {
                 conn = c;
                 setupConnHandlers();
-                addChatMessage("Sistem", "Dostunuz daxil oldu!", true);
+                addChatMessage("Sistem", "Biri daxil oldu!", true);
             });
         }
 
@@ -848,7 +847,7 @@
                 div.style.textAlign = "center";
                 div.innerHTML = `<i>${msg}</i>`;
             } else {
-                div.innerHTML = `<span class="user">${user}</span><span>${msg}</span>`;
+                div.innerHTML = `<span style="font-weight:bold; color:#58a6ff;">${user}: </span><span>${msg}</span>`;
             }
             box.appendChild(div);
             box.scrollTop = box.scrollHeight;

@@ -524,6 +524,54 @@
             cursor: pointer;
             font-weight: bold;
         }
+
+        /* YENİ OTAQ STİLLƏRİ */
+        .pro-room-container {
+            max-width: 900px;
+            margin: 30px auto;
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+        }
+        .room-movie-item {
+            display: flex;
+            align-items: center;
+            background: #1a1a1a;
+            margin-bottom: 12px;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid #222;
+            transition: 0.3s;
+        }
+        .room-movie-item:hover { border-color: #a855f7; transform: translateX(10px); }
+        .room-movie-item img { width: 60px; height: 90px; border-radius: 8px; object-fit: cover; margin-right: 20px; }
+        .room-movie-item h4 { margin: 0; font-size: 1.1rem; flex: 1; }
+        .add-room-trigger {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            margin-top: 10px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .add-room-trigger:hover { background: #059669; }
+        .remove-room-btn {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid #ef4444;
+            padding: 6px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .remove-room-btn:hover { background: #ef4444; color: white; }
     </style>
 </head>
 <body>
@@ -599,6 +647,8 @@
         const movieContent = document.getElementById('movie-content');
         
         let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+        let myRoom = JSON.parse(localStorage.getItem('cinemaRoom')) || []; // Yeni Otaq Listi
+
         let currentPage = 1;
         let currentMode = 'movies'; 
         let currentApiUrl = `${BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}&language=${LANG}`;
@@ -658,8 +708,48 @@
             } else if(mode === 'party') {
                 document.getElementById('nav-party').classList.add('active');
                 movieContent.style.display = 'none';
-                renderPartySetup();
+                renderProRoom(); // Yeni otaq renderingi
             }
+        }
+
+        // --- YENİ PEŞƏKAR OTAQ FUNKSİYALARI ---
+        function renderProRoom() {
+            main.innerHTML = `
+                <div class="pro-room-container">
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:15px; margin-bottom:20px;">
+                        <h2 style="color:#10b981; margin:0;"><i class="fas fa-video"></i> Sinema Otağım</h2>
+                        <button class="random-btn" onclick="initParty('host')">Canlı Otaq Yarat (P2P)</button>
+                    </div>
+                    <div id="room-list-content">
+                        ${myRoom.length === 0 ? '<p style="text-align:center; color:#555;">Hələ ki film yoxdur. Kataloqdan otağa film əlavə edin.</p>' : ''}
+                    </div>
+                </div>
+            `;
+            const list = document.getElementById('room-list-content');
+            myRoom.forEach(movie => {
+                const item = document.createElement('div');
+                item.className = 'room-movie-item';
+                item.innerHTML = `
+                    <img src="${IMG_PATH + movie.poster}" alt="">
+                    <h4>${movie.title}</h4>
+                    <button class="player-btn" style="margin-right:10px;" onclick="openDetails(${movie.id})">İzlə</button>
+                    <button class="remove-room-btn" onclick="removeFromRoom(${movie.id})">Sil</button>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function addToRoom(id, title, poster) {
+            if(myRoom.some(m => m.id === id)) return alert("Bu artıq otağınızda var!");
+            myRoom.push({id, title, poster});
+            localStorage.setItem('cinemaRoom', JSON.stringify(myRoom));
+            alert("Otağa əlavə edildi!");
+        }
+
+        function removeFromRoom(id) {
+            myRoom = myRoom.filter(m => m.id !== id);
+            localStorage.setItem('cinemaRoom', JSON.stringify(myRoom));
+            renderProRoom();
         }
 
         // --- PARTY SETUP ---
@@ -682,8 +772,7 @@
         }
 
         function initParty(type) {
-            const user = document.getElementById('party-username').value;
-            if(!user) return alert("Zəhmət olmasa ad seçin!");
+            const user = prompt("Adınızı daxil edin:") || "Qonaq";
             myUsername = user;
 
             if(type === 'host') {
@@ -825,7 +914,7 @@
                         <div class="rating">${item.vote_average.toFixed(1)}</div>
                         <div class="quick-view-data">
                             <span>📅 ${ (item.release_date || item.first_air_date || '').split('-')[0] }</span>
-                            <span style="color:var(--accent-gold); font-size: 10px;">DETALLARA BAX</span>
+                            <button class="add-room-trigger" onclick="event.stopPropagation(); addToRoom(${item.id}, '${title.replace(/'/g, "\\'")}', '${item.poster_path}')">Otağa əlavə et +</button>
                         </div>
                     </div>
                 `;

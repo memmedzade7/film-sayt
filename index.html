@@ -48,7 +48,7 @@
             --text-main: #ffffff;
             --text-muted: #9ca3af;
             --neon-glow: 0 0 20px rgba(168, 85, 247, 0.4);
-            --party-color: #818cf8; /* Yaşıl deyil, daha peşəkar Indigo */
+            --party-color: #818cf8;
         }
 
         body {
@@ -127,7 +127,6 @@
             background: rgba(255,255,255,0.1);
         }
 
-        /* Otaq düyməsinin peşəkar rəngi */
         .nav-link.party-nav {
             color: var(--party-color);
             border: 1px solid rgba(129, 140, 248, 0.3);
@@ -368,28 +367,6 @@
             overflow: hidden;
         }
 
-        #protection-overlay {
-            position: absolute;
-            inset: 0;
-            z-index: 999;
-            cursor: pointer;
-            background: rgba(0,0,0,0.01);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .shield-msg {
-            background: var(--primary-gradient);
-            padding: 15px 30px;
-            border-radius: 50px;
-            font-weight: bold;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            pointer-events: none;
-            opacity: 0;
-            transition: 0.3s;
-        }
-        #protection-overlay:hover .shield-msg { opacity: 1; }
-
         .player-tabs {
             display: flex;
             background: #111;
@@ -412,43 +389,13 @@
         .player-btn.active { background: #6366f1; border-color: #6366f1; }
         
         .player-btn.alt-source { background: #fbbf24; color: #000; font-weight: bold; border: none; }
-        .player-btn.az-dublaj { background: #ef4444; color: white; border: none; font-weight: bold; }
-        .player-btn.tr-dublaj { background: #3b82f6; color: white; border: none; font-weight: bold; }
 
         .details-grid { padding: 40px; display: grid; grid-template-columns: 300px 1fr; gap: 40px; }
         .details-grid img { width: 100%; border-radius: 20px; }
 
-        /* TV Series Selectors */
-        .tv-controls {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-            background: rgba(255,255,255,0.05);
-            padding: 15px;
-            border-radius: 12px;
-        }
-        .tv-controls select {
-            background: #1a1a1a;
-            color: white;
-            border: 1px solid #333;
-            padding: 8px;
-            border-radius: 5px;
-            flex: 1;
-        }
-
-        .comment-section { margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; }
-        .comment-input {
-            width: 100%; background: rgba(255,255,255,0.05); border: 1px solid #333;
-            color: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; font-family: inherit;
-        }
         .comment-btn {
             background: var(--primary-gradient); color: white; border: none;
             padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold;
-        }
-        .comments-list { margin-top: 20px; }
-        .comment-item {
-            background: rgba(255,255,255,0.03); padding: 15px; border-radius: 10px; margin-bottom: 10px;
-            border-left: 3px solid #a855f7;
         }
 
         .cast-container { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; margin-top: 20px;}
@@ -477,27 +424,31 @@
 
         .loader { grid-column: 1/-1; text-align: center; padding: 20px; display: none; }
         
-        /* --- YENİ OTAQ STİLLƏRİ (YENİLƏNDİ: TAM EKRAN VİDEO) --- */
+        /* --- YENİ OTAQ STİLLƏRİ (VİDEO MAKSİMUM, ÇAT SAĞDA) --- */
         .watch-party-layout {
-            display: grid;
-            grid-template-columns: 1fr 300px; /* Çat sahəsi daha da daraldıldı */
-            height: calc(100vh - 85px); /* Header çıxıldıqdan sonra tam hündürlük */
+            display: flex; /* Flexbox ilə film və çat yan-yana */
+            height: calc(100vh - 85px); 
             background: #000;
+            overflow: hidden;
         }
+        
         .video-side {
+            flex: 1; /* Videonun bütün qalan boşluğu tutmasını təmin edir */
             background: #000;
             display: flex;
             flex-direction: column;
             border-right: 1px solid #1f2937;
         }
+
         .chat-container {
+            width: 250px; /* Çat sahəsi 250px sabitləndi */
             background: #0d1117;
             border-left: 1px solid #30363d;
             display: flex;
             flex-direction: column;
             height: 100%;
         }
-        /* ... Digər party stilləri eyni qalır ... */
+
         .chat-header { 
             padding: 10px 15px; 
             background: #161b22; 
@@ -506,33 +457,53 @@
             justify-content: space-between;
             align-items: center;
         }
-        .user-list {
-            padding: 8px;
-            background: #161b22;
-            border-bottom: 1px solid #30363d;
-            font-size: 0.75rem;
-            color: #8b949e;
-            display: flex;
-            gap: 8px;
-            overflow-x: auto;
-        }
-        .user-tag { background: #21262d; padding: 3px 8px; border-radius: 20px; border: 1px solid #30363d; }
+
         #chat-messages { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
-        .chat-msg { background: #21262d; padding: 8px 12px; border-radius: 12px; font-size: 0.85rem; border: 1px solid #30363d; max-width: 90%; }
+        
+        .chat-msg { 
+            background: #21262d; 
+            padding: 8px 12px; 
+            border-radius: 12px; 
+            font-size: 0.8rem; 
+            border: 1px solid #30363d; 
+            max-width: 95%; 
+        }
+
         .chat-msg.mine { align-self: flex-end; background: #6366f1; border-color: transparent; }
         .chat-msg .user { font-weight: bold; color: #58a6ff; display: block; margin-bottom: 2px; font-size: 0.7rem; }
-        .chat-msg.mine .user { color: #fff; }
-        .chat-input-area { padding: 15px; background: #161b22; display: flex; flex-direction: column; gap: 8px; }
-        .emoji-bar { display: flex; gap: 8px; font-size: 1.1rem; cursor: pointer; padding-bottom: 5px; }
-        .chat-controls { display: flex; gap: 8px; }
-        .chat-input { flex: 1; background: #0d1117; border: 1px solid #30363d; color: white; padding: 10px; border-radius: 8px; font-size: 0.9rem; }
         
+        .chat-input-area { padding: 10px; background: #161b22; display: flex; flex-direction: column; gap: 8px; }
+        
+        .chat-controls { display: flex; gap: 5px; }
+        
+        .chat-input { 
+            flex: 1; 
+            background: #0d1117; 
+            border: 1px solid #30363d; 
+            color: white; 
+            padding: 8px; 
+            border-radius: 8px; 
+            font-size: 0.85rem; 
+        }
+        
+        #party-player-container {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        #party-player-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
         .room-setup-screen { padding: 100px 5%; text-align: center; }
         .room-card { background: var(--card-bg); max-width: 500px; margin: 0 auto; padding: 40px; border-radius: 30px; border: 1px solid rgba(129, 140, 248, 0.2); }
         .room-input { width: 100%; padding: 15px; margin: 10px 0; background: #000; border: 1px solid #333; color: white; border-radius: 10px; text-align: center; }
         .room-btn-main { width: 100%; padding: 15px; margin-top: 15px; background: var(--primary-gradient); border: none; color: white; border-radius: 10px; cursor: pointer; font-weight: bold; }
 
-        /* Otaq Film Seçimi Overlay */
         #party-catalog-overlay {
             display: none;
             position: fixed;
@@ -655,7 +626,6 @@
         let isFavoritesView = false;
         let isLoading = false;
 
-        // Party States
         let peer = null;
         let conn = null;
         let myUsername = "";
@@ -686,7 +656,6 @@
                 }
             });
 
-            // Kataloq sonsuz fırlanma (infinite scroll)
             document.getElementById('party-catalog-grid').addEventListener('scroll', e => {
                 const el = e.target;
                 if (el.scrollHeight - el.scrollTop <= el.clientHeight + 100) {
@@ -697,7 +666,6 @@
                 }
             });
 
-            // Kataloq axtarışı
             document.getElementById('catalog-search-inp').addEventListener('input', e => {
                 catalogQuery = e.target.value;
                 catalogPage = 1;
@@ -733,13 +701,11 @@
             }
         }
 
-        // --- PARTY SETUP ---
         function renderPartySetup() {
             main.innerHTML = `
                 <div class="room-setup-screen">
                     <div class="room-card">
                         <h2 style="color:var(--party-color);">🤝 Birgə İzləmə Otağı</h2>
-                        <p style="color:#9ca3af; font-size:0.9rem;">Dostlarınla eyni anda film izlə və söhbət et!</p>
                         <input type="text" id="party-username" class="room-input" placeholder="Adınızı daxil edin...">
                         <div style="margin-top:20px;">
                             <button class="room-btn-main" onclick="initParty('host')">Yeni Otaq Yarat</button>
@@ -781,49 +747,34 @@
             main.innerHTML = `
                 <div class="watch-party-layout">
                     <div class="video-side">
-                        <div style="padding:15px; background:#111; border-bottom:1px solid #30363d; display:flex; justify-content:space-between; align-items:center;">
-                            <span>Otaq ID: <b style="color:var(--party-color);">${roomId}</b></span>
+                        <div style="padding:10px; background:#111; border-bottom:1px solid #30363d; display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-size:0.8rem;">Otaq ID: <b style="color:var(--party-color);">${roomId}</b></span>
                             <div style="display:flex; gap:10px;">
-                                ${isHost ? '<button class="player-btn active" onclick="openPartyCatalog()">🎬 Film Seç (Kataloq)</button>' : '<span style="color:#8b949e;">🎥 Host film seçir...</span>'}
-                                <button class="player-btn" style="background:#ef4444; border:none;" onclick="location.reload()">Otaqdan Çıx</button>
+                                ${isHost ? '<button class="player-btn active" onclick="openPartyCatalog()">🎬 Film Seç</button>' : '<span style="color:#8b949e; font-size:0.8rem;">🎥 Host film seçir...</span>'}
+                                <button class="player-btn" style="background:#ef4444; border:none; padding:5px 10px;" onclick="location.reload()">X</button>
                             </div>
                         </div>
-                        <div id="party-player-container" style="flex:1; background:#000; position:relative;">
+                        <div id="party-player-container">
                             <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:#444;">
-                                <div style="font-size:3rem; margin-bottom:10px;">🍿</div>
                                 <div>Film seçilməsini gözləyirsiniz...</div>
                             </div>
                         </div>
                     </div>
                     <div class="chat-container">
                         <div class="chat-header">
-                            <span style="color:var(--party-color); font-weight:bold;">SÖHBƏT</span>
-                            <span id="user-count" style="font-size:0.7rem; color:#8b949e;">● Aktiv</span>
-                        </div>
-                        <div class="user-list" id="user-list">
-                            <div class="user-tag">👤 ${myUsername}</div>
+                            <span style="color:var(--party-color); font-weight:bold; font-size:0.8rem;">SÖHBƏT</span>
                         </div>
                         <div id="chat-messages"></div>
                         <div class="chat-input-area">
-                            <div class="emoji-bar">
-                                <span onclick="addEmoji('😂')">😂</span> <span onclick="addEmoji('😍')">😍</span> 
-                                <span onclick="addEmoji('🔥')">🔥</span> <span onclick="addEmoji('👍')">👍</span> 
-                            </div>
                             <div class="chat-controls">
                                 <input type="text" id="chat-input" class="chat-input" placeholder="Yazın...">
-                                <button class="comment-btn" style="padding:10px;" onclick="sendChatMessage()">></button>
+                                <button class="comment-btn" style="padding:5px 10px;" onclick="sendChatMessage()">></button>
                             </div>
                         </div>
                     </div>
                 </div>
             `;
             document.getElementById('chat-input').addEventListener('keypress', e => { if(e.key === 'Enter') sendChatMessage(); });
-            
-            window.addEventListener('message', function(event) {
-                if (event.data && event.data.type === 'seek' && isHost) {
-                   if(conn) conn.send({ type: 'sync-time', time: event.data.time });
-                }
-            });
         }
 
         async function openPartyCatalog() {
@@ -836,14 +787,11 @@
             isCatalogLoading = true;
             const grid = document.getElementById('party-catalog-grid');
             if(isNew) grid.innerHTML = '';
-
             let url = catalogQuery 
                 ? `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${catalogQuery}&page=${catalogPage}&language=${LANG}`
                 : `${BASE_URL}/movie/popular?api_key=${API_KEY}&page=${catalogPage}&language=${LANG}`;
-
             const res = await fetch(url);
             const data = await res.json();
-
             data.results.forEach(m => {
                 const div = document.createElement('div');
                 div.className = 'movie';
@@ -857,22 +805,18 @@
                     syncPartyPlayer(embed);
                     if(conn) conn.send({ type: 'sync-movie', embedUrl: embed });
                     document.getElementById('party-catalog-overlay').style.display = 'none';
-                    addChatMessage("Sistem", `"${m.title}" başladıldı! 🎬`, true);
+                    addChatMessage("Sistem", `"${m.title}" başladıldı!`, true);
                 };
                 grid.appendChild(div);
             });
             isCatalogLoading = false;
         }
 
-        function addEmoji(emoji) {
-            document.getElementById('chat-input').value += emoji;
-        }
-
         function listenForConnections() {
             peer.on('connection', c => {
                 conn = c;
                 setupConnHandlers();
-                addChatMessage("Sistem", "Dostunuz otağa daxil oldu! 👋", true);
+                addChatMessage("Sistem", "Dostunuz daxil oldu!", true);
             });
         }
 
@@ -880,10 +824,6 @@
             conn.on('data', data => {
                 if(data.type === 'chat') addChatMessage(data.user, data.msg);
                 if(data.type === 'sync-movie') syncPartyPlayer(data.embedUrl);
-                if(data.type === 'sync-time') {
-                    const ifr = document.querySelector('#party-player-container iframe');
-                    if(ifr) ifr.contentWindow.postMessage({ type: 'seek', time: data.time }, '*');
-                }
             });
         }
 
@@ -901,33 +841,24 @@
             if(!box) return;
             const div = document.createElement('div');
             div.className = `chat-msg ${isMine ? 'mine' : ''}`;
-            
             if(isSystem) {
                 div.style.background = "rgba(129, 140, 248, 0.1)";
                 div.style.color = "var(--party-color)";
                 div.style.width = "100%";
                 div.style.textAlign = "center";
-                div.style.maxWidth = "100%";
                 div.innerHTML = `<i>${msg}</i>`;
             } else {
-                div.innerHTML = `
-                    <span class="user">${user}</span>
-                    <span>${msg}</span>
-                `;
+                div.innerHTML = `<span class="user">${user}</span><span>${msg}</span>`;
             }
-            
             box.appendChild(div);
             box.scrollTop = box.scrollHeight;
         }
 
         function syncPartyPlayer(url) {
             const container = document.getElementById('party-player-container');
-            container.innerHTML = `
-                <iframe src="${url}" width="100%" height="100%" frameborder="0" allowfullscreen style="position:absolute; top:0; left:0;"></iframe>
-            `;
+            container.innerHTML = `<iframe src="${url}" allowfullscreen></iframe>`;
         }
 
-        // --- MOVIE LOGIC ---
         async function getMovies(url, isNew = true) {
             if (isNew) { main.innerHTML = ''; currentPage = 1; isFavoritesView = false; }
             isLoading = true;
@@ -986,22 +917,11 @@
                 fetch(`${BASE_URL}/movie/${id}/credits?api_key=${API_KEY}&language=${LANG}`)
             ]);
             const movie = await mRes.json();
-            const videos = await vRes.json();
             const credits = await cRes.json();
-            
-            const trailer = videos.results.find(v => v.type === 'Trailer') || videos.results[0];
-            const trailerUrl = trailer ? `https://www.youtube.com/watch?v=${trailer.key}` : `https://www.youtube.com/results?search_query=${encodeURIComponent(movie.title + " fragman")}`;
-            const googleSearch = `https://www.google.com/search?q=${encodeURIComponent(movie.title + " türkçe dublaj izle")}`;
-
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
                 <div class="video-container">
                     <iframe id="main-player" src="https://vidsrc.cc/v2/embed/movie/${id}" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
-                </div>
-                <div class="player-tabs">
-                    <button class="player-btn active">Film İzlə</button>
-                    <button class="player-btn tr-dublaj" onclick="window.open('${trailerUrl}', '_blank')">📽️ Treyler Bax</button>
-                    <button class="player-btn alt-source" onclick="window.open('${googleSearch}', '_blank')">🔍 Google-da Axtar (TR Dublaj)</button>
                 </div>
                 <div class="details-grid">
                     <img src="${IMG_PATH + movie.poster_path}">
@@ -1030,21 +950,10 @@
             ]);
             const tv = await tvRes.json();
             const credits = await cRes.json();
-            const googleSearch = `https://www.google.com/search?q=${encodeURIComponent(tv.name + " türkçe dublaj izle")}`;
-
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
                 <div class="video-container">
                     <iframe id="main-player" src="https://vidsrc.cc/v2/embed/tv/${id}/1/1" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
-                </div>
-                <div class="player-tabs">
-                    <select id="season-select" onchange="updateEpisodes(${id}, this.value)" style="background:#222; color:white; border:none; padding:10px; border-radius:5px;">
-                        ${Array.from({length: tv.number_of_seasons}, (_, i) => `<option value="${i+1}">Sezon ${i+1}</option>`).join('')}
-                    </select>
-                    <select id="episode-select" onchange="changeEp(${id})" style="background:#222; color:white; border:none; padding:10px; border-radius:5px;">
-                        <option value="1">Bölüm 1</option>
-                    </select>
-                    <button class="player-btn alt-source" onclick="window.open('${googleSearch}', '_blank')">🔍 Google Axtar</button>
                 </div>
                 <div class="details-grid">
                     <img src="${IMG_PATH + tv.poster_path}">
@@ -1062,19 +971,6 @@
                     </div>
                 </div>
             `;
-        }
-
-        async function updateEpisodes(tvId, s) {
-            const res = await fetch(`${BASE_URL}/tv/${tvId}/season/${s}?api_key=${API_KEY}&language=${LANG}`);
-            const data = await res.json();
-            document.getElementById('episode-select').innerHTML = data.episodes.map(e => `<option value="${e.episode_number}">Bölüm ${e.episode_number}</option>`).join('');
-            changeEp(tvId);
-        }
-
-        function changeEp(tvId) {
-            const s = document.getElementById('season-select').value;
-            const e = document.getElementById('episode-select').value;
-            document.getElementById('main-player').src = `https://vidsrc.cc/v2/embed/tv/${tvId}/${s}/${e}`;
         }
 
         async function getActors(url, isNew = true) {
@@ -1108,24 +1004,14 @@
             ]);
             const person = await pRes.json();
             const credits = await mRes.json();
-
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
-                <div class="actor-header">
-                    <img src="${person.profile_path ? IMG_PATH + person.profile_path : 'https://via.placeholder.com/300x450'}">
-                    <div class="actor-bio">
+                <div class="actor-header" style="display:flex; gap:20px; padding:40px;">
+                    <img src="${person.profile_path ? IMG_PATH + person.profile_path : ''}" style="width:200px; border-radius:20px;">
+                    <div>
                         <h2>${person.name}</h2>
-                        <p>${person.biography || 'Məlumat yoxdur.'}</p>
+                        <p>${person.biography || ''}</p>
                     </div>
-                </div>
-                <h3 style="padding:20px 40px;">Rol aldığı işlər:</h3>
-                <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap:20px; padding:0 40px 40px;">
-                    ${credits.cast.slice(0, 10).map(m => `
-                        <div class="movie" onclick="closeModal(); setTimeout(() => openDetails(${m.id}), 300)">
-                            <img src="${m.poster_path ? CAST_IMG_PATH + m.poster_path : 'https://via.placeholder.com/150x225'}">
-                            <h4 style="font-size:0.8rem; padding:10px; margin:0;">${m.title || m.name}</h4>
-                        </div>
-                    `).join('')}
                 </div>
             `;
         }
@@ -1141,7 +1027,6 @@
         }
 
         function updateWatchlistCount() { document.getElementById('watchlist-count').innerText = `Siyahım (${favorites.length})`; }
-
         function showFavorites() { isFavoritesView = true; main.innerHTML = ''; showMovies(favorites); }
 
         function filterByCountry(code, btn) {

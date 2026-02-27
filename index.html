@@ -464,114 +464,53 @@
 
         .loader { grid-column: 1/-1; text-align: center; padding: 20px; display: none; }
         
-        .actor-header { display: flex; gap: 30px; padding: 40px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .actor-header img { width: 250px; border-radius: 20px; }
-        .actor-bio h2 { margin-top: 0; }
-        .actor-movies-title { padding: 20px 40px 0; font-size: 1.5rem; }
-
-        /* Watch Party & Chat Styles */
+        /* --- YENİ OTAQ STİLLƏRİ --- */
         .watch-party-layout {
             display: grid;
-            grid-template-columns: 1fr 350px;
+            grid-template-columns: 1fr 400px;
             height: calc(100vh - 120px);
             background: #000;
         }
         .chat-container {
-            background: #111;
-            border-left: 1px solid #222;
+            background: #0d1117;
+            border-left: 1px solid #30363d;
             display: flex;
             flex-direction: column;
             height: 100%;
         }
-        .chat-header { padding: 15px; background: #1a1a1a; border-bottom: 1px solid #333; font-weight: bold; color: #10b981; }
-        #chat-messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .chat-msg { background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 10px; font-size: 0.9rem; }
-        .chat-msg .user { font-weight: bold; color: #a855f7; margin-right: 5px; }
-        .chat-msg .creator-crown { color: #fbbf24; margin-right: 5px; }
-        .chat-input-area { padding: 15px; background: #1a1a1a; display: flex; gap: 10px; }
-        .chat-input { flex: 1; background: #000; border: 1px solid #333; color: white; padding: 8px; border-radius: 5px; }
-        
-        .room-setup-screen {
-            padding: 100px 5%;
-            text-align: center;
-        }
-        .room-card {
-            background: var(--card-bg);
-            max-width: 500px;
-            margin: 0 auto;
-            padding: 40px;
-            border-radius: 30px;
-            border: 1px solid rgba(168, 85, 247, 0.2);
-        }
-        .room-input {
-            width: 100%;
-            padding: 15px;
-            margin: 10px 0;
-            background: #000;
-            border: 1px solid #333;
-            color: white;
-            border-radius: 10px;
-            text-align: center;
-        }
-        .room-btn-main {
-            width: 100%;
-            padding: 15px;
-            margin-top: 15px;
-            background: var(--primary-gradient);
-            border: none;
-            color: white;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        /* YENİ OTAQ STİLLƏRİ */
-        .pro-room-container {
-            max-width: 900px;
-            margin: 30px auto;
-            background: #111;
-            border: 1px solid #333;
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.6);
-        }
-        .room-movie-item {
+        .chat-header { 
+            padding: 15px; 
+            background: #161b22; 
+            border-bottom: 1px solid #30363d; 
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            background: #1a1a1a;
-            margin-bottom: 12px;
-            padding: 12px;
-            border-radius: 12px;
-            border: 1px solid #222;
-            transition: 0.3s;
         }
-        .room-movie-item:hover { border-color: #a855f7; transform: translateX(10px); }
-        .room-movie-item img { width: 60px; height: 90px; border-radius: 8px; object-fit: cover; margin-right: 20px; }
-        .room-movie-item h4 { margin: 0; font-size: 1.1rem; flex: 1; }
-        .add-room-trigger {
-            background: #10b981;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            margin-top: 10px;
-            cursor: pointer;
-            width: 100%;
-            font-weight: bold;
-            transition: 0.3s;
+        .user-list {
+            padding: 10px;
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            font-size: 0.8rem;
+            color: #8b949e;
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
         }
-        .add-room-trigger:hover { background: #059669; }
-        .remove-room-btn {
-            background: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
-            border: 1px solid #ef4444;
-            padding: 6px 15px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .remove-room-btn:hover { background: #ef4444; color: white; }
+        .user-tag { background: #21262d; padding: 4px 10px; border-radius: 20px; border: 1px solid #30363d; }
+        #chat-messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; }
+        .chat-msg { background: #21262d; padding: 10px 14px; border-radius: 15px; font-size: 0.9rem; border: 1px solid #30363d; max-width: 85%; }
+        .chat-msg.mine { align-self: flex-end; background: #238636; border-color: transparent; }
+        .chat-msg .user { font-weight: bold; color: #58a6ff; display: block; margin-bottom: 3px; font-size: 0.75rem; }
+        .chat-msg.mine .user { color: #aff5b4; }
+        .chat-input-area { padding: 20px; background: #161b22; display: flex; flex-direction: column; gap: 10px; }
+        .emoji-bar { display: flex; gap: 8px; font-size: 1.2rem; cursor: pointer; padding-bottom: 5px; }
+        .chat-controls { display: flex; gap: 10px; }
+        .chat-input { flex: 1; background: #0d1117; border: 1px solid #30363d; color: white; padding: 12px; border-radius: 8px; }
+        
+        .room-setup-screen { padding: 100px 5%; text-align: center; }
+        .room-card { background: var(--card-bg); max-width: 500px; margin: 0 auto; padding: 40px; border-radius: 30px; border: 1px solid rgba(168, 85, 247, 0.2); }
+        .room-input { width: 100%; padding: 15px; margin: 10px 0; background: #000; border: 1px solid #333; color: white; border-radius: 10px; text-align: center; }
+        .room-btn-main { width: 100%; padding: 15px; margin-top: 15px; background: var(--primary-gradient); border: none; color: white; border-radius: 10px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -647,8 +586,6 @@
         const movieContent = document.getElementById('movie-content');
         
         let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-        let myRoom = JSON.parse(localStorage.getItem('cinemaRoom')) || []; // Yeni Otaq Listi
-
         let currentPage = 1;
         let currentMode = 'movies'; 
         let currentApiUrl = `${BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}&language=${LANG}`;
@@ -708,48 +645,8 @@
             } else if(mode === 'party') {
                 document.getElementById('nav-party').classList.add('active');
                 movieContent.style.display = 'none';
-                renderProRoom(); // Yeni otaq renderingi
+                renderPartySetup();
             }
-        }
-
-        // --- YENİ PEŞƏKAR OTAQ FUNKSİYALARI ---
-        function renderProRoom() {
-            main.innerHTML = `
-                <div class="pro-room-container">
-                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:15px; margin-bottom:20px;">
-                        <h2 style="color:#10b981; margin:0;"><i class="fas fa-video"></i> Sinema Otağım</h2>
-                        <button class="random-btn" onclick="initParty('host')">Canlı Otaq Yarat (P2P)</button>
-                    </div>
-                    <div id="room-list-content">
-                        ${myRoom.length === 0 ? '<p style="text-align:center; color:#555;">Hələ ki film yoxdur. Kataloqdan otağa film əlavə edin.</p>' : ''}
-                    </div>
-                </div>
-            `;
-            const list = document.getElementById('room-list-content');
-            myRoom.forEach(movie => {
-                const item = document.createElement('div');
-                item.className = 'room-movie-item';
-                item.innerHTML = `
-                    <img src="${IMG_PATH + movie.poster}" alt="">
-                    <h4>${movie.title}</h4>
-                    <button class="player-btn" style="margin-right:10px;" onclick="openDetails(${movie.id})">İzlə</button>
-                    <button class="remove-room-btn" onclick="removeFromRoom(${movie.id})">Sil</button>
-                `;
-                list.appendChild(item);
-            });
-        }
-
-        function addToRoom(id, title, poster) {
-            if(myRoom.some(m => m.id === id)) return alert("Bu artıq otağınızda var!");
-            myRoom.push({id, title, poster});
-            localStorage.setItem('cinemaRoom', JSON.stringify(myRoom));
-            alert("Otağa əlavə edildi!");
-        }
-
-        function removeFromRoom(id) {
-            myRoom = myRoom.filter(m => m.id !== id);
-            localStorage.setItem('cinemaRoom', JSON.stringify(myRoom));
-            renderProRoom();
         }
 
         // --- PARTY SETUP ---
@@ -772,7 +669,8 @@
         }
 
         function initParty(type) {
-            const user = prompt("Adınızı daxil edin:") || "Qonaq";
+            const user = document.getElementById('party-username').value;
+            if(!user) return alert("Zəhmət olmasa ad seçin!");
             myUsername = user;
 
             if(type === 'host') {
@@ -799,20 +697,39 @@
             main.innerHTML = `
                 <div class="watch-party-layout">
                     <div class="video-side">
-                        <div style="padding:15px; background:#111; border-bottom:1px solid #222; display:flex; justify-content:space-between; align-items:center;">
-                            <span>ID: <b style="color:#10b981;">${roomId}</b></span>
-                            ${isHost ? '<button class="player-btn" onclick="changePartyMovie()">Film Seç</button>' : '<span style="color:#9ca3af;">Otaq Sahibi: Film seçilir...</span>'}
+                        <div style="padding:15px; background:#111; border-bottom:1px solid #30363d; display:flex; justify-content:space-between; align-items:center;">
+                            <span>Otaq ID: <b style="color:#10b981;">${roomId}</b></span>
+                            <div style="display:flex; gap:10px;">
+                                ${isHost ? '<button class="player-btn active" onclick="changePartyMovie()">🎬 Film Seç</button>' : '<span style="color:#8b949e;">🎥 Host film seçir...</span>'}
+                                <button class="player-btn" style="background:#ef4444; border:none;" onclick="location.reload()">Otaqdan Çıx</button>
+                            </div>
                         </div>
                         <div id="party-player-container" style="height: calc(100% - 65px);">
-                            <div style="display:flex; align-items:center; justify-content:center; height:100%; color:#444;">🎥 Film seçilməyib</div>
+                            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:#444;">
+                                <div style="font-size:3rem; margin-bottom:10px;">🍿</div>
+                                <div>Film seçilməsini gözləyirsiniz...</div>
+                            </div>
                         </div>
                     </div>
                     <div class="chat-container">
-                        <div class="chat-header">CANLI SÖHBƏT</div>
+                        <div class="chat-header">
+                            <span style="color:#10b981; font-weight:bold;">CANLI SÖHBƏT</span>
+                            <span id="user-count" style="font-size:0.8rem; color:#8b949e;">● 1 Onlayn</span>
+                        </div>
+                        <div class="user-list" id="user-list">
+                            <div class="user-tag">👤 ${myUsername} (Sən)</div>
+                        </div>
                         <div id="chat-messages"></div>
                         <div class="chat-input-area">
-                            <input type="text" id="chat-input" class="chat-input" placeholder="Mesaj yaz...">
-                            <button class="comment-btn" onclick="sendChatMessage()">></button>
+                            <div class="emoji-bar">
+                                <span onclick="addEmoji('😂')">😂</span> <span onclick="addEmoji('😍')">😍</span> 
+                                <span onclick="addEmoji('🔥')">🔥</span> <span onclick="addEmoji('😱')">😱</span> 
+                                <span onclick="addEmoji('👍')">👍</span> <span onclick="addEmoji('🎬')">🎬</span>
+                            </div>
+                            <div class="chat-controls">
+                                <input type="text" id="chat-input" class="chat-input" placeholder="Mesaj yaz...">
+                                <button class="comment-btn" onclick="sendChatMessage()">GÖNDƏR</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -820,11 +737,15 @@
             document.getElementById('chat-input').addEventListener('keypress', e => { if(e.key === 'Enter') sendChatMessage(); });
         }
 
+        function addEmoji(emoji) {
+            document.getElementById('chat-input').value += emoji;
+        }
+
         function listenForConnections() {
             peer.on('connection', c => {
                 conn = c;
                 setupConnHandlers();
-                addChatMessage("Sistem", "Dostunuz qoşuldu!", true);
+                addChatMessage("Sistem", "Dostunuz otağa daxil oldu! 👋", true);
             });
         }
 
@@ -840,31 +761,40 @@
             const msg = inp.value;
             if(!msg) return;
             if(conn) conn.send({ type: 'chat', user: myUsername, msg: msg });
-            addChatMessage(myUsername, msg);
+            addChatMessage(myUsername, msg, false, true);
             inp.value = '';
         }
 
-        function addChatMessage(user, msg, isSystem = false) {
+        function addChatMessage(user, msg, isSystem = false, isMine = false) {
             const box = document.getElementById('chat-messages');
             const div = document.createElement('div');
-            div.className = 'chat-msg';
-            const isCreator = user.includes("Rəsul Məmmədzadə");
-            div.innerHTML = `
-                ${isCreator ? '<span class="creator-crown">👑</span>' : ''}
-                <span class="user" style="${isCreator ? 'color:#fbbf24' : ''}">${user}:</span>
-                <span>${msg}</span>
-            `;
-            if(isSystem) div.style.color = '#10b981';
+            div.className = `chat-msg ${isMine ? 'mine' : ''}`;
+            
+            if(isSystem) {
+                div.style.background = "rgba(16, 185, 129, 0.1)";
+                div.style.color = "#10b981";
+                div.style.width = "100%";
+                div.style.textAlign = "center";
+                div.style.maxWidth = "100%";
+                div.innerHTML = `<i>${msg}</i>`;
+            } else {
+                div.innerHTML = `
+                    <span class="user">${user}</span>
+                    <span>${msg}</span>
+                `;
+            }
+            
             box.appendChild(div);
             box.scrollTop = box.scrollHeight;
         }
 
         function changePartyMovie() {
-            const id = prompt("Film və ya Serial TMDB ID daxil edin (Məsələn: 550):");
+            const id = prompt("Film və ya Serial TMDB ID daxil edin (Məsələn: '550' Döyüş Klubu üçün):");
             if(!id) return;
             const url = `https://vidsrc.cc/v2/embed/movie/${id}`;
             syncPartyPlayer(url);
             if(conn) conn.send({ type: 'sync-movie', embedUrl: url });
+            addChatMessage("Sistem", "Film otaq üçün yeniləndi! 🎬", true);
         }
 
         function syncPartyPlayer(url) {
@@ -914,7 +844,7 @@
                         <div class="rating">${item.vote_average.toFixed(1)}</div>
                         <div class="quick-view-data">
                             <span>📅 ${ (item.release_date || item.first_air_date || '').split('-')[0] }</span>
-                            <button class="add-room-trigger" onclick="event.stopPropagation(); addToRoom(${item.id}, '${title.replace(/'/g, "\\'")}', '${item.poster_path}')">Otağa əlavə et +</button>
+                            <span style="color:var(--accent-gold); font-size: 10px;">DETALLARA BAX</span>
                         </div>
                     </div>
                 `;

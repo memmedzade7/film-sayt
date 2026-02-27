@@ -1000,64 +1000,54 @@
     <script defer src="https://cloud.umami.is/script.js" data-website-id="0e532785-a35d-49f1-87d2-f45f5906d166"></script>
 
 </body>
-<script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+
+     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
 
 <script>
     let peer = null, conn = null, isHost = false;
     let myNick = localStorage.getItem('rm-nick') || 'İzləyici' + Math.floor(Math.random()*999);
 
-    // 1. Ümumi Otaqları Göstərmək (Firebase yoxdursa localStorage-dan oxuyur)
-    function showPublicRooms() {
-        const modal = document.getElementById('rooms-modal');
-        modal.style.display = 'block';
-        const list = document.getElementById('public-rooms-list');
+    // 1. Tab keçid funksiyası (Aktyorlar/Otaq arasında keçid üçün)
+    function showTab(tabId) {
+        // Bütün tab məzmunlarını gizlə
+        document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+        // Seçilən tabı göstər
+        const activeTab = document.getElementById(tabId);
+        if(activeTab) activeTab.style.display = 'block';
         
-        // Real vaxtlı olması üçün bura Firebase qoşulsa daha yaxşıdır
-        const rooms = JSON.parse(localStorage.getItem('public_rooms') || '[]');
-        
-        if(rooms.length > 0) {
-            list.innerHTML = rooms.map(r => `
-                <div class="room-item">
-                    <div class="room-info">
-                        <h4>${r.movieName}</h4>
-                        <p>👤 Lider: ${r.host}</p>
-                    </div>
-                    <button class="join-btn" onclick="joinRoom('${r.id}', '${r.movieId}')">Qoşul</button>
-                </div>
-            `).join('');
-        } else {
-            list.innerHTML = '<p style="color:#555; text-align:center;">Hal-hazırda aktiv otaq yoxdur...</p>';
-        }
+        // Tab düymələrinin aktivlik stilini dəyiş (isteğe bağlı)
+        document.querySelectorAll('.player-btn').forEach(btn => btn.classList.remove('active'));
+        event.currentTarget.classList.add('active');
     }
 
-    function joinRoom(id, movie) {
-        window.location.href = `?room=${id}&movie=${movie}`;
-    }
-
-    // 2. Otaq Yaradanda Düymələri Göstər (Observer)
+    // 2. Düymələri avtomatik olaraq yeni "Otaq" bölməsinə yerləşdirən Observer
     const observer = new MutationObserver(() => {
-        const tabs = document.querySelector('.player-tabs');
-        if (tabs && !document.getElementById('wp-btn')) {
+        const roomContainer = document.getElementById('dynamic-room-buttons');
+        if (roomContainer && !document.getElementById('wp-btn')) {
             const btn = document.createElement('button');
             btn.id = 'wp-btn'; btn.className = 'player-btn';
-            btn.style.background = '#10b981'; btn.innerHTML = '👥 Otaq Yarat';
+            btn.style.background = '#10b981'; 
+            btn.style.width = '100%';
+            btn.style.padding = '15px';
+            btn.innerHTML = '👥 Yeni Otaq Yarat';
             btn.onclick = startParty;
-            tabs.appendChild(btn);
+            roomContainer.appendChild(btn);
 
             const syncDiv = document.createElement('div');
             syncDiv.id = "sync-controls-area";
-            syncDiv.style.display = "none"; // Başlanğıcda gizli
-            syncDiv.style.marginTop = "10px";
+            syncDiv.style.display = "none";
+            syncDiv.style.marginTop = "15px";
             syncDiv.style.gap = "5px";
             syncDiv.innerHTML = `
                 <button class="player-btn" onclick="sendSync('play')" style="background:#059669; flex:1">🎬 Hamıda Başlat</button>
-                <button class="player-btn" onclick="sendSync('pause')" style="background:#dc2626; flex:1">⏸ Hamıda Dayandır</button>
+                <button class="player-btn" onclick="sendSync('pause')" style="background:#dc2626; flex:1">⏸ Hamıda Saxla</button>
             `;
-            tabs.after(syncDiv);
+            roomContainer.appendChild(syncDiv);
         }
     });
     observer.observe(document.body, { childList: true, subtree: true });
 
+    // 3. Otaq Yaradılması
     async function startParty() {
         isHost = true;
         const iframe = document.getElementById('main-player');
@@ -1071,7 +1061,7 @@
         
         const link = window.location.origin + window.location.pathname + `?room=${roomId}&movie=${movieId}`;
         navigator.clipboard.writeText(link);
-        alert("Otaq yaradıldı! Link kopyalandı. Artıq idarəetmə düymələri aktivdir.");
+        alert("Otaq yaradıldı! Link kopyalandı. Dostuna göndər.");
 
         // Siyahıya əlavə (Local simulyasiya)
         let rooms = JSON.parse(localStorage.getItem('public_rooms') || '[]');
@@ -1081,24 +1071,7 @@
         initConnection(roomId, true);
     }
 
-    // 3. Sinxronizasiya Əmrləri
-    function sendSync(action) {
-        if(conn && conn.open) {
-            conn.send({ type: 'sync', action: action });
-            remoteControl(action);
-        }
-    }
-
-    function remoteControl(action) {
-        const iframe = document.getElementById('main-player');
-        const shield = document.getElementById('protection-overlay');
-        if (action === 'play') {
-            if(shield) shield.click();
-        } else if (action === 'pause') {
-            const src = iframe.src; iframe.src = ''; iframe.src = src;
-        }
-    }
-
+    // 4. PeerJS və Sinxronizasiya
     function initConnection(id, hostStatus) {
         isHost = hostStatus;
         peer = new Peer(isHost ? id : null);
@@ -1118,9 +1091,41 @@
     }
 
     function setupConn() {
-        conn.on('data', (data) => {
-            if(data.type === 'sync') remoteControl(data.action);
+        conn.on('open', () => {
+            conn.on('data', (data) => {
+                if(data.type === 'sync') remoteControl(data.action);
+            });
         });
     }
+
+    function sendSync(action) {
+        if(conn && conn.open) {
+            conn.send({ type: 'sync', action: action });
+            remoteControl(action);
+        } else {
+            alert("Otaqda hələ kimsə yoxdur!");
+        }
+    }
+
+    function remoteControl(action) {
+        const iframe = document.getElementById('main-player');
+        const shield = document.getElementById('protection-overlay');
+        if (action === 'play') {
+            if(shield) shield.click();
+        } else if (action === 'pause') {
+            const src = iframe.src; iframe.src = ''; iframe.src = src;
+        }
+    }
+
+    // Linklə gələn istifadəçini yoxla
+    window.addEventListener('load', () => {
+        const p = new URLSearchParams(window.location.search);
+        if(p.has('room')) {
+            setTimeout(() => {
+                initConnection(p.get('room'), false);
+                showTab('room-section'); // Otaq tabını avtomatik aç
+            }, 1500);
+        }
+    });
 </script>
 </html>

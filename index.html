@@ -1,3 +1,4 @@
+# film-saytfullText:
 <!DOCTYPE html>
 <html lang="az">
 <head>
@@ -443,8 +444,8 @@
         }
 
         .chat-container {
-            width: 300px !important; /* Çat sahəsi sabit 300px */
-            min-width: 300px;
+            width: 450px !important; /* Çat sahəsi sabit 450px */
+            min-width: 450px;
             background: #0d1117;
             display: flex;
             flex-direction: column;
@@ -505,8 +506,11 @@
             border-top: 1px solid #30363d;
         }
         
-        .chat-controls { display: flex; gap: 8px; }
+        .chat-controls { display: flex; gap: 8px; flex-direction: column; }
         
+        .emoji-list { display: flex; gap: 8px; padding: 5px; flex-wrap: wrap;}
+        .emoji-item { cursor: pointer;}
+
         .chat-input { 
             flex: 1; 
             background: #0d1117; 
@@ -662,6 +666,8 @@
             { id: 10749, name: 'Romantik' }
         ];
 
+        const chatEmojis = ["😊", "😎", "😢", "😱", "😍", "🤝", "📽️", "🎬", "🤝", "👑", "🎲"];
+
         function init() {
             renderGenres();
             getMovies(currentApiUrl);
@@ -787,14 +793,25 @@
                         <div id="chat-messages"></div>
                         <div class="chat-input-area">
                             <div class="chat-controls">
-                                <input type="text" id="chat-input" class="chat-input" placeholder="Yazın...">
-                                <button class="comment-btn" style="padding:5px 12px;" onclick="sendChatMessage()">></button>
+                                <div class="emoji-list">
+                                    ${chatEmojis.map(emoji => `<span class="emoji-item" onclick="addEmojiToInput('${emoji}')">${emoji}</span>`).join('')}
+                                </div>
+                                <div style="display: flex; gap: 8px;">
+                                    <input type="text" id="chat-input" class="chat-input" placeholder="Yazın...">
+                                    <button class="comment-btn" style="padding:5px 12px;" onclick="sendChatMessage()">></button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             `;
             document.getElementById('chat-input').addEventListener('keypress', e => { if(e.key === 'Enter') sendChatMessage(); });
+        }
+
+        function addEmojiToInput(emoji) {
+            const input = document.getElementById('chat-input');
+            input.value += emoji;
+            input.focus();
         }
 
         async function openPartyCatalog() {
@@ -1095,3 +1112,4 @@
     </script>
 </body>
 </html>
+bu kodu tam gotur vedediklerimi et

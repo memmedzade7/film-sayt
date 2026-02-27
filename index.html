@@ -989,4 +989,50 @@
     <script defer src="https://cloud.umami.is/script.js" data-website-id="0e532785-a35d-49f1-87d2-f45f5906d166"></script>
 
 </body>
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+
+<script>
+    // 1. Düyməni avtomatik olaraq pəncərəyə (modal) əlavə edən funksiya
+    const observer = new MutationObserver(() => {
+        const tabs = document.querySelector('.player-tabs');
+        if (tabs && !document.getElementById('room-btn')) {
+            const roomBtn = document.createElement('button');
+            roomBtn.id = 'room-btn';
+            roomBtn.className = 'player-btn';
+            roomBtn.style.background = '#10b981';
+            roomBtn.style.fontWeight = 'bold';
+            roomBtn.innerHTML = '👥 Otaq Yarat';
+            
+            // Düyməyə basanda nə baş versin?
+            roomBtn.onclick = function() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const movieId = document.querySelector('iframe').src.split('/').pop();
+                const roomId = 'rm-' + Math.random().toString(36).substr(2, 7);
+                const partyLink = window.location.origin + window.location.pathname + `?room=${roomId}&movie=${movieId}`;
+                
+                navigator.clipboard.writeText(partyLink);
+                alert("Otaq yaradıldı! Link kopyalandı, dostuna göndər.");
+            };
+            tabs.appendChild(roomBtn);
+        }
+    });
+
+    // Saytda hər hansı dəyişiklik olanda (məsələn film açanda) yuxarıdakı kodu işə sal
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    // 2. Linklə gələn adam üçün filmi avtomatik açan hissə
+    window.addEventListener('load', () => {
+        const params = new URLSearchParams(window.location.search);
+        const room = params.get('room');
+        const movie = params.get('movie');
+
+        if (room && movie) {
+            // Əgər sənin openDetails funksiyan varsa, onu çağırırıq
+            if (typeof openDetails === "function") {
+                openDetails(movie);
+                setTimeout(() => alert("Otağa qoşuldunuz!"), 1000);
+            }
+        }
+    });
+</script>
 </html>

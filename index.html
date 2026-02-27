@@ -495,7 +495,17 @@
                 <div class="nav-link active" id="nav-home" onclick="switchTo('movies')">Filmlər</div>
                 <div class="nav-link" id="nav-series" onclick="switchTo('series')">Seriallar</div>
                 <div class="nav-link" id="nav-actors" onclick="switchTo('actors')">Aktyorlar</div>
-                <button class="nav-tab" onclick="showPublicRooms()" id="public-rooms-tab">🌐 Canlı Otaqlar</button> <button class="nav-tab" onclick="getRandomMovie()">Şanslı Seçim</button>
+                <button class="player-btn" onclick="showTab('room-section')" id="room-tab-btn">👥 Otaq</button>
+
+<div id="room-section" class="tab-content" style="display:none;">
+    <div class="room-controls-wrapper">
+        <h3 style="color: #10b981;">Watch Party Modu</h3>
+        <p style="font-size: 13px; color: #777;">Dostlarınla eyni vaxtda izlə və çatda müzakirə et.</p>
+        <div id="dynamic-room-buttons">
+            </div>
+    </div>
+</div>
+            
             </nav>
         </div>
         
@@ -992,44 +1002,17 @@
 </body>
 <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
 
-<style>
-    /* Otaq siyahısı üçün pəncərə dizaynı */
-    #rooms-modal {
-        display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-        width: 80%; max-width: 600px; background: #121212; border: 1px solid #333;
-        z-index: 10005; padding: 20px; border-radius: 15px; box-shadow: 0 0 50px #000;
-    }
-    .room-item {
-        display: flex; justify-content: space-between; align-items: center;
-        padding: 15px; background: #1a1a1a; margin-bottom: 10px; border-radius: 10px; border-left: 4px solid #10b981;
-    }
-    .room-info h4 { margin: 0; color: #fff; font-size: 14px; }
-    .room-info p { margin: 5px 0 0; color: #777; font-size: 11px; }
-    .join-btn { background: #10b981; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
-
-    /* Sinxron düymələri gizləmək üçün */
-    #sync-controls-area { display: none; margin-top: 10px; gap: 5px; }
-</style>
-
-<div id="rooms-modal">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-        <h3 style="color:white; margin:0;">🌐 Canlı Otaqlar</h3>
-        <span onclick="document.getElementById('rooms-modal').style.display='none'" style="cursor:pointer; color:#777; font-size:24px;">&times;</span>
-    </div>
-    <div id="public-rooms-list">
-        <p style="color:#555; text-align:center;">Hal-hazırda aktiv otaq yoxdur...</p>
-    </div>
-</div>
-
 <script>
     let peer = null, conn = null, isHost = false;
     let myNick = localStorage.getItem('rm-nick') || 'İzləyici' + Math.floor(Math.random()*999);
 
-    // 1. Ümumi Otaqları Göstərmək
+    // 1. Ümumi Otaqları Göstərmək (Firebase yoxdursa localStorage-dan oxuyur)
     function showPublicRooms() {
         const modal = document.getElementById('rooms-modal');
         modal.style.display = 'block';
         const list = document.getElementById('public-rooms-list');
+        
+        // Real vaxtlı olması üçün bura Firebase qoşulsa daha yaxşıdır
         const rooms = JSON.parse(localStorage.getItem('public_rooms') || '[]');
         
         if(rooms.length > 0) {
@@ -1042,6 +1025,8 @@
                     <button class="join-btn" onclick="joinRoom('${r.id}', '${r.movieId}')">Qoşul</button>
                 </div>
             `).join('');
+        } else {
+            list.innerHTML = '<p style="color:#555; text-align:center;">Hal-hazırda aktiv otaq yoxdur...</p>';
         }
     }
 
@@ -1049,7 +1034,7 @@
         window.location.href = `?room=${id}&movie=${movie}`;
     }
 
-    // 2. Otaq Yaradanda Düymələri Göstər
+    // 2. Otaq Yaradanda Düymələri Göstər (Observer)
     const observer = new MutationObserver(() => {
         const tabs = document.querySelector('.player-tabs');
         if (tabs && !document.getElementById('wp-btn')) {
@@ -1059,9 +1044,11 @@
             btn.onclick = startParty;
             tabs.appendChild(btn);
 
-            // Sinxron düymələri yaradırıq amma GİZLİ saxlayırıq
             const syncDiv = document.createElement('div');
             syncDiv.id = "sync-controls-area";
+            syncDiv.style.display = "none"; // Başlanğıcda gizli
+            syncDiv.style.marginTop = "10px";
+            syncDiv.style.gap = "5px";
             syncDiv.innerHTML = `
                 <button class="player-btn" onclick="sendSync('play')" style="background:#059669; flex:1">🎬 Hamıda Başlat</button>
                 <button class="player-btn" onclick="sendSync('pause')" style="background:#dc2626; flex:1">⏸ Hamıda Dayandır</button>
@@ -1074,19 +1061,19 @@
     async function startParty() {
         isHost = true;
         const iframe = document.getElementById('main-player');
+        if(!iframe) return alert("Pleyer tapılmadı!");
+        
         const movieId = iframe.src.split('/').pop();
         const movieName = document.querySelector('h2').innerText;
         const roomId = 'rm-' + Math.random().toString(36).substr(2, 6);
         
-        // Düymələri göstər
         document.getElementById('sync-controls-area').style.display = 'flex';
         
-        // Linki kopyala
         const link = window.location.origin + window.location.pathname + `?room=${roomId}&movie=${movieId}`;
         navigator.clipboard.writeText(link);
-        alert("Otaq yaradıldı və link kopyalandı! Artıq 'Hamıda Başlat' düyməsi aktivdir.");
+        alert("Otaq yaradıldı! Link kopyalandı. Artıq idarəetmə düymələri aktivdir.");
 
-        // Siyahıya əlavə et
+        // Siyahıya əlavə (Local simulyasiya)
         let rooms = JSON.parse(localStorage.getItem('public_rooms') || '[]');
         rooms.push({ id: roomId, movieId: movieId, movieName: movieName, host: myNick });
         localStorage.setItem('public_rooms', JSON.stringify(rooms));
@@ -1094,14 +1081,46 @@
         initConnection(roomId, true);
     }
 
-    // Əgər linklə gəlibsə düymələri dərhal göstər
+    // 3. Sinxronizasiya Əmrləri
+    function sendSync(action) {
+        if(conn && conn.open) {
+            conn.send({ type: 'sync', action: action });
+            remoteControl(action);
+        }
+    }
+
+    function remoteControl(action) {
+        const iframe = document.getElementById('main-player');
+        const shield = document.getElementById('protection-overlay');
+        if (action === 'play') {
+            if(shield) shield.click();
+        } else if (action === 'pause') {
+            const src = iframe.src; iframe.src = ''; iframe.src = src;
+        }
+    }
+
     function initConnection(id, hostStatus) {
         isHost = hostStatus;
         peer = new Peer(isHost ? id : null);
-        document.getElementById('sync-controls-area').style.display = 'flex';
-        // ... (Bağlantı kodlarının qalanı əvvəlki ilə eynidir)
+        
+        peer.on('open', () => {
+            if(!isHost) {
+                conn = peer.connect(id);
+                setupConn();
+            }
+        });
+
+        peer.on('connection', (c) => {
+            conn = c;
+            setupConn();
+            document.getElementById('sync-controls-area').style.display = 'flex';
+        });
     }
 
-    // ... (RemoteControl və PeerJS hadisələri bura daxildir)
+    function setupConn() {
+        conn.on('data', (data) => {
+            if(data.type === 'sync') remoteControl(data.action);
+        });
+    }
 </script>
 </html>

@@ -48,7 +48,7 @@
             --text-main: #ffffff;
             --text-muted: #9ca3af;
             --neon-glow: 0 0 20px rgba(168, 85, 247, 0.4);
-            --party-color: #00ff88;
+            --party-color: #818cf8; /* Yaşıl deyil, daha peşəkar Indigo */
         }
 
         body {
@@ -130,12 +130,12 @@
         /* Otaq düyməsinin peşəkar rəngi */
         .nav-link.party-nav {
             color: var(--party-color);
-            border: 1px solid rgba(0, 255, 136, 0.3);
-            box-shadow: inset 0 0 10px rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(129, 140, 248, 0.3);
+            box-shadow: inset 0 0 10px rgba(129, 140, 248, 0.1);
         }
         .nav-link.party-nav:hover {
-            background: rgba(0, 255, 136, 0.15);
-            box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+            background: rgba(129, 140, 248, 0.15);
+            box-shadow: 0 0 15px rgba(129, 140, 248, 0.3);
             border-color: var(--party-color);
         }
 
@@ -480,9 +480,15 @@
         /* --- YENİ OTAQ STİLLƏRİ --- */
         .watch-party-layout {
             display: grid;
-            grid-template-columns: 1fr 400px;
+            grid-template-columns: 1fr 380px; /* Chat hissəsi bir az kiçildi ki video böyüsün */
             height: calc(100vh - 120px);
             background: #000;
+        }
+        .video-side {
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #1f2937;
         }
         .chat-container {
             background: #0d1117;
@@ -512,16 +518,16 @@
         .user-tag { background: #21262d; padding: 4px 10px; border-radius: 20px; border: 1px solid #30363d; }
         #chat-messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; }
         .chat-msg { background: #21262d; padding: 10px 14px; border-radius: 15px; font-size: 0.9rem; border: 1px solid #30363d; max-width: 85%; }
-        .chat-msg.mine { align-self: flex-end; background: #238636; border-color: transparent; }
+        .chat-msg.mine { align-self: flex-end; background: #6366f1; border-color: transparent; }
         .chat-msg .user { font-weight: bold; color: #58a6ff; display: block; margin-bottom: 3px; font-size: 0.75rem; }
-        .chat-msg.mine .user { color: #aff5b4; }
+        .chat-msg.mine .user { color: #fff; }
         .chat-input-area { padding: 20px; background: #161b22; display: flex; flex-direction: column; gap: 10px; }
         .emoji-bar { display: flex; gap: 8px; font-size: 1.2rem; cursor: pointer; padding-bottom: 5px; }
         .chat-controls { display: flex; gap: 10px; }
         .chat-input { flex: 1; background: #0d1117; border: 1px solid #30363d; color: white; padding: 12px; border-radius: 8px; }
         
         .room-setup-screen { padding: 100px 5%; text-align: center; }
-        .room-card { background: var(--card-bg); max-width: 500px; margin: 0 auto; padding: 40px; border-radius: 30px; border: 1px solid rgba(168, 85, 247, 0.2); }
+        .room-card { background: var(--card-bg); max-width: 500px; margin: 0 auto; padding: 40px; border-radius: 30px; border: 1px solid rgba(129, 140, 248, 0.2); }
         .room-input { width: 100%; padding: 15px; margin: 10px 0; background: #000; border: 1px solid #333; color: white; border-radius: 10px; text-align: center; }
         .room-btn-main { width: 100%; padding: 15px; margin-top: 15px; background: var(--primary-gradient); border: none; color: white; border-radius: 10px; cursor: pointer; font-weight: bold; }
 
@@ -731,7 +737,7 @@
             main.innerHTML = `
                 <div class="room-setup-screen">
                     <div class="room-card">
-                        <h2 style="color:#00ff88;">🤝 Birgə İzləmə Otağı</h2>
+                        <h2 style="color:var(--party-color);">🤝 Birgə İzləmə Otağı</h2>
                         <p style="color:#9ca3af; font-size:0.9rem;">Dostlarınla eyni anda film izlə və söhbət et!</p>
                         <input type="text" id="party-username" class="room-input" placeholder="Adınızı daxil edin...">
                         <div style="margin-top:20px;">
@@ -775,13 +781,13 @@
                 <div class="watch-party-layout">
                     <div class="video-side">
                         <div style="padding:15px; background:#111; border-bottom:1px solid #30363d; display:flex; justify-content:space-between; align-items:center;">
-                            <span>Otaq ID: <b style="color:#00ff88;">${roomId}</b></span>
+                            <span>Otaq ID: <b style="color:var(--party-color);">${roomId}</b></span>
                             <div style="display:flex; gap:10px;">
                                 ${isHost ? '<button class="player-btn active" onclick="openPartyCatalog()">🎬 Film Seç (Kataloq)</button>' : '<span style="color:#8b949e;">🎥 Host film seçir...</span>'}
                                 <button class="player-btn" style="background:#ef4444; border:none;" onclick="location.reload()">Otaqdan Çıx</button>
                             </div>
                         </div>
-                        <div id="party-player-container" style="height: calc(100% - 65px);">
+                        <div id="party-player-container" style="flex:1; background:#000; position:relative;">
                             <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:#444;">
                                 <div style="font-size:3rem; margin-bottom:10px;">🍿</div>
                                 <div>Film seçilməsini gözləyirsiniz...</div>
@@ -790,8 +796,8 @@
                     </div>
                     <div class="chat-container">
                         <div class="chat-header">
-                            <span style="color:#00ff88; font-weight:bold;">CANLI SÖHBƏT</span>
-                            <span id="user-count" style="font-size:0.8rem; color:#8b949e;">● 1 Onlayn</span>
+                            <span style="color:var(--party-color); font-weight:bold;">CANLI SÖHBƏT</span>
+                            <span id="user-count" style="font-size:0.8rem; color:#8b949e;">● Aktiv</span>
                         </div>
                         <div class="user-list" id="user-list">
                             <div class="user-tag">👤 ${myUsername} (Sən)</div>
@@ -812,6 +818,13 @@
                 </div>
             `;
             document.getElementById('chat-input').addEventListener('keypress', e => { if(e.key === 'Enter') sendChatMessage(); });
+            
+            // Vaxt sinxronizasiyası üçün dinləyici (PostMessage API)
+            window.addEventListener('message', function(event) {
+                if (event.data && event.data.type === 'seek' && isHost) {
+                   if(conn) conn.send({ type: 'sync-time', time: event.data.time });
+                }
+            });
         }
 
         async function openPartyCatalog() {
@@ -868,6 +881,11 @@
             conn.on('data', data => {
                 if(data.type === 'chat') addChatMessage(data.user, data.msg);
                 if(data.type === 'sync-movie') syncPartyPlayer(data.embedUrl);
+                if(data.type === 'sync-time') {
+                    // İrəli/geri atma əmri gəldikdə iframe-ə siqnal göndər
+                    const ifr = document.querySelector('#party-player-container iframe');
+                    if(ifr) ifr.contentWindow.postMessage({ type: 'seek', time: data.time }, '*');
+                }
             });
         }
 
@@ -882,12 +900,13 @@
 
         function addChatMessage(user, msg, isSystem = false, isMine = false) {
             const box = document.getElementById('chat-messages');
+            if(!box) return;
             const div = document.createElement('div');
             div.className = `chat-msg ${isMine ? 'mine' : ''}`;
             
             if(isSystem) {
-                div.style.background = "rgba(0, 255, 136, 0.1)";
-                div.style.color = "#00ff88";
+                div.style.background = "rgba(129, 140, 248, 0.1)";
+                div.style.color = "var(--party-color)";
                 div.style.width = "100%";
                 div.style.textAlign = "center";
                 div.style.maxWidth = "100%";
@@ -904,8 +923,9 @@
         }
 
         function syncPartyPlayer(url) {
-            document.getElementById('party-player-container').innerHTML = `
-                <iframe src="${url}" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
+            const container = document.getElementById('party-player-container');
+            container.innerHTML = `
+                <iframe src="${url}" width="100%" height="100%" frameborder="0" allowfullscreen style="position:absolute; top:0; left:0;"></iframe>
             `;
         }
 

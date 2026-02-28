@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="az">
 <head>
@@ -601,31 +602,6 @@
             left: 0;
         }
 
-        /* Sinxron İdarəetmə Paneli */
-        .sync-controls {
-            background: #161b22;
-            padding: 15px;
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            border-top: 1px solid #30363d;
-        }
-        .sync-btn {
-            background: #21262d;
-            border: 1px solid #30363d;
-            color: white;
-            padding: 8px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: 0.2s;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .sync-btn:hover { background: #30363d; }
-        .sync-btn.host-active { border-color: #fbbf24; color: #fbbf24; }
-
         /* Setup Ekranı - TAM EKRAN PƏRDƏLƏR VƏ MƏRKƏZ KART */
         .room-setup-screen { 
             position: fixed;
@@ -731,6 +707,31 @@
             overflow-y: auto;
             padding-bottom: 100px;
         }
+
+        /* SINXRON İDARƏETMƏ PANELI */
+        .sync-controls {
+            background: #161b22;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            border-top: 1px solid #30363d;
+        }
+        .sync-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid #444;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+        .sync-btn:hover { background: var(--party-color); border-color: transparent; }
+        .sync-btn.host-only { border-color: #fbbf24; color: #fbbf24; }
     </style>
 </head>
 <body>
@@ -977,11 +978,11 @@
                                 <div style="font-weight:bold;">Film hələ başladılmayıb</div>
                             </div>
                         </div>
-                        
                         <div class="sync-controls">
-                            <button class="sync-btn ${isHost ? 'host-active' : ''}" onclick="syncVideoAction('play')">▶️ Başlat</button>
-                            <button class="sync-btn ${isHost ? 'host-active' : ''}" onclick="syncVideoAction('pause')">⏸️ Dayandır</button>
-                            <button class="sync-btn ${isHost ? 'host-active' : ''}" onclick="syncVideoAction('forward')">⏩ 10 saniyə irəli</button>
+                            <button class="sync-btn ${isHost ? 'host-only' : ''}" onclick="controlAction('play')">▶️ Başlat</button>
+                            <button class="sync-btn ${isHost ? 'host-only' : ''}" onclick="controlAction('pause')">⏸️ Dayandır</button>
+                            <button class="sync-btn ${isHost ? 'host-only' : ''}" onclick="controlAction('rewind')">⏪ -10s</button>
+                            <button class="sync-btn ${isHost ? 'host-only' : ''}" onclick="controlAction('forward')">⏩ +10s</button>
                             ${isHost ? '<span style="color:#fbbf24; font-size:10px; align-self:center;">HOST İDARƏSİ</span>' : ''}
                         </div>
                     </div>
@@ -1006,25 +1007,24 @@
             document.getElementById('chat-input').addEventListener('keypress', e => { if(e.key === 'Enter') sendChatMessage(); });
         }
 
-        // Sinxron idarəetmə funksiyası
-        function syncVideoAction(action) {
+        // Sinxron hərəkət funksiyası
+        function controlAction(action) {
             if(!isHost) {
-                alert("Yalnız Host videonu idarə edə bilər!");
+                alert("Yalnız Host (otağı yaradan) videonu idarə edə bilər!");
                 return;
             }
             
+            // Host pleyerini yenilə (iframe yenilənməsi vasitəsilə)
             const iframe = document.querySelector('#party-player-container iframe');
-            if(!iframe) return;
-
-            // Host hərəkəti özündə icra edir (iframe-i yeniləyərək və ya xüsusi parametrlə)
-            if(action === 'forward') {
-                // Iframe-i saniyə ilə irəli atmaq çətin olduğu üçün səhifəni yeniləmək ən sabitidir
-                iframe.src = iframe.src; 
+            if(iframe) {
+                // Burada iframe-ə mesaj göndərilir, vidsrc dəstəkləyirsə sinxron olacaq
+                iframe.contentWindow.postMessage({ type: 'playerControl', action: action }, '*');
             }
 
-            // Hərəkəti hamıya göndər
-            broadcast({ type: 'video-sync', action: action });
-            addChatMessage("Sistem", `Host videonu ${action === 'play' ? 'başlatdı' : 'dayandırdı/irəli atdı'}.`, true);
+            // Dostuna göndər
+            const data = { type: 'video-control', action: action };
+            broadcast(data);
+            addChatMessage("Sistem", `Video ${action === 'play' ? 'başladıldı' : 'dayandırıldı/dəyişdirildi'}.`, true);
         }
 
         function addEmojiToInput(emoji) {
@@ -1085,13 +1085,12 @@
                 if(data.type === 'sync-movie') {
                     syncPartyPlayer(data.embedUrl);
                 }
-                // Sinxron əmrlərin qəbulu
-                if(data.type === 'video-sync') {
+                if(data.type === 'video-control') {
                     const iframe = document.querySelector('#party-player-container iframe');
                     if(iframe) {
-                        iframe.src = iframe.src; // Pleyeri yeniləyərək hostla eyni vəziyyətə gətiririk
+                        iframe.contentWindow.postMessage({ type: 'playerControl', action: data.action }, '*');
+                        addChatMessage("Sistem", "Host videonu idarə etdi.", true);
                     }
-                    addChatMessage("Sistem", "Video sinxronlaşdırıldı.", true);
                 }
             });
 

@@ -575,6 +575,1135 @@
             overflow-y: auto;
             padding-bottom: 100px;
         }
+        <!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1200">
+    
+    <title>RM Film | Minlərlə film, Tək Məkan</title>
+    <meta name="description" content="RM Film - Ən son filmlər, seriallar və aktyorlar haqqında məlumat, onlayn izləmə imkanı və şəxsi izləmə siyahısı.">
+    <meta name="keywords" content="film izlə, serial izlə, yeni filmlər, RM Film, Rəsul Məmmədzadə, sinema, HD film">
+    <meta name="author" content="Rəsul Məmmədzadə">
+    <meta name="robots" content="index, follow">
+    
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://rmfilm.az/">
+    <meta property="og:title" content="RM Film | Minlərlə film, Tək Məkan">
+    <meta property="og:description" content="Ən son filmləri və serialları kəşf et. Öz siyahını yarat və onlayn izlə.">
+    <meta property="og:image" content="https://cdn-icons-png.flaticon.com/512/3507/3507102.png">
+
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3507/3507102.png">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3507/3507102.png">
+
+    <style>
+        /* Mood-a görə dəyişən dinamik arxa fon təbəqəsi */
+        #bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            transition: background 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            background: var(--bg-dark);
+        }
+
+        #ambient-layer {
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            filter: blur(100px);
+            opacity: 0.5;
+            transition: background 1s ease;
+        }
+        :root {
+            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            --bg-dark: #05070a;
+            --card-bg: #111827;
+            --accent-gold: #fbbf24;
+            --text-main: #ffffff;
+            --text-muted: #9ca3af;
+            --neon-glow: 0 0 20px rgba(168, 85, 247, 0.4);
+            --party-color: #818cf8;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            overflow-x: auto;
+            min-width: 1200px;
+        }
+
+        header {
+            padding: 1.5rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(17, 24, 39, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .brand {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .logo {
+            font-size: 2.4rem;
+            font-weight: 900;
+            letter-spacing: -2px;
+            margin: 0;
+            background: linear-gradient(to right, #6366f1, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .slogan {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-top: 5px;
+            background: linear-gradient(90deg, #9ca3af, #ffffff, #9ca3af);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 3s linear infinite;
+        }
+
+        @keyframes shine {
+            to { background-position: 200% center; }
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 15px;
+            margin-left: 30px;
+        }
+        .nav-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            padding: 8px 15px;
+            border-radius: 8px;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: white;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .nav-link.party-nav {
+            color: var(--party-color);
+            border: 1px solid rgba(129, 140, 248, 0.3);
+            box-shadow: inset 0 0 10px rgba(129, 140, 248, 0.1);
+        }
+        .nav-link.party-nav:hover {
+            background: rgba(129, 140, 248, 0.15);
+            box-shadow: 0 0 15px rgba(129, 140, 248, 0.3);
+            border-color: var(--party-color);
+        }
+
+        .mood-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .mood-title {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        .mood-container {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        .mood-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #d1d5db;
+            padding: 10px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mood-happy:hover { background: #fbbf24 !important; color: #000 !important; box-shadow: 0 0 15px rgba(251, 191, 36, 0.4); border-color: transparent; }
+        .mood-strong:hover { background: #3b82f6 !important; color: #fff !important; box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); border-color: transparent; }
+        .mood-sad:hover { background: #6b7280 !important; color: #fff !important; box-shadow: 0 0 15px rgba(107, 114, 128, 0.4); border-color: transparent; }
+        .mood-scary:hover { background: #ef4444 !important; color: #fff !important; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); border-color: transparent; }
+        .mood-love:hover { background: #f472b6 !important; color: #fff !important; box-shadow: 0 0 15px rgba(244, 114, 182, 0.4); border-color: transparent; }
+
+        .watchlist-pill, .random-btn {
+            margin-top: 8px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .watchlist-pill {
+            background: rgba(99, 102, 241, 0.15);
+            color: #a855f7;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+        }
+
+        .random-btn {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+        }
+
+        .search {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            padding: 12px 25px;
+            color: white;
+            width: 280px;
+            transition: 0.4s;
+        }
+
+        .search:focus { width: 380px; outline: none; border-color: #a855f7; box-shadow: var(--neon-glow); }
+
+        .genres-container { display: flex; justify-content: center; gap: 10px; padding: 20px 5%; overflow-x: auto; }
+
+        .genre-tag {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+            padding: 8px 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: 0.3s;
+            white-space: nowrap;
+        }
+
+        .genre-tag:hover, .genre-tag.active {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: var(--neon-glow);
+            border-color: transparent;
+        }
+
+        main {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 40px;
+            padding: 20px 5% 100px;
+        }
+
+        .movie {
+            background: var(--card-bg);
+            border-radius: 24px;
+            overflow: hidden;
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .movie:hover {
+            transform: translateY(-15px) scale(1.02);
+            border-color: rgba(168, 85, 247, 0.6);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8), var(--neon-glow);
+        }
+
+        .movie img { 
+            width: 100%; 
+            height: 380px; 
+            object-fit: cover; 
+            transition: transform 0.6s ease, filter 0.6s ease;
+        }
+
+        .movie:hover img {
+            transform: scale(1.1);
+            filter: brightness(0.6);
+        }
+
+        .movie-info { 
+            padding: 20px; 
+            background: linear-gradient(to top, rgba(17, 24, 39, 0.95) 70%, transparent);
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            transform: translateY(70%);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-sizing: border-box;
+        }
+
+        .movie:hover .movie-info { transform: translateY(0); }
+
+        .quick-view-data {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .movie:hover .quick-view-data { opacity: 1; }
+
+        .movie-info h3 { 
+            margin: 0; 
+            font-size: 1.1rem; 
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: #fff;
+        }
+
+        .rating { color: var(--accent-gold); font-weight: 800; display: flex; align-items: center; gap: 5px; margin-top: 5px; }
+        .rating::before { content: '★'; }
+
+        .fav-btn {
+            position: absolute;
+            top: 15px; right: 15px;
+            background: rgba(0,0,0,0.6);
+            border: none;
+            color: white;
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 10;
+            font-size: 1.2rem;
+            transition: 0.3s;
+            backdrop-filter: blur(5px);
+        }
+        .fav-btn:hover { transform: scale(1.2); }
+        .fav-btn.active { color: #ff4757; background: white; }
+
+        .actor-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            text-align: center;
+            padding-bottom: 15px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .actor-card:hover { transform: translateY(-10px); border-color: #a855f7; }
+        .actor-card img { width: 100%; height: 300px; object-fit: cover; }
+        .actor-card h3 { margin: 15px 0 5px; font-size: 1rem; }
+        .actor-card p { color: var(--text-muted); font-size: 0.8rem; margin: 0; }
+
+        .modal {
+            position: fixed; inset: 0;
+            background: rgba(0, 0, 0, 0.95);
+            display: none; justify-content: center; align-items: center;
+            z-index: 2000; padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            width: 100%; max-width: 1100px; max-height: 90vh;
+            border-radius: 30px; overflow-y: auto;
+            position: relative; border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .close-modal { position: absolute; top: 20px; right: 20px; font-size: 2.5rem; cursor: pointer; color: white; z-index: 100; }
+        
+        .video-container { 
+            width: 100%; 
+            aspect-ratio: 16/9; 
+            background: #000; 
+            position: relative; 
+            overflow: hidden;
+        }
+
+        .player-tabs {
+            display: flex;
+            background: #111;
+            padding: 15px;
+            gap: 10px;
+            border-bottom: 1px solid #222;
+            overflow-x: auto;
+        }
+        .player-btn {
+            background: #1a1a1a;
+            color: white;
+            border: 1px solid #333;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: 0.3s;
+            white-space: nowrap;
+        }
+        .player-btn.active { background: #6366f1; border-color: #6366f1; }
+        
+        .player-btn.alt-source { background: #fbbf24; color: #000; font-weight: bold; border: none; }
+
+        .details-grid { padding: 40px; display: grid; grid-template-columns: 300px 1fr; gap: 40px; }
+        .details-grid img { width: 100%; border-radius: 20px; }
+
+        .comment-btn {
+            background: var(--primary-gradient); color: white; border: none;
+            padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold;
+        }
+
+        .cast-container { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; margin-top: 20px;}
+        .cast-card { min-width: 100px; text-align: center; font-size: 0.8rem; cursor: pointer; transition: 0.3s;}
+        .cast-card:hover { color: #a855f7; }
+        .cast-card img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(168, 85, 247, 0.3);}
+
+        .country-tabs { display: flex; justify-content: center; gap: 15px; margin: 30px 0; }
+        .tab-btn {
+            background: #111; color: #999; border: 1px solid #333;
+            padding: 10px 25px; cursor: pointer; border-radius: 12px; transition: 0.4s;
+        }
+        .tab-btn.active { background: #fff; color: #000; }
+
+        .creator-text {
+            color: var(--text-muted);
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 1.5px; 
+            margin-bottom: 6px; 
+            text-transform: uppercase; 
+            text-align: right;
+            width: 100%;
+        }
+        .search-container { display: flex; flex-direction: column; align-items: flex-end; }
+
+        .loader { grid-column: 1/-1; text-align: center; padding: 20px; display: none; }
+        
+        /* --- TƏKMİLLƏŞDİRİLMİŞ OTAQ STRUKTURU --- */
+        .watch-party-layout {
+            display: flex !important;
+            flex-direction: row !important;
+            width: 100vw !important;
+            height: calc(100vh - 85px) !important; 
+            background: #000;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .video-side {
+            flex: 1 !important; 
+            height: 100%;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            order: 1;
+        }
+
+        .chat-container {
+            width: 400px !important; 
+            min-width: 400px;
+            background: #0d1117;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            border-left: 1px solid #30363d;
+            order: 2;
+        }
+
+        #party-player-container {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        #party-player-container iframe {
+            width: 100% !important;
+            height: 100% !important;
+            border: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .chat-header { 
+            padding: 15px; 
+            background: #161b22; 
+            border-bottom: 1px solid #30363d; 
+            text-align: center;
+            font-weight: bold;
+            font-size: 1rem;
+            color: var(--party-color);
+        }
+
+        #chat-messages { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 15px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px;
+            background: #0d1117;
+        }
+        
+        .chat-msg { 
+            background: #21262d; 
+            padding: 10px 14px; 
+            border-radius: 15px; 
+            font-size: 0.9rem; 
+            border: 1px solid #30363d; 
+            max-width: 85%; 
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+
+        .chat-msg.mine { align-self: flex-end; background: #6366f1; border-color: transparent; color: white; }
+        
+        .chat-input-area { 
+            padding: 15px; 
+            background: #161b22; 
+            border-top: 1px solid #30363d;
+        }
+        
+        .chat-controls { display: flex; gap: 10px; flex-direction: column; }
+        
+        .emoji-list { 
+            display: flex; 
+            gap: 10px; 
+            padding: 5px; 
+            flex-wrap: wrap; 
+            justify-content: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 8px;
+        }
+        .emoji-item { cursor: pointer; font-size: 1.2rem; transition: 0.2s; }
+        .emoji-item:hover { transform: scale(1.3); }
+
+        .chat-input { 
+            flex: 1; 
+            background: #0d1117; 
+            border: 1px solid #30363d; 
+            color: white; 
+            padding: 12px; 
+            border-radius: 10px; 
+            font-size: 0.9rem;
+            outline: none;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .chat-input:focus { border-color: #6366f1; }
+
+        /* Setup Ekranı */
+        .room-setup-screen { padding: 80px 5%; text-align: center; }
+        .room-card { background: var(--card-bg); max-width: 450px; margin: 0 auto; padding: 40px; border-radius: 30px; border: 1px solid rgba(129, 140, 248, 0.2); box-shadow: 0 10px 50px rgba(0,0,0,0.5); }
+        .room-input { width: 100%; padding: 15px; margin: 10px 0; background: #05070a; border: 1px solid #30363d; color: white; border-radius: 12px; text-align: center; box-sizing: border-box; }
+        .room-btn-main { width: 100%; padding: 15px; margin-top: 15px; background: var(--primary-gradient); border: none; color: white; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 1rem; transition: 0.3s; }
+        .room-btn-main:hover { opacity: 0.9; transform: scale(1.02); }
+
+        #party-catalog-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.98);
+            z-index: 3000;
+            padding: 30px 5%;
+        }
+        .catalog-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            gap: 20px;
+        }
+        .catalog-search {
+            flex: 1;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid #333;
+            padding: 12px 25px;
+            border-radius: 50px;
+            color: white;
+            outline: none;
+        }
+        #party-catalog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 25px;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding-bottom: 100px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="bg-overlay"></div>
+
+    <header>
+        <div style="display: flex; align-items: center;">
+            <div class="brand">
+                <h1 class="logo" onclick="location.reload()">RM Film</h1>
+                <span class="slogan">Minlərlə film, Tək Məkan</span>
+            </div>
+            <nav class="nav-menu">
+                <div class="nav-link active" id="nav-home" onclick="switchTo('movies')">Filmlər</div>
+                <div class="nav-link" id="nav-series" onclick="switchTo('series')">Seriallar</div>
+                <div class="nav-link" id="nav-actors" onclick="switchTo('actors')">Aktyorlar</div>
+                <div class="nav-link party-nav" id="nav-party" onclick="switchTo('party')">Otaq 🤝</div>
+            </nav>
+        </div>
+        
+        <div class="search-container">
+            <div class="creator-text">Yaradıcı: Rəsul Məmmədzadə 👑</div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <div id="watchlist-count" class="watchlist-pill" onclick="showFavorites()">Siyahım (0)</div>
+                <button class="random-btn" onclick="getRandomMovie()">🎲 Şans</button>
+                <form id="form"><input type="text" id="search" class="search" placeholder="Axtarış..."></form>
+            </div>
+        </div>
+    </header>
+
+    <div id="movie-content">
+        <div class="mood-section">
+            <div class="mood-title">BU GÜN ÖZÜNÜ NECƏ HİSS EDİRSƏN?</div>
+            <div class="mood-container">
+                <button class="mood-btn mood-happy" onclick="searchByMood(35, '#2d2401')"><span>😊</span> Şən</button>
+                <button class="mood-btn mood-strong" onclick="searchByMood(28, '#01162d')"><span>😎</span> Güclü</button>
+                <button class="mood-btn mood-sad" onclick="searchByMood(18, '#1a1a1a')"><span>😢</span> Kədərli</button>
+                <button class="mood-btn mood-scary" onclick="searchByMood(27, '#2d0101')"><span>😱</span> Həyəcanlı</button>
+                <button class="mood-btn mood-love" onclick="searchByMood(10749, '#2d011a')"><span>😍</span> Sevgi</button>
+            </div>
+        </div>
+
+        <div class="country-tabs">
+            <button class="tab-btn active" onclick="filterByCountry('all', this)">Hamısı</button>
+            <button class="tab-btn" onclick="filterByCountry('AZ', this)">Azərbaycan</button>
+            <button class="tab-btn" onclick="filterByCountry('TR', this)">Türkiyə</button>
+            <button class="tab-btn" onclick="filterByCountry('IN', this)">Hindistan</button>
+        </div>
+        <div id="genres" class="genres-container"></div>
+    </div>
+
+    <main id="main"></main>
+    <div id="loader" class="loader">Yüklənir...</div>
+
+    <div id="modal" class="modal">
+        <div class="modal-content" id="modal-content"></div>
+    </div>
+
+    <div id="party-catalog-overlay">
+        <div class="catalog-header">
+            <h2 style="color:white; margin:0;">🎬 Film Seçin</h2>
+            <input type="text" id="catalog-search-inp" class="catalog-search" placeholder="Filmlərdə axtar...">
+            <button class="player-btn" style="background:#ef4444;" onclick="document.getElementById('party-catalog-overlay').style.display='none'">Geri</button>
+        </div>
+        <div id="party-catalog-grid"></div>
+    </div>
+
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+
+    <script>
+        const API_KEY = '34d4692f40f9b4827503c570ebda8db7';
+        const BASE_URL = 'https://api.themoviedb.org/3';
+        const IMG_PATH = 'https://image.tmdb.org/t/p/w1280';
+        const CAST_IMG_PATH = 'https://image.tmdb.org/t/p/w200'; 
+        const LANG = 'tr-TR'; 
+
+        const main = document.getElementById('main');
+        const loader = document.getElementById('loader');
+        const modal = document.getElementById('modal');
+        const modalContent = document.getElementById('modal-content');
+        const bgOverlay = document.getElementById('bg-overlay');
+        const movieContent = document.getElementById('movie-content');
+        
+        let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+        let currentPage = 1;
+        let currentMode = 'movies'; 
+        let currentApiUrl = `${BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}&language=${LANG}`;
+        let isFavoritesView = false;
+        let isLoading = false;
+
+        let peer = null;
+        let conn = null;
+        let myUsername = "";
+        let isHost = false;
+        let catalogPage = 1;
+        let catalogQuery = "";
+        let isCatalogLoading = false;
+
+        const genres = [
+            { id: 28, name: 'Aksiyon' }, { id: 12, name: 'Macəra' },
+            { id: 16, name: 'Animasiya' }, { id: 35, name: 'Komediya' },
+            { id: 80, name: 'Cinayət' }, { id: 18, name: 'Dram' },
+            { id: 27, name: 'Qorxu' }, { id: 878, name: 'Fantastika' },
+            { id: 10749, name: 'Romantik' }
+        ];
+
+        const chatEmojis = ["😊", "😎", "😢", "😱", "😍", "🤝", "📽️", "🎬", "🤝", "👑", "🎲"];
+
+        function init() {
+            renderGenres();
+            getMovies(currentApiUrl);
+            updateWatchlistCount();
+            window.addEventListener('scroll', () => {
+                if (isLoading || isFavoritesView || currentMode === 'party') return;
+                if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
+                    currentPage++;
+                    if(currentMode === 'movies') getMovies(currentApiUrl, false);
+                    else if(currentMode === 'series') getSeries(currentApiUrl, false);
+                    else if(currentMode === 'actors') getActors(currentApiUrl, false);
+                }
+            });
+
+            document.getElementById('party-catalog-grid').addEventListener('scroll', e => {
+                const el = e.target;
+                if (el.scrollHeight - el.scrollTop <= el.clientHeight + 100) {
+                    if(!isCatalogLoading) {
+                        catalogPage++;
+                        loadPartyCatalog(false);
+                    }
+                }
+            });
+
+            document.getElementById('catalog-search-inp').addEventListener('input', e => {
+                catalogQuery = e.target.value;
+                catalogPage = 1;
+                loadPartyCatalog(true);
+            });
+        }
+
+        function switchTo(mode) {
+            currentMode = mode;
+            currentPage = 1;
+            main.innerHTML = '';
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            
+            if(mode === 'movies') {
+                document.getElementById('nav-home').classList.add('active');
+                movieContent.style.display = 'block';
+                currentApiUrl = `${BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}&language=${LANG}`;
+                getMovies(currentApiUrl);
+            } else if(mode === 'series') {
+                document.getElementById('nav-series').classList.add('active');
+                movieContent.style.display = 'block';
+                currentApiUrl = `${BASE_URL}/discover/tv?sort_by=popularity.desc&api_key=${API_KEY}&language=${LANG}`;
+                getSeries(currentApiUrl);
+            } else if(mode === 'actors') {
+                document.getElementById('nav-actors').classList.add('active');
+                movieContent.style.display = 'none';
+                currentApiUrl = `${BASE_URL}/person/popular?api_key=${API_KEY}&language=${LANG}`;
+                getActors(currentApiUrl);
+            } else if(mode === 'party') {
+                document.getElementById('nav-party').classList.add('active');
+                movieContent.style.display = 'none';
+                renderPartySetup();
+            }
+        }
+
+        function renderPartySetup() {
+            main.innerHTML = `
+                <div class="room-setup-screen">
+                    <div class="room-card">
+                        <h2 style="color:var(--party-color); margin-bottom:25px;">🤝 Watch Party</h2>
+                        <input type="text" id="party-username" class="room-input" placeholder="Adınız">
+                        <div style="margin-top:20px;">
+                            <button class="room-btn-main" onclick="initParty('host')">Yeni Otaq Yarat</button>
+                            <div style="margin: 20px 0; color:#444; font-size:0.8rem; font-weight:bold;">VƏ YA</div>
+                            <input type="text" id="join-room-id" class="room-input" placeholder="Otaq ID-si">
+                            <button class="room-btn-main" style="background:#3b82f6;" onclick="initParty('join')">Qoşul</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function initParty(type) {
+            const user = document.getElementById('party-username').value;
+            if(!user) return alert("Zəhmət olmasa ad seçin!");
+            myUsername = user;
+
+            if(type === 'host') {
+                isHost = true;
+                peer = new Peer();
+                peer.on('open', id => {
+                    renderActiveParty(id);
+                    listenForConnections();
+                });
+            } else {
+                const rid = document.getElementById('join-room-id').value;
+                if(!rid) return alert("ID daxil edilməyib!");
+                isHost = false;
+                peer = new Peer();
+                peer.on('open', () => {
+                    conn = peer.connect(rid);
+                    setupConnHandlers();
+                    renderActiveParty(rid);
+                });
+            }
+        }
+
+        function renderActiveParty(roomId) {
+            main.innerHTML = `
+                <div class="watch-party-layout">
+                    <div class="video-side">
+                        <div style="padding:10px 20px; background:#111; border-bottom:1px solid #30363d; display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-size:0.8rem; color:#8b949e;">Otaq ID: <b style="color:var(--party-color);">${roomId}</b></span>
+                            <div style="display:flex; gap:10px;">
+                                ${isHost ? '<button class="player-btn active" onclick="openPartyCatalog()">🎬 Film Seç</button>' : '<span style="color:#6366f1; font-size:0.8rem; animation: pulse 2s infinite;">• Film gözlənilir</span>'}
+                                <button class="player-btn" style="background:#ef4444; border:none;" onclick="location.reload()">Bağla</button>
+                            </div>
+                        </div>
+                        <div id="party-player-container">
+                            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:#555; background:#05070a;">
+                                <div style="font-size:3rem; margin-bottom:15px;">📽️</div>
+                                <div style="font-weight:bold;">Film hələ başladılmayıb</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chat-container">
+                        <div class="chat-header">Otaq Söhbəti</div>
+                        <div id="chat-messages"></div>
+                        <div class="chat-input-area">
+                            <div class="chat-controls">
+                                <div class="emoji-list">
+                                    ${chatEmojis.map(emoji => `<span class="emoji-item" onclick="addEmojiToInput('${emoji}')">${emoji}</span>`).join('')}
+                                </div>
+                                <div style="display: flex; gap: 8px; width: 100%;">
+                                    <input type="text" id="chat-input" class="chat-input" placeholder="Yazın...">
+                                    <button class="comment-btn" style="padding: 10px 15px; min-width: 50px;" onclick="sendChatMessage()">></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('chat-input').addEventListener('keypress', e => { if(e.key === 'Enter') sendChatMessage(); });
+        }
+
+        function addEmojiToInput(emoji) {
+            const input = document.getElementById('chat-input');
+            input.value += emoji;
+            input.focus();
+        }
+
+        async function openPartyCatalog() {
+            document.getElementById('party-catalog-overlay').style.display = 'block';
+            catalogPage = 1;
+            loadPartyCatalog(true);
+        }
+
+        async function loadPartyCatalog(isNew = true) {
+            isCatalogLoading = true;
+            const grid = document.getElementById('party-catalog-grid');
+            if(isNew) grid.innerHTML = '';
+            let url = catalogQuery 
+                ? `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${catalogQuery}&page=${catalogPage}&language=${LANG}`
+                : `${BASE_URL}/movie/popular?api_key=${API_KEY}&page=${catalogPage}&language=${LANG}`;
+            const res = await fetch(url);
+            const data = await res.json();
+            data.results.forEach(m => {
+                const div = document.createElement('div');
+                div.className = 'movie';
+                div.style.transform = "none";
+                div.innerHTML = `
+                    <img src="${m.poster_path ? CAST_IMG_PATH + m.poster_path : 'https://via.placeholder.com/150x225'}" style="height:250px;">
+                    <div style="padding:10px; font-size:0.8rem; text-align:center;">${m.title}</div>
+                `;
+                div.onclick = () => {
+                    const embed = `https://vidsrc.cc/v2/embed/movie/${m.id}`;
+                    syncPartyPlayer(embed);
+                    if(conn) conn.send({ type: 'sync-movie', embedUrl: embed });
+                    document.getElementById('party-catalog-overlay').style.display = 'none';
+                    addChatMessage("Sistem", `"${m.title}" başladıldı!`, true);
+                };
+                grid.appendChild(div);
+            });
+            isCatalogLoading = false;
+        }
+
+        function listenForConnections() {
+            peer.on('connection', c => {
+                conn = c;
+                setupConnHandlers();
+                addChatMessage("Sistem", "Yeni iştirakçı daxil oldu!", true);
+            });
+        }
+
+        function setupConnHandlers() {
+            conn.on('data', data => {
+                if(data.type === 'chat') addChatMessage(data.user, data.msg);
+                if(data.type === 'sync-movie') syncPartyPlayer(data.embedUrl);
+            });
+        }
+
+        function sendChatMessage() {
+            const inp = document.getElementById('chat-input');
+            const msg = inp.value;
+            if(!msg) return;
+            if(conn) conn.send({ type: 'chat', user: myUsername, msg: msg });
+            addChatMessage(myUsername, msg, false, true);
+            inp.value = '';
+        }
+
+        function addChatMessage(user, msg, isSystem = false, isMine = false) {
+            const box = document.getElementById('chat-messages');
+            if(!box) return;
+            const div = document.createElement('div');
+            div.className = `chat-msg ${isMine ? 'mine' : ''}`;
+            if(isSystem) {
+                div.style.background = "rgba(129, 140, 248, 0.05)";
+                div.style.color = "var(--party-color)";
+                div.style.textAlign = "center";
+                div.style.fontSize = "0.75rem";
+                div.innerHTML = `<i>${msg}</i>`;
+            } else {
+                div.innerHTML = `<span style="font-weight:bold; font-size:0.7rem; color:#818cf8; display:block; margin-bottom:2px;">${user}</span><span>${msg}</span>`;
+            }
+            box.appendChild(div);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function syncPartyPlayer(url) {
+            const container = document.getElementById('party-player-container');
+            container.innerHTML = `<iframe src="${url}" allowfullscreen></iframe>`;
+        }
+
+        async function getMovies(url, isNew = true) {
+            if (isNew) { main.innerHTML = ''; currentPage = 1; isFavoritesView = false; }
+            isLoading = true;
+            loader.style.display = 'block';
+            try {
+                const res = await fetch(`${url}&page=${currentPage}`);
+                const data = await res.json();
+                if (data.results) showMovies(data.results);
+            } catch (error) { console.error("Xəta:", error); }
+            isLoading = false;
+            loader.style.display = 'none';
+        }
+
+        async function getSeries(url, isNew = true) {
+            if (isNew) { main.innerHTML = ''; currentPage = 1; isFavoritesView = false; }
+            isLoading = true;
+            loader.style.display = 'block';
+            try {
+                const res = await fetch(`${url}&page=${currentPage}`);
+                const data = await res.json();
+                if (data.results) showMovies(data.results, true);
+            } catch (error) { console.error("Xəta:", error); }
+            isLoading = false;
+            loader.style.display = 'none';
+        }
+
+        function showMovies(items, isTV = false) {
+            items.forEach(item => {
+                const isFav = favorites.some(f => f.id === item.id);
+                const title = item.title || item.name;
+                const el = document.createElement('div');
+                el.className = 'movie';
+                el.innerHTML = `
+                    <button class="fav-btn ${isFav ? 'active' : ''}" onclick="event.stopPropagation(); toggleFav(${JSON.stringify(item).replace(/"/g, '&quot;')}, this)">❤</button>
+                    <img src="${item.poster_path ? IMG_PATH + item.poster_path : 'https://via.placeholder.com/300x450'}" alt="${title}">
+                    <div class="movie-info">
+                        <h3>${title}</h3>
+                        <div class="rating">${item.vote_average.toFixed(1)}</div>
+                        <div class="quick-view-data">
+                            <span>📅 ${ (item.release_date || item.first_air_date || '').split('-')[0] }</span>
+                            <span style="color:var(--accent-gold); font-size: 10px;">DETALLARA BAX</span>
+                        </div>
+                    </div>
+                `;
+                el.onclick = () => isTV ? openTVDetails(item.id) : openDetails(item.id);
+                main.appendChild(el);
+            });
+        }
+
+        async function openDetails(id) {
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            const [mRes, vRes, cRes] = await Promise.all([
+                fetch(`${BASE_URL}/movie/${id}?api_key=${API_KEY}&language=${LANG}`),
+                fetch(`${BASE_URL}/movie/${id}/videos?api_key=${API_KEY}`),
+                fetch(`${BASE_URL}/movie/${id}/credits?api_key=${API_KEY}&language=${LANG}`)
+            ]);
+            const movie = await mRes.json();
+            const credits = await cRes.json();
+            modalContent.innerHTML = `
+                <span class="close-modal" onclick="closeModal()">&times;</span>
+                <div class="video-container">
+                    <iframe id="main-player" src="https://vidsrc.cc/v2/embed/movie/${id}" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
+                </div>
+                <div class="details-grid">
+                    <img src="${IMG_PATH + movie.poster_path}">
+                    <div>
+                        <h2>${movie.title}</h2>
+                        <p>${movie.overview}</p>
+                        <div class="cast-container">
+                            ${credits.cast.slice(0, 8).map(c => `
+                                <div class="cast-card" onclick="openActorDetails(${c.id})">
+                                    <img src="${c.profile_path ? CAST_IMG_PATH + c.profile_path : 'https://via.placeholder.com/80x80'}">
+                                    <div>${c.name}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function openTVDetails(id) {
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            const [tvRes, cRes] = await Promise.all([
+                fetch(`${BASE_URL}/tv/${id}?api_key=${API_KEY}&language=${LANG}`),
+                fetch(`${BASE_URL}/tv/${id}/credits?api_key=${API_KEY}&language=${LANG}`)
+            ]);
+            const tv = await tvRes.json();
+            const credits = await cRes.json();
+            modalContent.innerHTML = `
+                <span class="close-modal" onclick="closeModal()">&times;</span>
+                <div class="video-container">
+                    <iframe id="main-player" src="https://vidsrc.cc/v2/embed/tv/${id}/1/1" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
+                </div>
+                <div class="details-grid">
+                    <img src="${IMG_PATH + tv.poster_path}">
+                    <div>
+                        <h2>${tv.name}</h2>
+                        <p>${tv.overview}</p>
+                        <div class="cast-container">
+                            ${credits.cast.slice(0, 8).map(c => `
+                                <div class="cast-card" onclick="openActorDetails(${c.id})">
+                                    <img src="${c.profile_path ? CAST_IMG_PATH + c.profile_path : 'https://via.placeholder.com/80x80'}">
+                                    <div>${c.name}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function getActors(url, isNew = true) {
+            if (isNew) { main.innerHTML = ''; currentPage = 1; }
+            isLoading = true;
+            loader.style.display = 'block';
+            try {
+                const res = await fetch(`${url}&page=${currentPage}`);
+                const data = await res.json();
+                data.results.forEach(actor => {
+                    const el = document.createElement('div');
+                    el.className = 'actor-card';
+                    el.innerHTML = `
+                        <img src="${actor.profile_path ? CAST_IMG_PATH + actor.profile_path : 'https://via.placeholder.com/200x300'}" alt="${actor.name}">
+                        <h3>${actor.name}</h3>
+                        <p>${actor.known_for_department}</p>
+                    `;
+                    el.onclick = () => openActorDetails(actor.id);
+                    main.appendChild(el);
+                });
+            } catch (error) { console.error(error); }
+            isLoading = false;
+            loader.style.display = 'none';
+        }
+
+        async function openActorDetails(id) {
+            modal.style.display = 'flex';
+            const [pRes, mRes] = await Promise.all([
+                fetch(`${BASE_URL}/person/${id}?api_key=${API_KEY}&language=${LANG}`),
+                fetch(`${BASE_URL}/person/${id}/combined_credits?api_key=${API_KEY}&language=${LANG}`)
+            ]);
+            const person = await pRes.json();
+            const credits = await mRes.json();
+            modalContent.innerHTML = `
+                <span class="close-modal" onclick="closeModal()">&times;</span>
+                <div class="actor-header" style="display:flex; gap:20px; padding:40px;">
+                    <img src="${person.profile_path ? IMG_PATH + person.profile_path : ''}" style="width:200px; border-radius:20px;">
+                    <div>
+                        <h2>${person.name}</h2>
+                        <p>${person.biography || ''}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function closeModal() { modal.style.display = 'none'; document.body.style.overflow = 'auto'; if(document.getElementById('main-player')) document.getElementById('main-player').src = ''; }
+        
+        function toggleFav(item, btn) {
+            const idx = favorites.findIndex(f => f.id === item.id);
+            if(idx > -1) { favorites.splice(idx, 1); btn.classList.remove('active'); }
+            else { favorites.push(item); btn.classList.add('active'); }
+            localStorage.setItem('favorites', JSON.stringify(favorites));
+            updateWatchlistCount();
+        }
+
+        function updateWatchlistCount() { document.getElementById('watchlist-count').innerText = `Siyahım (${favorites.length})`; }
+        function showFavorites() { isFavoritesView = true; main.innerHTML = ''; showMovies(favorites); }
+
+        function filterByCountry(code, btn) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            let type = currentMode === 'series' ? 'tv' : 'movie';
+            currentApiUrl = code === 'all' ? `${BASE_URL}/discover/${type}?api_key=${API_KEY}&language=${LANG}` : `${BASE_URL}/discover/${type}?api_key=${API_KEY}&with_origin_country=${code}&language=${LANG}`;
+            currentMode === 'series' ? getSeries(currentApiUrl) : getMovies(currentApiUrl);
+        }
+
+        function searchByMood(genreId, bgColor) {
+            bgOverlay.style.background = `radial-gradient(circle at center, ${bgColor} 0%, #05070a 100%)`;
+            currentApiUrl = `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${genreId}&language=${LANG}`;
+            getMovies(currentApiUrl);
+        }
+
+        function renderGenres() {
+            const container = document.getElementById('genres');
+            genres.forEach(g => {
+                const tag = document.createElement('div');
+                tag.className = 'genre-tag';
+                tag.innerText = g.name;
+                tag.onclick = () => {
+                    let type = currentMode === 'series' ? 'tv' : 'movie';
+                    currentApiUrl = `${BASE_URL}/discover/${type}?api_key=${API_KEY}&with_genres=${g.id}&language=${LANG}`;
+                    currentMode === 'series' ? getSeries(currentApiUrl) : getMovies(currentApiUrl);
+                };
+                container.appendChild(tag);
+            });
+        }
+
+        document.getElementById('form').addEventListener('submit', e => {
+            e.preventDefault();
+            const q = document.getElementById('search').value;
+            currentApiUrl = `${BASE_URL}/search/${currentMode === 'series' ? 'tv' : 'movie'}?api_key=${API_KEY}&query=${q}&language=${LANG}`;
+            currentMode === 'series' ? getSeries(currentApiUrl) : getMovies(currentApiUrl);
+        });
+
+        async function getRandomMovie() {
+            const res = await fetch(`${BASE_URL}/movie/popular?api_key=${API_KEY}`);
+            const data = await res.json();
+            openDetails(data.results[Math.floor(Math.random() * 20)].id);
+        }
+
+        init();
+    </script>
+</body>
+</html>
     </style>
 </head>
 <body>

@@ -829,6 +829,7 @@
         let catalogPage = 1;
         let catalogQuery = "";
         let isCatalogLoading = false;
+        let currentPartyEmbed = ""; // Sinxronizasiya üçün cari link
 
         const genres = [
             { id: 28, name: 'Aksiyon' }, { id: 12, name: 'Macəra' },
@@ -1006,24 +1007,27 @@
             document.getElementById('chat-input').addEventListener('keypress', e => { if(e.key === 'Enter') sendChatMessage(); });
         }
 
-        // Sinxron hərəkət funksiyası
+        // Sinxron hərəkət funksiyası - TƏKMİLLƏŞDİRİLDİ
         function controlAction(action) {
             if(!isHost) {
-                alert("Yalnız Host (otağı yaradan) videonu idarə edə bilər!");
+                alert("Yalnız Host videonu idarə edə bilər!");
                 return;
             }
             
-            // Host pleyerini yenilə (iframe yenilənməsi vasitəsilə)
             const iframe = document.querySelector('#party-player-container iframe');
-            if(iframe) {
-                // Burada iframe-ə mesaj göndərilir, vidsrc dəstəkləyirsə sinxron olacaq
-                iframe.contentWindow.postMessage({ type: 'playerControl', action: action }, '*');
+            if(!iframe) return;
+
+            // Host hərəkəti idarə edir
+            if(action === 'pause') {
+                syncPartyPlayer(""); // Dayandırmaq üçün müvəqqəti boşaltmaq (vidsrc məhdudiyyəti)
+            } else if(action === 'play') {
+                syncPartyPlayer(currentPartyEmbed); // Yenidən başlat
             }
 
-            // Dostuna göndər
-            const data = { type: 'video-control', action: action };
+            // Bütün qoşulanlara məlumat göndər
+            const data = { type: 'video-control', action: action, embed: currentPartyEmbed };
             broadcast(data);
-            addChatMessage("Sistem", `Video ${action === 'play' ? 'başladıldı' : 'dayandırıldı/dəyişdirildi'}.`, true);
+            addChatMessage("Sistem", `Video Host tərəfindən ${action === 'play' ? 'başladıldı' : 'dayandırıldı'}.`, true);
         }
 
         function addEmojiToInput(emoji) {
@@ -1056,9 +1060,9 @@
                     <div style="padding:10px; font-size:0.8rem; text-align:center;">${m.title}</div>
                 `;
                 div.onclick = () => {
-                    const embed = `https://vidsrc.cc/v2/embed/movie/${m.id}`;
-                    syncPartyPlayer(embed);
-                    broadcast({ type: 'sync-movie', embedUrl: embed });
+                    currentPartyEmbed = `https://vidsrc.cc/v2/embed/movie/${m.id}`;
+                    syncPartyPlayer(currentPartyEmbed);
+                    broadcast({ type: 'sync-movie', embedUrl: currentPartyEmbed });
                     document.getElementById('party-catalog-overlay').style.display = 'none';
                     addChatMessage("Sistem", `"${m.title}" başladıldı!`, true);
                 };
@@ -1072,6 +1076,10 @@
                 connections.push(conn);
                 setupConnHandlers(conn);
                 addChatMessage("Sistem", "Yeni iştirakçı daxil oldu!", true);
+                // Yeni qoşulana mövcud filmi göndər
+                if(currentPartyEmbed) {
+                    setTimeout(() => conn.send({ type: 'sync-movie', embedUrl: currentPartyEmbed }), 1000);
+                }
             });
         }
 
@@ -1082,14 +1090,13 @@
                     if(isHost) broadcast(data, conn);
                 }
                 if(data.type === 'sync-movie') {
+                    currentPartyEmbed = data.embedUrl;
                     syncPartyPlayer(data.embedUrl);
                 }
                 if(data.type === 'video-control') {
-                    const iframe = document.querySelector('#party-player-container iframe');
-                    if(iframe) {
-                        iframe.contentWindow.postMessage({ type: 'playerControl', action: data.action }, '*');
-                        addChatMessage("Sistem", "Host videonu idarə etdi.", true);
-                    }
+                    if(data.action === 'play') syncPartyPlayer(data.embed);
+                    if(data.action === 'pause') syncPartyPlayer(""); 
+                    addChatMessage("Sistem", "Host videonu sinxronlaşdırdı.", true);
                 }
             });
 
@@ -1153,6 +1160,14 @@
 
         function syncPartyPlayer(url) {
             const container = document.getElementById('party-player-container');
+            if(!url) {
+                container.innerHTML = `
+                    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:#fbbf24; background:#05070a;">
+                        <div style="font-size:3rem; margin-bottom:15px;">⏸️</div>
+                        <div style="font-weight:bold;">Host tərəfindən dayandırıldı</div>
+                    </div>`;
+                return;
+            }
             container.innerHTML = `<iframe src="${url}" allow-forms allow-scripts allow-same-origin allow-presentation sandbox="allow-forms allow-scripts allow-same-origin allow-presentation" allowfullscreen></iframe>`;
         }
 

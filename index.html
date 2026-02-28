@@ -2,7 +2,7 @@
 <html lang="az">
 <head>
     <meta charset="UTF-8">
-   <meta name="viewport" content="width=1200">
+    <meta name="viewport" content="width=1200">
     
     <title>RM Film | Minlərlə film, Tək Məkan</title>
     <meta name="description" content="RM Film - Ən son filmlər, seriallar və aktyorlar haqqında məlumat, onlayn izləmə imkanı və şəxsi izləmə siyahısı.">
@@ -58,10 +58,6 @@
             margin: 0;
             overflow-x: auto;
             min-width: 1200px;
-        
-    width: 1200px; /* Saytın enini 1200 pikseldə dondurur */
-    overflow-x: visible; /* Kənara çıxan hissələri gizləmir */
-
         }
 
         header {
@@ -579,58 +575,6 @@
             overflow-y: auto;
             padding-bottom: 100px;
         }
-        /* Telefonlar üçün xüsusi ayarlar */
-@media (max-width: 768px) {
-    /* 1. Saytın kənara daşmasını və donmasını qarşısını alır */
-    body {
-        min-width: auto !important;
-        overflow-x: hidden;
-    }
-
-    /* 2. Filmləri telefonda 2-2 düzür */
-    main {
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: 10px !important;
-        padding: 10px !important;
-    }
-
-    /* 3. Chat və Video hissəsini alt-alta qoyur */
-    #watch-party-modal .modal-content {
-        flex-direction: column !important;
-        width: 95% !important;
-        height: 90vh !important;
-        margin: 20px auto;
-    }
-
-    .video-side {
-        width: 100% !important;
-        height: 250px !important; /* Video yuxarıda */
-    }
-
-    .chat-container {
-        width: 100% !important;
-        height: 300px !important; /* Chat aşağıda */
-        border-left: none !important;
-        border-top: 1px solid #333;
-    }
-
-    /* 4. Menyu və Axtarış hissəsini səliqəyə salır */
-    header {
-        flex-direction: column;
-        height: auto !important;
-        padding: 10px;
-    }
-
-    .nav-menu {
-        margin: 10px 0;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-
-    .search {
-        width: 100% !important;
-    }
-}
     </style>
 </head>
 <body>

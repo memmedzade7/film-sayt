@@ -531,6 +531,8 @@
             border-radius: 10px; 
             font-size: 0.9rem;
             outline: none;
+            width: 100%;
+            box-sizing: border-box;
         }
         .chat-input:focus { border-color: #6366f1; }
 
@@ -809,9 +811,9 @@
                                 <div class="emoji-list">
                                     ${chatEmojis.map(emoji => `<span class="emoji-item" onclick="addEmojiToInput('${emoji}')">${emoji}</span>`).join('')}
                                 </div>
-                                <div style="display: flex; gap: 8px;">
+                                <div style="display: flex; gap: 8px; width: 100%;">
                                     <input type="text" id="chat-input" class="chat-input" placeholder="Yazın...">
-                                    <button class="comment-btn" style="padding:5px 12px;" onclick="sendChatMessage()">></button>
+                                    <button class="comment-btn" style="padding: 10px 15px; min-width: 50px;" onclick="sendChatMessage()">></button>
                                 </div>
                             </div>
                         </div>

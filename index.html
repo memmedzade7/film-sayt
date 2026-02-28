@@ -1071,7 +1071,8 @@
 
         function syncPartyPlayer(url) {
             const container = document.getElementById('party-player-container');
-            container.innerHTML = `<iframe src="${url}" allowfullscreen></iframe>`;
+            // Reklam bloklama üçün sandbox əlavə edildi
+            container.innerHTML = `<iframe src="${url}" allow-forms allow-scripts allow-same-origin allow-presentation sandbox="allow-forms allow-scripts allow-same-origin allow-presentation" allowfullscreen></iframe>`;
         }
 
         async function getMovies(url, isNew = true) {
@@ -1136,7 +1137,7 @@
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
                 <div class="video-container">
-                    <iframe id="main-player" src="https://vidsrc.cc/v2/embed/movie/${id}" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
+                    <iframe id="main-player" src="https://vidsrc.cc/v2/embed/movie/${id}" width="100%" height="100%" frameborder="0" allow-forms allow-scripts allow-same-origin allow-presentation sandbox="allow-forms allow-scripts allow-same-origin allow-presentation" allowfullscreen></iframe>
                 </div>
                 <div class="details-grid">
                     <img src="${IMG_PATH + movie.poster_path}">
@@ -1168,7 +1169,7 @@
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
                 <div class="video-container">
-                    <iframe id="main-player" src="https://vidsrc.cc/v2/embed/tv/${id}/1/1" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
+                    <iframe id="main-player" src="https://vidsrc.cc/v2/embed/tv/${id}/1/1" width="100%" height="100%" frameborder="0" allow-forms allow-scripts allow-same-origin allow-presentation sandbox="allow-forms allow-scripts allow-same-origin allow-presentation" allowfullscreen></iframe>
                 </div>
                 <div class="details-grid">
                     <img src="${IMG_PATH + tv.poster_path}">
@@ -1285,6 +1286,9 @@
             const data = await res.json();
             openDetails(data.results[Math.floor(Math.random() * 20)].id);
         }
+
+        // Reklamları əngəlləmək üçün pəncərə nəzarəti
+        window.open = function() { return null; }; 
 
         init();
     </script>

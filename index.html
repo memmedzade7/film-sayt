@@ -422,11 +422,11 @@
 
         .loader { grid-column: 1/-1; text-align: center; padding: 20px; display: none; }
         
-        /* --- TƏKMİLLƏŞDİRİLMİŞ OTAQ STRUKTURU --- */
+        /* --- TƏKMİLLƏŞDİRİLMİŞ OTAQ STRUKTURU (MOBİL UYĞUNLUQ İLƏ) --- */
         .watch-party-layout {
             display: flex !important;
             flex-direction: row !important;
-            width: 100vw !important;
+            width: 100% !important;
             height: calc(100vh - 85px) !important; 
             background: #000;
             overflow: hidden;
@@ -440,6 +440,7 @@
             display: flex;
             flex-direction: column;
             order: 1;
+            min-width: 0; /* Flexbox bug fix */
         }
 
         /* --- PROFESSIONAL CHAT DESIGN --- */
@@ -453,6 +454,29 @@
             border-left: 1px solid #30363d;
             order: 2;
             box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+        }
+
+        @media (max-width: 1024px) {
+            .watch-party-layout {
+                flex-direction: column !important;
+                height: auto !important;
+                overflow-y: auto;
+            }
+            .video-side {
+                width: 100% !important;
+                height: 56.25vw !important; /* 16:9 ratio */
+                flex: none !important;
+            }
+            .chat-container {
+                width: 100% !important;
+                min-width: 100% !important;
+                height: 500px !important;
+                border-left: none;
+                border-top: 1px solid #30363d;
+            }
+            body { min-width: 100% !important; }
+            header { flex-direction: column; gap: 15px; }
+            .nav-menu { margin: 0; flex-wrap: wrap; justify-content: center; }
         }
 
         .chat-header { 
@@ -713,21 +737,22 @@
             padding: 15px;
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 10px;
             border-top: 1px solid #30363d;
+            flex-wrap: wrap;
         }
         .sync-btn {
             background: rgba(255,255,255,0.05);
             border: 1px solid #444;
             color: white;
-            padding: 8px 20px;
+            padding: 8px 15px;
             border-radius: 8px;
             cursor: pointer;
             transition: 0.3s;
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
         }
         .sync-btn:hover { background: var(--party-color); border-color: transparent; }
         .sync-btn.host-only { border-color: #fbbf24; color: #fbbf24; }
@@ -753,7 +778,7 @@
         
         <div class="search-container">
             <div class="creator-text">Yaradıcı: Rəsul Məmmədzadə 👑</div>
-            <div style="display: flex; gap: 10px; align-items: center;">
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
                 <div id="watchlist-count" class="watchlist-pill" onclick="showFavorites()">Siyahım (0)</div>
                 <button class="random-btn" onclick="getRandomMovie()">🎲 Şans</button>
                 <form id="form"><input type="text" id="search" class="search" placeholder="Axtarış..."></form>
@@ -830,7 +855,7 @@
         let catalogQuery = "";
         let isCatalogLoading = false;
         let currentPartyEmbed = "";
-        let currentTimestamp = 0; // Saniyəni izləmək üçün
+        let currentTimestamp = 0; 
 
         const genres = [
             { id: 28, name: 'Aksiyon' }, { id: 12, name: 'Macəra' },
@@ -967,10 +992,10 @@
                 <div class="watch-party-layout">
                     <div class="video-side">
                         <div style="padding:10px 20px; background:#111; border-bottom:1px solid #30363d; display:flex; justify-content:space-between; align-items:center;">
-                            <span style="font-size:0.8rem; color:#8b949e;">Otaq ID: <b style="color:var(--party-color);">${roomId}</b></span>
-                            <div style="display:flex; gap:10px;">
-                                ${isHost ? '<button class="player-btn active" onclick="openPartyCatalog()">🎬 Film Seç</button>' : '<span style="color:#6366f1; font-size:0.8rem; animation: pulse 2s infinite;">• Film gözlənilir</span>'}
-                                <button class="player-btn" style="background:#ef4444; border:none;" onclick="location.reload()">Bağla</button>
+                            <span style="font-size:0.7rem; color:#8b949e;">ID: <b style="color:var(--party-color);">${roomId}</b></span>
+                            <div style="display:flex; gap:5px;">
+                                ${isHost ? '<button class="player-btn active" onclick="openPartyCatalog()">🎬 Seç</button>' : '<span style="color:#6366f1; font-size:0.7rem;">• Gözlənilir</span>'}
+                                <button class="player-btn" style="background:#ef4444; border:none;" onclick="location.reload()">X</button>
                             </div>
                         </div>
                         <div id="party-player-container">
@@ -982,8 +1007,8 @@
                         <div class="sync-controls">
                             <button class="sync-btn ${isHost ? 'host-only' : ''}" onclick="controlAction('play')">▶️ Başlat</button>
                             <button class="sync-btn ${isHost ? 'host-only' : ''}" onclick="controlAction('pause')">⏸️ Dayandır</button>
-                            <button class="sync-btn ${isHost ? 'host-only' : ''}" onclick="controlAction('rewind')">⏪ -30 s</button>
-                            <button class="sync-btn ${isHost ? 'host-only' : ''}" onclick="controlAction('forward')">⏩ +30 s</button>
+                            <button class="sync-btn ${isHost ? 'host-only' : ''}" onclick="controlAction('rewind')">⏪ -30s</button>
+                            <button class="sync-btn ${isHost ? 'host-only' : ''}" onclick="controlAction('forward')">⏩ +30s</button>
                         </div>
                     </div>
 
@@ -996,8 +1021,8 @@
                                     ${chatEmojis.map(emoji => `<span class="emoji-item" onclick="addEmojiToInput('${emoji}')">${emoji}</span>`).join('')}
                                 </div>
                                 <div class="chat-input-wrapper">
-                                    <input type="text" id="chat-input" class="chat-input" placeholder="Mesajınızı yazın...">
-                                    <button class="comment-btn" style="border-radius:10px; margin:4px;" onclick="sendChatMessage()">GÖNDƏR</button>
+                                    <input type="text" id="chat-input" class="chat-input" placeholder="Mesaj...">
+                                    <button class="comment-btn" style="border-radius:10px; margin:4px; padding:8px 15px;" onclick="sendChatMessage()">OK</button>
                                 </div>
                             </div>
                         </div>
@@ -1007,7 +1032,6 @@
             document.getElementById('chat-input').addEventListener('keypress', e => { if(e.key === 'Enter') sendChatMessage(); });
         }
 
-        // TƏKMİLLƏŞDİRİLMİŞ SİNXRON İDARƏETMƏ
         function controlAction(action) {
             if(!isHost) {
                 alert("Yalnız Host videonu idarə edə bilər!");
@@ -1017,18 +1041,16 @@
 
             if(action === 'forward') currentTimestamp += 30;
             if(action === 'rewind') currentTimestamp = Math.max(0, currentTimestamp - 30);
-            if(action === 'play') currentTimestamp += 1; // Play basanda donub qalmaması üçün kiçik təkan
+            if(action === 'play') currentTimestamp += 1; 
 
-            // Zaman kodunu vidsrc üçün t saniyə kimi əlavə edirik
             let updatedUrl = currentPartyEmbed + (currentPartyEmbed.includes('?') ? '&' : '?') + "t=" + currentTimestamp;
 
             if(action === 'pause') {
-                syncPartyPlayer(""); // Hamıda pleyeri "dayandırıldı" halına gətirir
+                syncPartyPlayer(""); 
             } else {
                 syncPartyPlayer(updatedUrl);
             }
 
-            // Hamıya yeni vəziyyəti göndər
             broadcast({ 
                 type: 'master-sync', 
                 action: action, 
@@ -1176,7 +1198,7 @@
                 container.innerHTML = `
                 <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:#fbbf24; background:#05070a;">
                     <div style="font-size:3rem; margin-bottom:15px;">⏸️</div>
-                    <div style="font-weight:bold;">Video Host tərəfindən dayandırıldı</div>
+                    <div style="font-weight:bold;">Video dayandırıldı</div>
                 </div>`;
                 return;
             }
@@ -1395,7 +1417,6 @@
             openDetails(data.results[Math.floor(Math.random() * 20)].id);
         }
 
-        // Reklam əngəlləmə (sadə səviyyə)
         window.open = function() { return null; };
 
         init();

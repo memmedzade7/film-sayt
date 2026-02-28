@@ -722,12 +722,12 @@
                 <div class="nav-link active" id="nav-home" onclick="switchTo('movies')">Filmlər</div>
                 <div class="nav-link" id="nav-series" onclick="switchTo('series')">Seriallar</div>
                 <div class="nav-link" id="nav-actors" onclick="switchTo('actors')">Aktyorlar</div>
-                <div class="nav-link party-nav" id="nav-party" onclick="switchTo('party')">Otaq </div>
+                <div class="nav-link party-nav" id="nav-party" onclick="switchTo('party')">Otaq 🤝</div>
             </nav>
         </div>
         
         <div class="search-container">
-            <div class="creator-text">Yaradıcı: Rəsul Məmmədzadə </div>
+            <div class="creator-text">Yaradıcı: Rəsul Məmmədzadə 👑</div>
             <div style="display: flex; gap: 10px; align-items: center;">
                 <div id="watchlist-count" class="watchlist-pill" onclick="showFavorites()">Siyahım (0)</div>
                 <button class="random-btn" onclick="getRandomMovie()">🎲 Şans</button>
@@ -796,8 +796,9 @@
         let isFavoritesView = false;
         let isLoading = false;
 
+        // PeerJS Dəyişənləri
         let peer = null;
-        let conn = null;
+        let connections = []; // Bütün qoşulanların siyahısı
         let myUsername = "";
         let isHost = false;
         let catalogPage = 1;
@@ -842,23 +843,6 @@
                 catalogQuery = e.target.value;
                 catalogPage = 1;
                 loadPartyCatalog(true);
-            });
-
-            // Iframe mesajlarını dinlə (Vidsrc kimi pleyerlərdən gələn play/pause eventləri üçün)
-            window.addEventListener('message', function(event) {
-                if (!conn) return;
-                
-                // Pleyer daxilindəki hərəkətləri tutmağa çalışırıq
-                if (event.data && event.data.source === 'vidsrc') {
-                    const status = event.data.status;
-                    if (status === 'playing' || status === 'paused') {
-                        conn.send({
-                            type: 'video-sync',
-                            status: status,
-                            time: event.data.time || 0
-                        });
-                    }
-                }
             });
         }
 
@@ -937,8 +921,8 @@
                     isHost = false;
                     peer = new Peer();
                     peer.on('open', () => {
-                        conn = peer.connect(rid);
-                        setupConnHandlers();
+                        const conn = peer.connect(rid);
+                        setupConnHandlers(conn);
                         finalizePartyUI(rid);
                     });
                 }
@@ -1022,7 +1006,7 @@
                 div.onclick = () => {
                     const embed = `https://vidsrc.cc/v2/embed/movie/${m.id}`;
                     syncPartyPlayer(embed);
-                    if(conn) conn.send({ type: 'sync-movie', embedUrl: embed });
+                    broadcast({ type: 'sync-movie', embedUrl: embed });
                     document.getElementById('party-catalog-overlay').style.display = 'none';
                     addChatMessage("Sistem", `"${m.title}" başladıldı!`, true);
                 };
@@ -1032,28 +1016,39 @@
         }
 
         function listenForConnections() {
-            peer.on('connection', c => {
-                conn = c;
-                setupConnHandlers();
+            peer.on('connection', conn => {
+                connections.push(conn);
+                setupConnHandlers(conn);
                 addChatMessage("Sistem", "Yeni iştirakçı daxil oldu!", true);
             });
         }
 
-        function setupConnHandlers() {
+        function setupConnHandlers(conn) {
             conn.on('data', data => {
-                if(data.type === 'chat') addChatMessage(data.user, data.msg);
-                if(data.type === 'sync-movie') syncPartyPlayer(data.embedUrl);
-                
-                // Video sinxronizasiya datası gələndə
+                if(data.type === 'chat') {
+                    addChatMessage(data.user, data.msg);
+                    if(isHost) broadcast(data, conn); // Host gələn mesajı hamıya yayır
+                }
+                if(data.type === 'sync-movie') {
+                    syncPartyPlayer(data.embedUrl);
+                }
                 if(data.type === 'video-sync') {
                     const iframe = document.querySelector('#party-player-container iframe');
                     if(iframe) {
-                        iframe.contentWindow.postMessage({
-                            source: 'vidsrc_control',
-                            status: data.status,
-                            time: data.time
-                        }, '*');
+                        iframe.contentWindow.postMessage({ type: 'control', action: data.action, time: data.time }, '*');
                     }
+                }
+            });
+
+            if(!isHost) {
+                connections = [conn]; // Qoşulan üçün tək connection host-dur
+            }
+        }
+
+        function broadcast(data, excludeConn = null) {
+            connections.forEach(c => {
+                if(c !== excludeConn && c.open) {
+                    c.send(data);
                 }
             });
         }
@@ -1062,7 +1057,15 @@
             const inp = document.getElementById('chat-input');
             const msg = inp.value;
             if(!msg) return;
-            if(conn) conn.send({ type: 'chat', user: myUsername, msg: msg });
+            
+            const chatData = { type: 'chat', user: myUsername, msg: msg };
+            
+            if(isHost) {
+                broadcast(chatData);
+            } else if(connections[0]) {
+                connections[0].send(chatData);
+            }
+            
             addChatMessage(myUsername, msg, false, true);
             inp.value = '';
         }
@@ -1314,8 +1317,8 @@
             openDetails(data.results[Math.floor(Math.random() * 20)].id);
         }
 
-        // Reklamları əngəlləmək üçün pəncərə nəzarəti
-        window.open = function() { return null; }; 
+        // Reklam əngəlləmə (sadə səviyyə)
+        window.open = function() { return null; };
 
         init();
     </script>

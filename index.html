@@ -707,7 +707,7 @@
             padding-bottom: 100px;
         }
 
-        /* SINXRON İDARƏETMƏ PANELI */
+        /* SİNXRON İDARƏETMƏ PANELİ */
         .sync-controls {
             background: #161b22;
             padding: 15px;
@@ -829,8 +829,8 @@
         let catalogPage = 1;
         let catalogQuery = "";
         let isCatalogLoading = false;
-        let currentPartyEmbed = ""; // Cari film linki
-        let currentTimestamp = 0; // Saniyə kodu
+        let currentPartyEmbed = "";
+        let currentTimestamp = 0; // Videonun cari saniyəsini saxlamaq üçün
 
         const genres = [
             { id: 28, name: 'Aksiyon' }, { id: 12, name: 'Macəra' },
@@ -982,8 +982,8 @@
                         <div class="sync-controls">
                             <button class="sync-btn ${isHost ? 'host-only' : ''}" onclick="controlAction('play')">▶️ Başlat</button>
                             <button class="sync-btn ${isHost ? 'host-only' : ''}" onclick="controlAction('pause')">⏸️ Dayandır</button>
-                            <button class="sync-btn ${isHost ? 'host-only' : ''}" onclick="controlAction('rewind')">⏪ -1 dəq</button>
-                            <button class="sync-btn ${isHost ? 'host-only' : ''}" onclick="controlAction('forward')">⏩ +1 dəq</button>
+                            <button class="sync-btn ${isHost ? 'host-only' : ''}" onclick="controlAction('rewind')">⏪ -30 s</button>
+                            <button class="sync-btn ${isHost ? 'host-only' : ''}" onclick="controlAction('forward')">⏩ +30 s</button>
                             ${isHost ? '<span style="color:#fbbf24; font-size:10px; align-self:center;">HOST İDARƏSİ</span>' : ''}
                         </div>
                     </div>
@@ -1008,38 +1008,35 @@
             document.getElementById('chat-input').addEventListener('keypress', e => { if(e.key === 'Enter') sendChatMessage(); });
         }
 
-        // TƏKMİLLƏŞDİRİLMİŞ SİNXRON İDARƏETMƏ
+        // TƏKMİLLƏŞDİRİLMİŞ SİNXRON İDARƏETMƏ (HOST ÜÇÜN)
         function controlAction(action) {
             if(!isHost) {
                 alert("Yalnız Host videonu idarə edə bilər!");
                 return;
             }
-            
             if(!currentPartyEmbed) return;
 
-            if(action === 'forward') currentTimestamp += 60;
-            if(action === 'rewind') currentTimestamp = Math.max(0, currentTimestamp - 60);
-
-            let syncUrl = currentPartyEmbed;
-            if(currentTimestamp > 0) {
-                // vidsrc zaman kodunu URL parametri kimi qəbul edir
-                syncUrl = currentPartyEmbed + (currentPartyEmbed.includes('?') ? '&' : '?') + "t=" + currentTimestamp;
-            }
+            if(action === 'forward') currentTimestamp += 30;
+            if(action === 'rewind') currentTimestamp = Math.max(0, currentTimestamp - 30);
+            
+            // vidsrc iframe-i üçün URL formatında zaman kodu (t=saniyə)
+            let syncUrl = currentPartyEmbed + (currentPartyEmbed.includes('?') ? '&' : '?') + "t=" + currentTimestamp;
 
             if(action === 'pause') {
-                syncPartyPlayer(""); // Hamıda dayandır (ekranı bağla)
+                // Hamıda videonu dayandır (pleyeri boşalt və ya dayandırılmış görüntü ver)
+                syncPartyPlayer(""); 
             } else {
-                syncPartyPlayer(syncUrl); // Hamıda eyni saniyədən başlat
+                syncPartyPlayer(syncUrl);
             }
 
-            const data = { 
+            // Bütün qoşulanlara vəziyyəti göndər
+            broadcast({ 
                 type: 'video-control', 
                 action: action, 
                 embed: syncUrl,
                 time: currentTimestamp 
-            };
-            
-            broadcast(data);
+            });
+
             addChatMessage("Sistem", `Sinxronizasiya: ${action}`, true);
         }
 
@@ -1107,9 +1104,13 @@
                     syncPartyPlayer(data.embedUrl);
                 }
                 if(data.type === 'video-control') {
+                    // Qonaq tərəfdə zamanı və pleyeri yenilə
                     currentTimestamp = data.time;
-                    if(data.action === 'pause') syncPartyPlayer("");
-                    else syncPartyPlayer(data.embed);
+                    if(data.action === 'pause') {
+                        syncPartyPlayer("");
+                    } else {
+                        syncPartyPlayer(data.embed);
+                    }
                     addChatMessage("Sistem", "Host hərəkəti sinxronlaşdırdı.", true);
                 }
             });

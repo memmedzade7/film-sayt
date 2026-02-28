@@ -829,7 +829,8 @@
         let catalogPage = 1;
         let catalogQuery = "";
         let isCatalogLoading = false;
-        let currentPartyEmbed = ""; // Sinxronizasiya üçün cari link
+        let currentPartyEmbed = ""; // Cari film linki
+        let currentTimestamp = 0; // Saniyə kodu
 
         const genres = [
             { id: 28, name: 'Aksiyon' }, { id: 12, name: 'Macəra' },
@@ -981,8 +982,8 @@
                         <div class="sync-controls">
                             <button class="sync-btn ${isHost ? 'host-only' : ''}" onclick="controlAction('play')">▶️ Başlat</button>
                             <button class="sync-btn ${isHost ? 'host-only' : ''}" onclick="controlAction('pause')">⏸️ Dayandır</button>
-                            <button class="sync-btn ${isHost ? 'host-only' : ''}" onclick="controlAction('rewind')">⏪ -10s</button>
-                            <button class="sync-btn ${isHost ? 'host-only' : ''}" onclick="controlAction('forward')">⏩ +10s</button>
+                            <button class="sync-btn ${isHost ? 'host-only' : ''}" onclick="controlAction('rewind')">⏪ -1 dəq</button>
+                            <button class="sync-btn ${isHost ? 'host-only' : ''}" onclick="controlAction('forward')">⏩ +1 dəq</button>
                             ${isHost ? '<span style="color:#fbbf24; font-size:10px; align-self:center;">HOST İDARƏSİ</span>' : ''}
                         </div>
                     </div>
@@ -1007,27 +1008,39 @@
             document.getElementById('chat-input').addEventListener('keypress', e => { if(e.key === 'Enter') sendChatMessage(); });
         }
 
-        // Sinxron hərəkət funksiyası - TƏKMİLLƏŞDİRİLDİ
+        // TƏKMİLLƏŞDİRİLMİŞ SİNXRON İDARƏETMƏ
         function controlAction(action) {
             if(!isHost) {
                 alert("Yalnız Host videonu idarə edə bilər!");
                 return;
             }
             
-            const iframe = document.querySelector('#party-player-container iframe');
-            if(!iframe) return;
+            if(!currentPartyEmbed) return;
 
-            // Host hərəkəti idarə edir
-            if(action === 'pause') {
-                syncPartyPlayer(""); // Dayandırmaq üçün müvəqqəti boşaltmaq (vidsrc məhdudiyyəti)
-            } else if(action === 'play') {
-                syncPartyPlayer(currentPartyEmbed); // Yenidən başlat
+            if(action === 'forward') currentTimestamp += 60;
+            if(action === 'rewind') currentTimestamp = Math.max(0, currentTimestamp - 60);
+
+            let syncUrl = currentPartyEmbed;
+            if(currentTimestamp > 0) {
+                // vidsrc zaman kodunu URL parametri kimi qəbul edir
+                syncUrl = currentPartyEmbed + (currentPartyEmbed.includes('?') ? '&' : '?') + "t=" + currentTimestamp;
             }
 
-            // Bütün qoşulanlara məlumat göndər
-            const data = { type: 'video-control', action: action, embed: currentPartyEmbed };
+            if(action === 'pause') {
+                syncPartyPlayer(""); // Hamıda dayandır (ekranı bağla)
+            } else {
+                syncPartyPlayer(syncUrl); // Hamıda eyni saniyədən başlat
+            }
+
+            const data = { 
+                type: 'video-control', 
+                action: action, 
+                embed: syncUrl,
+                time: currentTimestamp 
+            };
+            
             broadcast(data);
-            addChatMessage("Sistem", `Video Host tərəfindən ${action === 'play' ? 'başladıldı' : 'dayandırıldı'}.`, true);
+            addChatMessage("Sistem", `Sinxronizasiya: ${action}`, true);
         }
 
         function addEmojiToInput(emoji) {
@@ -1061,6 +1074,7 @@
                 `;
                 div.onclick = () => {
                     currentPartyEmbed = `https://vidsrc.cc/v2/embed/movie/${m.id}`;
+                    currentTimestamp = 0;
                     syncPartyPlayer(currentPartyEmbed);
                     broadcast({ type: 'sync-movie', embedUrl: currentPartyEmbed });
                     document.getElementById('party-catalog-overlay').style.display = 'none';
@@ -1076,9 +1090,8 @@
                 connections.push(conn);
                 setupConnHandlers(conn);
                 addChatMessage("Sistem", "Yeni iştirakçı daxil oldu!", true);
-                // Yeni qoşulana mövcud filmi göndər
                 if(currentPartyEmbed) {
-                    setTimeout(() => conn.send({ type: 'sync-movie', embedUrl: currentPartyEmbed }), 1000);
+                    setTimeout(() => conn.send({ type: 'sync-movie', embedUrl: currentPartyEmbed, time: currentTimestamp }), 1000);
                 }
             });
         }
@@ -1094,9 +1107,10 @@
                     syncPartyPlayer(data.embedUrl);
                 }
                 if(data.type === 'video-control') {
-                    if(data.action === 'play') syncPartyPlayer(data.embed);
-                    if(data.action === 'pause') syncPartyPlayer(""); 
-                    addChatMessage("Sistem", "Host videonu sinxronlaşdırdı.", true);
+                    currentTimestamp = data.time;
+                    if(data.action === 'pause') syncPartyPlayer("");
+                    else syncPartyPlayer(data.embed);
+                    addChatMessage("Sistem", "Host hərəkəti sinxronlaşdırdı.", true);
                 }
             });
 
@@ -1164,7 +1178,7 @@
                 container.innerHTML = `
                     <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:#fbbf24; background:#05070a;">
                         <div style="font-size:3rem; margin-bottom:15px;">⏸️</div>
-                        <div style="font-weight:bold;">Host tərəfindən dayandırıldı</div>
+                        <div style="font-weight:bold;">Video Host tərəfindən dayandırıldı</div>
                     </div>`;
                 return;
             }

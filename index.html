@@ -830,7 +830,7 @@
         let catalogQuery = "";
         let isCatalogLoading = false;
         let currentPartyEmbed = "";
-        let currentTimestamp = 0; // Videonun cari saniyəsini saxlamaq üçün
+        let currentTimestamp = 0; // Saniyəni izləmək üçün
 
         const genres = [
             { id: 28, name: 'Aksiyon' }, { id: 12, name: 'Macəra' },
@@ -984,7 +984,6 @@
                             <button class="sync-btn ${isHost ? 'host-only' : ''}" onclick="controlAction('pause')">⏸️ Dayandır</button>
                             <button class="sync-btn ${isHost ? 'host-only' : ''}" onclick="controlAction('rewind')">⏪ -30 s</button>
                             <button class="sync-btn ${isHost ? 'host-only' : ''}" onclick="controlAction('forward')">⏩ +30 s</button>
-                            ${isHost ? '<span style="color:#fbbf24; font-size:10px; align-self:center;">HOST İDARƏSİ</span>' : ''}
                         </div>
                     </div>
 
@@ -1008,7 +1007,7 @@
             document.getElementById('chat-input').addEventListener('keypress', e => { if(e.key === 'Enter') sendChatMessage(); });
         }
 
-        // TƏKMİLLƏŞDİRİLMİŞ SİNXRON İDARƏETMƏ (HOST ÜÇÜN)
+        // TƏKMİLLƏŞDİRİLMİŞ SİNXRON İDARƏETMƏ
         function controlAction(action) {
             if(!isHost) {
                 alert("Yalnız Host videonu idarə edə bilər!");
@@ -1018,26 +1017,26 @@
 
             if(action === 'forward') currentTimestamp += 30;
             if(action === 'rewind') currentTimestamp = Math.max(0, currentTimestamp - 30);
-            
-            // vidsrc iframe-i üçün URL formatında zaman kodu (t=saniyə)
-            let syncUrl = currentPartyEmbed + (currentPartyEmbed.includes('?') ? '&' : '?') + "t=" + currentTimestamp;
+            if(action === 'play') currentTimestamp += 1; // Play basanda donub qalmaması üçün kiçik təkan
+
+            // Zaman kodunu vidsrc üçün t saniyə kimi əlavə edirik
+            let updatedUrl = currentPartyEmbed + (currentPartyEmbed.includes('?') ? '&' : '?') + "t=" + currentTimestamp;
 
             if(action === 'pause') {
-                // Hamıda videonu dayandır (pleyeri boşalt və ya dayandırılmış görüntü ver)
-                syncPartyPlayer(""); 
+                syncPartyPlayer(""); // Hamıda pleyeri "dayandırıldı" halına gətirir
             } else {
-                syncPartyPlayer(syncUrl);
+                syncPartyPlayer(updatedUrl);
             }
 
-            // Bütün qoşulanlara vəziyyəti göndər
+            // Hamıya yeni vəziyyəti göndər
             broadcast({ 
-                type: 'video-control', 
+                type: 'master-sync', 
                 action: action, 
-                embed: syncUrl,
+                url: updatedUrl, 
                 time: currentTimestamp 
             });
 
-            addChatMessage("Sistem", `Sinxronizasiya: ${action}`, true);
+            addChatMessage("Sistem", `Sinxron: ${action}`, true);
         }
 
         function addEmojiToInput(emoji) {
@@ -1088,7 +1087,7 @@
                 setupConnHandlers(conn);
                 addChatMessage("Sistem", "Yeni iştirakçı daxil oldu!", true);
                 if(currentPartyEmbed) {
-                    setTimeout(() => conn.send({ type: 'sync-movie', embedUrl: currentPartyEmbed, time: currentTimestamp }), 1000);
+                    setTimeout(() => conn.send({ type: 'sync-movie', embedUrl: currentPartyEmbed }), 1000);
                 }
             });
         }
@@ -1103,15 +1102,13 @@
                     currentPartyEmbed = data.embedUrl;
                     syncPartyPlayer(data.embedUrl);
                 }
-                if(data.type === 'video-control') {
-                    // Qonaq tərəfdə zamanı və pleyeri yenilə
+                if(data.type === 'master-sync') {
                     currentTimestamp = data.time;
                     if(data.action === 'pause') {
                         syncPartyPlayer("");
                     } else {
-                        syncPartyPlayer(data.embed);
+                        syncPartyPlayer(data.url);
                     }
-                    addChatMessage("Sistem", "Host hərəkəti sinxronlaşdırdı.", true);
                 }
             });
 
@@ -1177,10 +1174,10 @@
             const container = document.getElementById('party-player-container');
             if(!url) {
                 container.innerHTML = `
-                    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:#fbbf24; background:#05070a;">
-                        <div style="font-size:3rem; margin-bottom:15px;">⏸️</div>
-                        <div style="font-weight:bold;">Video Host tərəfindən dayandırıldı</div>
-                    </div>`;
+                <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:#fbbf24; background:#05070a;">
+                    <div style="font-size:3rem; margin-bottom:15px;">⏸️</div>
+                    <div style="font-weight:bold;">Video Host tərəfindən dayandırıldı</div>
+                </div>`;
                 return;
             }
             container.innerHTML = `<iframe src="${url}" allow-forms allow-scripts allow-same-origin allow-presentation sandbox="allow-forms allow-scripts allow-same-origin allow-presentation" allowfullscreen></iframe>`;

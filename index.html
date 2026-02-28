@@ -843,6 +843,23 @@
                 catalogPage = 1;
                 loadPartyCatalog(true);
             });
+
+            // Iframe mesajlarını dinlə (Vidsrc kimi pleyerlərdən gələn play/pause eventləri üçün)
+            window.addEventListener('message', function(event) {
+                if (!conn) return;
+                
+                // Pleyer daxilindəki hərəkətləri tutmağa çalışırıq
+                if (event.data && event.data.source === 'vidsrc') {
+                    const status = event.data.status;
+                    if (status === 'playing' || status === 'paused') {
+                        conn.send({
+                            type: 'video-sync',
+                            status: status,
+                            time: event.data.time || 0
+                        });
+                    }
+                }
+            });
         }
 
         function switchTo(mode) {
@@ -904,7 +921,6 @@
             if(!user) return alert("Zəhmət olmasa ad seçin!");
             myUsername = user;
 
-            // Pərdələrin açılma animasiyası
             document.getElementById('room-setup').classList.add('open');
 
             setTimeout(() => {
@@ -1027,6 +1043,18 @@
             conn.on('data', data => {
                 if(data.type === 'chat') addChatMessage(data.user, data.msg);
                 if(data.type === 'sync-movie') syncPartyPlayer(data.embedUrl);
+                
+                // Video sinxronizasiya datası gələndə
+                if(data.type === 'video-sync') {
+                    const iframe = document.querySelector('#party-player-container iframe');
+                    if(iframe) {
+                        iframe.contentWindow.postMessage({
+                            source: 'vidsrc_control',
+                            status: data.status,
+                            time: data.time
+                        }, '*');
+                    }
+                }
             });
         }
 
@@ -1071,7 +1099,6 @@
 
         function syncPartyPlayer(url) {
             const container = document.getElementById('party-player-container');
-            // Reklam bloklama üçün sandbox əlavə edildi
             container.innerHTML = `<iframe src="${url}" allow-forms allow-scripts allow-same-origin allow-presentation sandbox="allow-forms allow-scripts allow-same-origin allow-presentation" allowfullscreen></iframe>`;
         }
 

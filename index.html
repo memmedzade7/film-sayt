@@ -1496,5 +1496,30 @@
         init();
     </script>
 </body>
+<!--
+1. "Vanilla JS"-dən React/Next.js-ə keçid üçün Prompt 
+ Bu prompt mövcud kodunu komponentlərə bölmək üçün istifadə olunur. 
+ 
+ Prompt: "Məndə təmiz JavaScript (Vanilla JS) ilə yazılmış bir film saytı kodu var. Bu kodu Next.js (App Router) və Tailwind CSS istifadə edərək yenidən qurmağını istəyirəm. Kodun içindəki funksiyaları (TMDB API-dən məlumat çəkmə, axtarış, filtrasiya) saxlamaq şərti ilə aşağıdakı komponentləri yarat: 
+ 
+ Navbar (Axtarış və kateqoriyalar ilə) 
+ 
+ MovieCard (Film afişası və reytinqi ilə) 
+ 
+ HeroSection (Giriş hissəsi və təsadüfi film üçün) 
+ 
+ MovieDetails (Film detalları və video pleyer üçün modal/səhifə) 
+ Xahiş edirəm, bütün state-ləri (filmlərin siyahısı, axtarış nəticələri) useState və useEffect ilə idarə et
+ 
+ 2. Firebase ilə Qeydiyyat və Verilənlər Bazası üçün Prompt 
+ Bu prompt localStorage-i ləğv edib bulud sisteminə keçmək üçündür. 
+ 
+ Prompt: "Layihəmə Firebase Auth və Firestore əlavə etmək istəyirəm. Mövcud localStorage əsaslı 'Siyahım' (Watchlist) funksiyasını Firebase ilə əvəz et. İstifadəçilər Google ilə giriş edə bilsinlər və hər bir istifadəçinin özünə məxsus film siyahısı Firestore-da saxlanılsın. İstifadəçi sayta daxil olduqda (login), onun siyahısı avtomatik yüklənsin. Mənə həm Firebase konfiqurasiya faylını, həm də addToWatchlist və getFromWatchlist funksiyalarının Firebase versiyasını yaz."
+ 
+ 3. API Açarının Gizlədilməsi (Backend Proxy) üçün Prompt 
+ Bu, təhlükəsizlik üçün ən vacib addımdır. 
+ 
+ Prompt: "TMDB API açarımı (API_KEY) brauzer tərəfində (frontend) gizlətmək və təhlükəsizliyi təmin etmək istəyirəm. Next.js API Routes (və ya sadə bir Node.js/Express serveri) istifadə edərək bir proxy yarada bilərsən? Brauzer birbaşa TMDB-yə yox, mənim daxili /api/movies endpoint-imə müraciət etsin və API açarı yalnız server tərəfində .env faylında qalsın. Həm backend kodunu, həm də frontend-dəki fetch sorğusunun yeni versiyasını mənə göstər."
+-->
 </html>
 

@@ -456,7 +456,7 @@
             padding: 20px; 
             background: #161b22; 
             border-bottom: 1px solid #30363d; 
-            text-align: left;
+            text-align: lefte;
             font-weight: 800;
             font-size: 1.1rem;
             color: #fff;
@@ -701,30 +701,6 @@
             overflow-y: auto;
             padding-bottom: 100px;
         }
-
-        .sync-controls {
-            background: #161b22;
-            padding: 15px;
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            border-top: 1px solid #30363d;
-        }
-        .sync-btn {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid #444;
-            color: white;
-            padding: 8px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.9rem;
-        }
-        .sync-btn:hover { background: var(--party-color); border-color: transparent; }
-        .sync-btn.host-only { border-color: #fbbf24; color: #fbbf24; }
 
         .film-links-bar-visual {
             background: linear-gradient(135deg, #0d0d0d 0%, #1a1a2e 50%, #0d0d0d 100%) !important;
@@ -1034,7 +1010,6 @@
                             <span style="font-size:0.8rem; color:#8b949e;">Otaq ID: <b style="color:var(--party-color);">${roomId}</b></span>
                             <div style="display:flex; gap:10px;">
                                 ${isHost ? '<button class="player-btn active" onclick="openPartyCatalog()">🎬 Film Seç</button>' : '<span style="color:#6366f1; font-size:0.8rem; animation: pulse 2s infinite;">• Film gözlənilir</span>'}
-                                <button class="player-btn" onclick="syncNow()" ${isHost ? '' : 'disabled style="opacity:0.6; cursor:not-allowed;"'}>🔄 Sinxronizasiya Et</button>
                                 <button class="player-btn" style="background:#ef4444; border:none;" onclick="location.reload()">Bağla</button>
                             </div>
                         </div>
@@ -1081,24 +1056,14 @@
                 controlAction('rewind');
             }
         }
-        function syncNow() {
-            if(!isHost || !partyVideoUrl) return;
-            const base = String(partyVideoUrl).split('?')[0].split('#')[0];
-            const t = Math.floor(partyVideoTime || 0);
-            const embedWithHash = base + '#t=' + t;
-            syncPartyPlayer(embedWithHash);
-            broadcast({ type: 'sync-embed', embedUrl: embedWithHash, currentTime: t });
-            addChatMessage("Sistem", "Sinxronizasiya göndərildi.", true);
-        }
+
         function controlAction(action) {
             if(!isHost) {
-                if(connections[0] && connections[0].open) connections[0].send({ type: 'video-control', action: action });
-                addChatMessage("Sistem", "Video idarəsi göndərildi.", true);
+                addChatMessage("Sistem", "İdarəetmə yalnız host üçündür.", true);
                 return;
             }
             
-            const iframe = document.querySelector('#party-player-container iframe');
-            if(!iframe || !partyVideoUrl) return;
+            if(!partyVideoUrl) return;
             
             if(action === 'forward') { partyVideoTime += 10; }
             if(action === 'rewind') { partyVideoTime = Math.max(0, partyVideoTime - 10); }
@@ -1109,13 +1074,12 @@
                 if(partyVideoPlayInterval) { clearInterval(partyVideoPlayInterval); }
                 partyVideoPlayInterval = setInterval(function() { partyVideoTime += 1; }, 1000);
             }
-            
-            const base = String(partyVideoUrl).split('?')[0].split('#')[0];
             const t = Math.floor(partyVideoTime || 0);
-            const embedWithHash = base + '#t=' + t;
-            syncPartyPlayer(embedWithHash);
-            broadcast({ type: 'sync-embed', embedUrl: embedWithHash, currentTime: t, action: action });
-            const details = action === 'pause' ? 'videonu dayandırdı' : (action === 'play' ? 'videonu başlatdı' : ('videonu ' + formatTime(t) + ' dəqiqəsinə çəkdi'));
+            const details = action === 'pause'
+                ? ('videonu ' + formatTime(t) + ' dəqiqəsində dayandırdı')
+                : (action === 'play'
+                    ? ('videonu ' + formatTime(t) + ' dəqiqəsindən başlatdı')
+                    : ('videonu ' + formatTime(t) + ' dəqiqəsinə keçirdi'));
             const notifyText = myUsername + ' ' + details;
             addChatMessage("Sistem", notifyText, true);
             showToast(notifyText);
@@ -1157,9 +1121,9 @@
                     partyVideoTime = 0;
                     if(partyVideoPlayInterval) { clearInterval(partyVideoPlayInterval); partyVideoPlayInterval = null; }
                     syncPartyPlayer(embed);
-                    broadcast({ type: 'sync-movie', embedUrl: embed });
                     document.getElementById('party-catalog-overlay').style.display = 'none';
-                    addChatMessage("Sistem", `"${m.title}" başladıldı!`, true);
+                    addChatMessage("Sistem", `"${m.title}" başladı (yalnız host).`, true);
+                    showToast(`"${m.title}" başladı`);
                 };
                 grid.appendChild(div);
             });
@@ -1184,77 +1148,11 @@
                     addChatMessage(data.user, data.msg);
                     if(isHost) broadcast(data, conn);
                 }
-                if(data.type === 'sync-movie') {
-                    partyVideoUrl = data.embedUrl || partyVideoUrl;
-                    syncPartyPlayer(data.embedUrl);
-                }
-                if(data.type === 'sync-embed') {
-                    const u = data.embedUrl;
-                    if(u) {
-                        const tHash = u.split('#t=')[1];
-                        if(tHash) partyVideoTime = Math.floor(parseInt(tHash, 10) || 0);
-                        partyVideoUrl = u.split('#')[0];
-                        syncPartyPlayer(u);
-                        addChatMessage("Sistem", "Eyni saniyəyə sinxron edildi.", true);
-                    }
-                    if(isHost) broadcast(data, conn);
-                }
-                if(data.type === 'sync-time') {
-                    if(!isHost) {
-                        partyVideoUrl = data.embedUrl || partyVideoUrl;
-                        partyVideoTime = Math.floor(data.currentTime || 0);
-                        var act = data.action || 'play';
-                        var autoPlayFlag = (act === 'play' || act === 'forward' || act === 'rewind');
-                        var base = String(partyVideoUrl).split('?')[0].split('#')[0];
-                        syncTime(base, partyVideoTime, autoPlayFlag);
-                        var iframe = document.querySelector('#party-player-container iframe');
-                        if(iframe) iframe.contentWindow.postMessage({ type: 'playerControl', action: act }, '*');
-                        addChatMessage("Sistem", "Video sinxronlandı.", true);
-                    } else {
-                        broadcast(data, conn);
-                    }
-                }
+                
                 if(data.type === 'notify') {
                     const txt = (data.user || 'İstifadəçi') + ' ' + (data.actionDetails || '');
                     addChatMessage("Sistem", txt, true);
                     showToast(txt);
-                }
-                if(data.type === 'video-control') {
-                    if(isHost) {
-                        var act = data.action || 'play';
-                        if(act === 'forward') { partyVideoTime += 10; }
-                        if(act === 'rewind') { partyVideoTime = Math.max(0, partyVideoTime - 10); }
-                        if(act === 'pause') {
-                            if(partyVideoPlayInterval) { clearInterval(partyVideoPlayInterval); partyVideoPlayInterval = null; }
-                        }
-                        if(act === 'play') {
-                            if(partyVideoPlayInterval) { clearInterval(partyVideoPlayInterval); }
-                            partyVideoPlayInterval = setInterval(function() { partyVideoTime += 1; }, 1000);
-                        }
-                        if(partyVideoUrl) {
-                            var base = String(partyVideoUrl).split('?')[0].split('#')[0];
-                            var autoPlayVal = (act === 'play' || act === 'forward' || act === 'rewind') ? '1' : '0';
-                            var seekUrl = base + '?t=' + Math.floor(partyVideoTime) + '&autoplay=' + autoPlayVal + '&x=' + Date.now();
-                            syncPartyPlayer(seekUrl);
-                        }
-                        broadcast({ type: 'video-control', action: act, embedUrl: partyVideoUrl, currentTime: Math.floor(partyVideoTime) });
-                        addChatMessage("Sistem", "Video idarə edildi.", true);
-                    } else {
-                        try {
-                            const baseUrl = data.embedUrl || partyVideoUrl;
-                            const t = Math.floor(data.currentTime || 0);
-                            const action = data.action || 'play';
-                            if(baseUrl) {
-                                const base = String(baseUrl).split('?')[0].split('#')[0];
-                                const autoPlayVal = (action === 'play' || action === 'forward' || action === 'rewind') ? '1' : '0';
-                                const seekUrl = base + '?t=' + t + '&autoplay=' + autoPlayVal + '&x=' + Date.now();
-                                syncPartyPlayer(seekUrl);
-                            }
-                            const iframe = document.querySelector('#party-player-container iframe');
-                            if(iframe) iframe.contentWindow.postMessage({ type: 'playerControl', action: action }, '*');
-                            addChatMessage("Sistem", "Host videonu idarə etdi.", true);
-                        } catch(err) { addChatMessage("Sistem", "Video sinxron xətası.", true); }
-                    }
                 }
             });
 
@@ -1346,12 +1244,6 @@
                     if(cont && cont.children.length === 0) cont.remove();
                 }, 200);
             }, 3000);
-        }
-
-        function syncTime(baseUrl, seconds, autoplay) {
-            const base = String(baseUrl).split('?')[0].split('#')[0];
-            const url = base + '?t=' + Math.floor(seconds || 0) + '&autoplay=' + (autoplay ? '1' : '0') + '&x=' + Date.now();
-            syncPartyPlayer(url);
         }
 
         function syncPartyPlayer(url) {

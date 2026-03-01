@@ -1225,6 +1225,8 @@
                 <div class="film-links-bar" style="display:flex; gap:15px; padding:15px 20px; background:#111; border-bottom:1px solid #222; flex-wrap:wrap;">
                     <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(movie.title)}" target="_blank" rel="noopener" class="player-btn" style="text-decoration:none;">YouTube</a>
                     <a href="https://www.google.com/search?q=${encodeURIComponent('перевод фильма ' + movie.title)}" target="_blank" rel="noopener" class="player-btn" style="text-decoration:none;">Перевод на русском</a>
+                    <a href="https://www.google.com/search?q=${encodeURIComponent('türkçe altyazı ' + movie.title)}" target="_blank" rel="noopener" class="player-btn" style="text-decoration:none;">Türkçe axtarış</a>
+                    <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(movie.title + ' trailer')}" target="_blank" rel="noopener" class="player-btn" style="text-decoration:none;">Treyler</a>
                 </div>
                 <div class="details-grid">
                     <img src="${IMG_PATH + movie.poster_path}">
@@ -1261,6 +1263,8 @@
                 <div class="film-links-bar" style="display:flex; gap:15px; padding:15px 20px; background:#111; border-bottom:1px solid #222; flex-wrap:wrap;">
                     <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(tv.name)}" target="_blank" rel="noopener" class="player-btn" style="text-decoration:none;">YouTube</a>
                     <a href="https://www.google.com/search?q=${encodeURIComponent('перевод сериала ' + tv.name)}" target="_blank" rel="noopener" class="player-btn" style="text-decoration:none;">Перевод на русском</a>
+                    <a href="https://www.google.com/search?q=${encodeURIComponent('türkçe altyazı ' + tv.name)}" target="_blank" rel="noopener" class="player-btn" style="text-decoration:none;">Türkçe axtarış</a>
+                    <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(tv.name + ' trailer')}" target="_blank" rel="noopener" class="player-btn" style="text-decoration:none;">Treyler</a>
                 </div>
                 <div class="details-grid">
                     <img src="${IMG_PATH + tv.poster_path}">

@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="az">
 <head>
@@ -20,6 +22,7 @@
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3507/3507102.png">
 
     <style>
+        /* Mood-a görə dəyişən dinamik arxa fon təbəqəsi */
         #bg-overlay {
             position: fixed;
             top: 0;
@@ -421,6 +424,7 @@
 
         .loader { grid-column: 1/-1; text-align: center; padding: 20px; display: none; }
         
+        /* --- TƏKMİLLƏŞDİRİLMİŞ OTAQ STRUKTURU --- */
         .watch-party-layout {
             display: flex !important;
             flex-direction: row !important;
@@ -440,6 +444,7 @@
             order: 1;
         }
 
+        /* --- PROFESSIONAL CHAT DESIGN --- */
         .chat-container {
             width: 400px !important; 
             min-width: 400px;
@@ -456,7 +461,7 @@
             padding: 20px; 
             background: #161b22; 
             border-bottom: 1px solid #30363d; 
-            text-align: lefte;
+            text-align: left;
             font-weight: 800;
             font-size: 1.1rem;
             color: #fff;
@@ -506,7 +511,7 @@
         }
 
         .chat-msg.mine { 
-            align-self: felx-end; 
+            align-self: flex-end; 
             background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); 
             border: none; 
             color: white; 
@@ -598,6 +603,7 @@
             left: 0;
         }
 
+        /* Setup Ekranı - TAM EKRAN PƏRDƏLƏR VƏ MƏRKƏZ KART */
         .room-setup-screen { 
             position: fixed;
             top: 0;
@@ -615,7 +621,7 @@
         .curtain {
             position: absolute;
             top: 0;
-            width: 50.5%;
+            width: 50.5%; /* Üst-üstə düşməsi üçün */
             height: 100%;
             background: #8b0000;
             background-image: repeating-linear-gradient(90deg, #8b0000 0px, #b30000 30px, #8b0000 60px);
@@ -626,6 +632,7 @@
         .curtain-left { left: 0; transform: translateX(0); border-right: 3px solid #5a0000; }
         .curtain-right { right: 0; transform: translateX(0); border-left: 3px solid #5a0000; }
         
+        /* Otağa keçid edildikdə pərdələrin açılması */
         .room-setup-screen.open .curtain-left { transform: translateX(-100%); }
         .room-setup-screen.open .curtain-right { transform: translateX(100%); }
 
@@ -691,7 +698,7 @@
             padding: 12px 25px;
             border-radius: 50px;
             color: white;
-            outline: none.
+            outline: none;
         }
         #party-catalog-grid {
             display: grid;
@@ -702,74 +709,30 @@
             padding-bottom: 100px;
         }
 
-        .film-links-bar-visual {
-            background: linear-gradient(135deg, #0d0d0d 0%, #1a1a2e 50%, #0d0d0d 100%) !important;
-            background-size: 200% 200% !important;
-            animation: filmLinksBgShift 8s ease infinite !important;
-            border-bottom: 1px solid transparent !important;
-            border-image: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.5), rgba(99, 102, 241, 0.5), rgba(168, 85, 247, 0.5), transparent) 1 !important;
-            box-shadow: 0 4px 20px rgba(168, 85, 247, 0.15), inset 0 1px 0 rgba(255,255,255,0.03) !important;
-        }
-        @keyframes filmLinksBgShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-        .film-link-btn {
-            position: relative !important;
-            overflow: hidden !important;
-            border-radius: 12px !important;
-            border: 1px solid rgba(168, 85, 247, 0.25) !important;
-            background: linear-gradient(145deg, rgba(30, 30, 50, 0.9), rgba(20, 20, 35, 0.95)) !important;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3), 0 0 0 0 rgba(168, 85, 247, 0.4) !important;
-            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease, border-color 0.35s ease !important;
-        }
-        .film-link-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
-            transition: left 0.5s ease;
-        }
-        .film-link-btn:hover {
-            transform: translateY(-4px) scale(1.05) !important;
-            border-color: rgba(168, 85, 247, 0.7) !important;
-            box-shadow: 0 8px 25px rgba(168, 85, 247, 0.35), 0 0 20px rgba(168, 85, 247, 0.2) !important;
-        }
-        .film-link-btn:hover::before {
-            left: 100%;
-        }
-        .film-link-btn:active {
-            transform: translateY(-2px) scale(1.02) !important;
-        }
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 9999;
+        /* SINXRON İDARƏETMƏ PANELI */
+        .sync-controls {
+            background: #161b22;
+            padding: 15px;
             display: flex;
-            flex-direction: column;
-            gap: 10px;
+            justify-content: center;
+            gap: 20px;
+            border-top: 1px solid #30363d;
         }
-        .toast {
-            background: rgba(0,0,0,0.8);
-            color: #fff;
-            padding: 10px 16px;
-            border-radius: 10px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
-            opacity: 0;
-            transform: translateY(-10px);
-            transition: opacity .2s ease, transform .2s ease;
-            font-weight: 700;
+        .sync-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid #444;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
             font-size: 0.9rem;
         }
-        .toast.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        .sync-btn:hover { background: var(--party-color); border-color: transparent; }
+        .sync-btn.host-only { border-color: #fbbf24; color: #fbbf24; }
     </style>
 </head>
 <body>
@@ -860,6 +823,7 @@
         let isFavoritesView = false;
         let isLoading = false;
 
+        // PeerJS Dəyişənləri
         let peer = null;
         let connections = []; 
         let myUsername = "";
@@ -867,9 +831,6 @@
         let catalogPage = 1;
         let catalogQuery = "";
         let isCatalogLoading = false;
-        let partyVideoUrl = "";
-        let partyVideoTime = 0;
-        let partyVideoPlayInterval = null;
 
         const genres = [
             { id: 28, name: 'Aksiyon' }, { id: 12, name: 'Macəra' },
@@ -1018,6 +979,13 @@
                                 <div style="font-weight:bold;">Film hələ başladılmayıb</div>
                             </div>
                         </div>
+                        <div class="sync-controls">
+                            <button class="sync-btn ${isHost ? 'host-only' : ''}" onclick="controlAction('play')">▶️ Başlat</button>
+                            <button class="sync-btn ${isHost ? 'host-only' : ''}" onclick="controlAction('pause')">⏸️ Dayandır</button>
+                            <button class="sync-btn ${isHost ? 'host-only' : ''}" onclick="controlAction('rewind')">⏪ -10s</button>
+                            <button class="sync-btn ${isHost ? 'host-only' : ''}" onclick="controlAction('forward')">⏩ +10s</button>
+                            ${isHost ? '<span style="color:#fbbf24; font-size:10px; align-self:center;">HOST İDARƏSİ</span>' : ''}
+                        </div>
                     </div>
 
                     <div class="chat-container">
@@ -1038,51 +1006,26 @@
                 </div>
             `;
             document.getElementById('chat-input').addEventListener('keypress', e => { if(e.key === 'Enter') sendChatMessage(); });
-            if(isHost) document.addEventListener('keydown', handlePartyKeys, { passive: false });
         }
 
-        function handlePartyKeys(e) {
-            if(!isHost) return;
-            if(!partyVideoUrl) return;
-            if(e.code === 'Space') {
-                e.preventDefault();
-                controlAction(partyVideoPlayInterval ? 'pause' : 'play');
-            } else if(e.code === 'ArrowRight') {
-                e.preventDefault();
-                controlAction('forward');
-            } else if(e.code === 'ArrowLeft') {
-                e.preventDefault();
-                controlAction('rewind');
-            }
-        }
-
+        // Sinxron hərəkət funksiyası
         function controlAction(action) {
             if(!isHost) {
-                addChatMessage("Sistem", "İdarəetmə yalnız host üçündür.", true);
+                alert("Yalnız Host (otağı yaradan) videonu idarə edə bilər!");
                 return;
             }
             
-            if(!partyVideoUrl) return;
-            
-            if(action === 'forward') { partyVideoTime += 10; }
-            if(action === 'rewind') { partyVideoTime = Math.max(0, partyVideoTime - 10); }
-            if(action === 'pause') {
-                if(partyVideoPlayInterval) { clearInterval(partyVideoPlayInterval); partyVideoPlayInterval = null; }
+            // Host pleyerini yenilə (iframe yenilənməsi vasitəsilə)
+            const iframe = document.querySelector('#party-player-container iframe');
+            if(iframe) {
+                // Burada iframe-ə mesaj göndərilir, vidsrc dəstəkləyirsə sinxron olacaq
+                iframe.contentWindow.postMessage({ type: 'playerControl', action: action }, '*');
             }
-            if(action === 'play') {
-                if(partyVideoPlayInterval) { clearInterval(partyVideoPlayInterval); }
-                partyVideoPlayInterval = setInterval(function() { partyVideoTime += 1; }, 1000);
-            }
-            const t = Math.floor(partyVideoTime || 0);
-            const details = action === 'pause'
-                ? 'videonu dayandırdı'
-                : (action === 'play'
-                    ? 'videonu başlatdı'
-                    : (action === 'forward' ? '10 saniyə irəli çəkdi' : '10 saniyə geri çəkdi'));
-            const notifyText = myUsername + ' ' + details;
-            addChatMessage("Sistem", notifyText, true);
-            showToast(notifyText);
-            broadcast({ type: 'notification', user: myUsername, action: action, actionDetails: details, currentTime: t });
+
+            // Dostuna göndər
+            const data = { type: 'video-control', action: action };
+            broadcast(data);
+            addChatMessage("Sistem", `Video ${action === 'play' ? 'başladıldı' : 'dayandırıldı/dəyişdirildi'}.`, true);
         }
 
         function addEmojiToInput(emoji) {
@@ -1116,14 +1059,10 @@
                 `;
                 div.onclick = () => {
                     const embed = `https://vidsrc.cc/v2/embed/movie/${m.id}`;
-                    partyVideoUrl = embed;
-                    partyVideoTime = 0;
-                    if(partyVideoPlayInterval) { clearInterval(partyVideoPlayInterval); partyVideoPlayInterval = null; }
                     syncPartyPlayer(embed);
                     broadcast({ type: 'sync-movie', embedUrl: embed });
                     document.getElementById('party-catalog-overlay').style.display = 'none';
-                    addChatMessage("Sistem", `"${m.title}" başladı`, true);
-                    showToast(`"${m.title}" başladı`);
+                    addChatMessage("Sistem", `"${m.title}" başladıldı!`, true);
                 };
                 grid.appendChild(div);
             });
@@ -1139,25 +1078,20 @@
         }
 
         function setupConnHandlers(conn) {
-            conn.on('open', () => {
-                if(!isHost) connections = [conn];
-                addChatMessage("Sistem", "Bağlantı quruldu.", true);
-            });
             conn.on('data', data => {
                 if(data.type === 'chat') {
                     addChatMessage(data.user, data.msg);
                     if(isHost) broadcast(data, conn);
                 }
                 if(data.type === 'sync-movie') {
-                    partyVideoUrl = data.embedUrl || partyVideoUrl;
-                    if(data.embedUrl) syncPartyPlayer(data.embedUrl);
-                    addChatMessage("Sistem", "Host filmi paylaşdı, pleyer yeniləndi.", true);
-                    showToast("Film paylaşdı: pleyer yeniləndi");
+                    syncPartyPlayer(data.embedUrl);
                 }
-                if(data.type === 'notification') {
-                    const txt = (data.user || 'İstifadəçi') + ' ' + (data.actionDetails || '');
-                    addChatMessage("Sistem", txt, true);
-                    showToast(txt);
+                if(data.type === 'video-control') {
+                    const iframe = document.querySelector('#party-player-container iframe');
+                    if(iframe) {
+                        iframe.contentWindow.postMessage({ type: 'playerControl', action: data.action }, '*');
+                        addChatMessage("Sistem", "Host videonu idarə etdi.", true);
+                    }
                 }
             });
 
@@ -1181,11 +1115,8 @@
             
             if(isHost) {
                 broadcast(chatData);
-            } else if(connections[0] && connections[0].open) {
+            } else if(connections[0]) {
                 connections[0].send(chatData);
-            } else {
-                addChatMessage("Sistem", "Bağlantı hazır deyil.", true);
-                return;
             }
             
             addChatMessage(myUsername, msg, false, true);
@@ -1222,6 +1153,60 @@
             box.scrollTop = box.scrollHeight;
         }
 
+        function syncPartyPlayer(url) {
+            const container = document.getElementById('party-player-container');
+            container.innerHTML = `<iframe src="${url}" allow-forms allow-scripts allow-same-origin allow-presentation sandbox="allow-forms allow-scripts allow-same-origin allow-presentation" allowfullscreen></iframe>`;
+        }
+
+        async function getMovies(url, isNew = true) {
+            if (isNew) { main.innerHTML = ''; currentPage = 1; isFavoritesView = false; }
+            isLoading = true;
+            loader.style.display = 'block';
+            try {
+                const res = await fetch(`${url}&page=${currentPage}`);
+                const data = await res.json();
+                if (data.results) showMovies(data.results);
+            } catch (error) { console.error("Xəta:", error); }
+            isLoading = false;
+            loader.style.display = 'none';
+        }
+
+        async function getSeries(url, isNew = true) {
+            if (isNew) { main.innerHTML = ''; currentPage = 1; isFavoritesView = false; }
+            isLoading = true;
+            loader.style.display = 'block';
+            try {
+                const res = await fetch(`${url}&page=${currentPage}`);
+                const data = await res.json();
+                if (data.results) showMovies(data.results, true);
+            } catch (error) { console.error("Xəta:", error); }
+            isLoading = false;
+            loader.style.display = 'none';
+        }
+
+        function showMovies(items, isTV = false) {
+            items.forEach(item => {
+                const isFav = favorites.some(f => f.id === item.id);
+                const title = item.title || item.name;
+                const el = document.createElement('div');
+                el.className = 'movie';
+                el.innerHTML = `
+                    <button class="fav-btn ${isFav ? 'active' : ''}" onclick="event.stopPropagation(); toggleFav(${JSON.stringify(item).replace(/"/g, '&quot;')}, this)">❤</button>
+                    <img src="${item.poster_path ? IMG_PATH + item.poster_path : 'https://via.placeholder.com/300x450'}" alt="${title}">
+                    <div class="movie-info">
+                        <h3>${title}</h3>
+                        <div class="rating">${item.vote_average.toFixed(1)}</div>
+                        <div class="quick-view-data">
+                            <span>📅 ${ (item.release_date || item.first_air_date || '').split('-')[0] }</span>
+                            <span style="color:var(--accent-gold); font-size: 10px;">DETALLARA BAX</span>
+                        </div>
+                    </div>
+                `;
+                el.onclick = () => isTV ? openTVDetails(item.id) : openDetails(item.id);
+                main.appendChild(el);
+            });
+        }
+
         async function openDetails(id) {
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
@@ -1232,19 +1217,10 @@
             ]);
             const movie = await mRes.json();
             const credits = await cRes.json();
-            const embedUrl = currentMode === 'series' ? `https://vidsrc.cc/v2/embed/tv/${id}/1/1` : `https://vidsrc.cc/v2/embed/movie/${id}`;
-            partyVideoUrl = embedUrl;
-            if(isHost) broadcast({ type: 'sync-movie', embedUrl: embedUrl });
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
                 <div class="video-container">
-                    <iframe id="main-player" src="${embedUrl}" width="100%" height="100%" frameborder="0" allow-forms allow-scripts allow-same-origin allow-presentation sandbox="allow-forms allow-scripts allow-same-origin allow-presentation" allowfullscreen></iframe>
-                </div>
-                <div class="film-links-bar film-links-bar-visual" style="display:flex; gap:15px; padding:15px 20px; background:#111; border-bottom:1px solid #222; flex-wrap:wrap;">
-                    <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(movie.title + ' trailer')}" target="_blank" rel="noopener" class="player-btn film-link-btn" style="text-decoration:none;">Treyler</a>
-                    <a href="https://www.google.com/search?q=${encodeURIComponent('türkçe dublaj ' + movie.title)}" target="_blank" rel="noopener" class="player-btn film-link-btn" style="text-decoration:none;">Türkçe dublaj axtarış</a>
-                    <a href="https://www.google.com/search?q=${encodeURIComponent('перевод фильма ' + movie.title)}" target="_blank" rel="noopener" class="player-btn film-link-btn" style="text-decoration:none;">Перевод на русском</a>
-                    <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(movie.title)}" target="_blank" rel="noopener" class="player-btn film-link-btn" style="text-decoration:none;">YouTube</a>
+                    <iframe id="main-player" src="https://vidsrc.cc/v2/embed/movie/${id}" width="100%" height="100%" frameborder="0" allow-forms allow-scripts allow-same-origin allow-presentation sandbox="allow-forms allow-scripts allow-same-origin allow-presentation" allowfullscreen></iframe>
                 </div>
                 <div class="details-grid">
                     <img src="${IMG_PATH + movie.poster_path}">
@@ -1273,19 +1249,10 @@
             ]);
             const tv = await tvRes.json();
             const credits = await cRes.json();
-            const embedUrl = `https://vidsrc.cc/v2/embed/tv/${id}/1/1`;
-            partyVideoUrl = embedUrl;
-            if(isHost) broadcast({ type: 'sync-movie', embedUrl: embedUrl });
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
                 <div class="video-container">
-                    <iframe id="main-player" src="${embedUrl}" width="100%" height="100%" frameborder="0" allow-forms allow-scripts allow-same-origin allow-presentation sandbox="allow-forms allow-scripts allow-same-origin allow-presentation" allowfullscreen></iframe>
-                </div>
-                <div class="film-links-bar film-links-bar-visual" style="display:flex; gap:15px; padding:15px 20px; background:#111; border-bottom:1px solid #222; flex-wrap:wrap;">
-                    <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(tv.name + ' trailer')}" target="_blank" rel="noopener" class="player-btn film-link-btn" style="text-decoration:none;">Treyler</a>
-                    <a href="https://www.google.com/search?q=${encodeURIComponent('türkçe dublaj ' + tv.name)}" target="_blank" rel="noopener" class="player-btn film-link-btn" style="text-decoration:none;">Türkçe dublaj axtarış</a>
-                    <a href="https://www.google.com/search?q=${encodeURIComponent('перевод сериала ' + tv.name)}" target="_blank" rel="noopener" class="player-btn film-link-btn" style="text-decoration:none;">Перевод на русском</a>
-                    <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(tv.name)}" target="_blank" rel="noopener" class="player-btn film-link-btn" style="text-decoration:none;">YouTube</a>
+                    <iframe id="main-player" src="https://vidsrc.cc/v2/embed/tv/${id}/1/1" width="100%" height="100%" frameborder="0" allow-forms allow-scripts allow-same-origin allow-presentation sandbox="allow-forms allow-scripts allow-same-origin allow-presentation" allowfullscreen></iframe>
                 </div>
                 <div class="details-grid">
                     <img src="${IMG_PATH + tv.poster_path}">
@@ -1362,7 +1329,7 @@
         function showFavorites() { isFavoritesView = true; main.innerHTML = ''; showMovies(favorites); }
 
         function filterByCountry(code, btn) {
-            document.querySelectorAll('.tab-btn').forEach b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             let type = currentMode === 'series' ? 'tv' : 'movie';
             currentApiUrl = code === 'all' ? `${BASE_URL}/discover/${type}?api_key=${API_KEY}&language=${LANG}` : `${BASE_URL}/discover/${type}?api_key=${API_KEY}&with_origin_country=${code}&language=${LANG}`;
@@ -1377,7 +1344,7 @@
 
         function renderGenres() {
             const container = document.getElementById('genres');
-            genres.forEach g => {
+            genres.forEach(g => {
                 const tag = document.createElement('div');
                 tag.className = 'genre-tag';
                 tag.innerText = g.name;
@@ -1403,6 +1370,7 @@
             openDetails(data.results[Math.floor(Math.random() * 20)].id);
         }
 
+        // Reklam əngəlləmə (sadə səviyyə)
         window.open = function() { return null; };
 
         init();

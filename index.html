@@ -875,6 +875,9 @@
         let catalogPage = 1;
         let catalogQuery = "";
         let isCatalogLoading = false;
+        let partyVideoUrl = "";
+        let partyVideoTime = 0;
+        let partyVideoPlayInterval = null;
 
         const genres = [
             { id: 28, name: 'Aksiyon' }, { id: 12, name: 'Macəra' },
@@ -1059,15 +1062,21 @@
                 return;
             }
             
-            // Host pleyerini yenilə (iframe yenilənməsi vasitəsilə)
             const iframe = document.querySelector('#party-player-container iframe');
-            if(iframe) {
-                // Burada iframe-ə mesaj göndərilir, vidsrc dəstəkləyirsə sinxron olacaq
-                iframe.contentWindow.postMessage({ type: 'playerControl', action: action }, '*');
+            if(!iframe || !partyVideoUrl) return;
+            
+            if(action === 'forward') { partyVideoTime += 10; }
+            if(action === 'rewind') { partyVideoTime = Math.max(0, partyVideoTime - 10); }
+            if(action === 'pause') {
+                if(partyVideoPlayInterval) { clearInterval(partyVideoPlayInterval); partyVideoPlayInterval = null; }
             }
-
-            // Dostuna göndər
-            const data = { type: 'video-control', action: action };
+            if(action === 'play') {
+                if(partyVideoPlayInterval) { clearInterval(partyVideoPlayInterval); }
+                partyVideoPlayInterval = setInterval(function() { partyVideoTime += 1; }, 1000);
+            }
+            
+            iframe.contentWindow.postMessage({ type: 'playerControl', action: action }, '*');
+            const data = { type: 'video-control', action: action, embedUrl: partyVideoUrl, currentTime: Math.floor(partyVideoTime) };
             broadcast(data);
             addChatMessage("Sistem", `Video ${action === 'play' ? 'başladıldı' : 'dayandırıldı/dəyişdirildi'}.`, true);
         }
@@ -1103,6 +1112,9 @@
                 `;
                 div.onclick = () => {
                     const embed = `https://vidsrc.cc/v2/embed/movie/${m.id}`;
+                    partyVideoUrl = embed;
+                    partyVideoTime = 0;
+                    if(partyVideoPlayInterval) { clearInterval(partyVideoPlayInterval); partyVideoPlayInterval = null; }
                     syncPartyPlayer(embed);
                     broadcast({ type: 'sync-movie', embedUrl: embed });
                     document.getElementById('party-catalog-overlay').style.display = 'none';
@@ -1128,14 +1140,20 @@
                     if(isHost) broadcast(data, conn);
                 }
                 if(data.type === 'sync-movie') {
+                    partyVideoUrl = data.embedUrl || partyVideoUrl;
                     syncPartyPlayer(data.embedUrl);
                 }
                 if(data.type === 'video-control') {
-                    const iframe = document.querySelector('#party-player-container iframe');
-                    if(iframe) {
-                        iframe.contentWindow.postMessage({ type: 'playerControl', action: data.action }, '*');
-                        addChatMessage("Sistem", "Host videonu idarə etdi.", true);
+                    const baseUrl = data.embedUrl || partyVideoUrl;
+                    const t = Math.floor(data.currentTime || 0);
+                    if(baseUrl) {
+                        const sep = baseUrl.indexOf('?') >= 0 ? '&' : '?';
+                        const seekUrl = baseUrl + sep + 't=' + t;
+                        syncPartyPlayer(seekUrl);
                     }
+                    const iframe = document.querySelector('#party-player-container iframe');
+                    if(iframe) iframe.contentWindow.postMessage({ type: 'playerControl', action: data.action }, '*');
+                    addChatMessage("Sistem", "Host videonu idarə etdi.", true);
                 }
             });
 

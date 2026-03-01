@@ -1144,16 +1144,20 @@
                     syncPartyPlayer(data.embedUrl);
                 }
                 if(data.type === 'video-control') {
-                    const baseUrl = data.embedUrl || partyVideoUrl;
-                    const t = Math.floor(data.currentTime || 0);
-                    if(baseUrl) {
-                        const sep = baseUrl.indexOf('?') >= 0 ? '&' : '?';
-                        const seekUrl = baseUrl + sep + 't=' + t;
-                        syncPartyPlayer(seekUrl);
-                    }
-                    const iframe = document.querySelector('#party-player-container iframe');
-                    if(iframe) iframe.contentWindow.postMessage({ type: 'playerControl', action: data.action }, '*');
-                    addChatMessage("Sistem", "Host videonu idarə etdi.", true);
+                    try {
+                        const baseUrl = data.embedUrl || partyVideoUrl;
+                        const t = Math.floor(data.currentTime || 0);
+                        const action = data.action || 'play';
+                        if(baseUrl) {
+                            const base = String(baseUrl).split('?')[0].split('#')[0];
+                            const autoPlayVal = (action === 'play' || action === 'forward' || action === 'rewind') ? 'true' : 'false';
+                            const seekUrl = base + '?t=' + t + '&autoPlay=' + autoPlayVal;
+                            syncPartyPlayer(seekUrl);
+                        }
+                        const iframe = document.querySelector('#party-player-container iframe');
+                        if(iframe) iframe.contentWindow.postMessage({ type: 'playerControl', action: action }, '*');
+                        addChatMessage("Sistem", "Host videonu idarə etdi.", true);
+                    } catch(err) { addChatMessage("Sistem", "Video sinxron xətası.", true); }
                 }
             });
 
@@ -1217,6 +1221,7 @@
 
         function syncPartyPlayer(url) {
             const container = document.getElementById('party-player-container');
+            if(!container) return;
             container.innerHTML = `<iframe src="${url}" allow-forms allow-scripts allow-same-origin allow-presentation sandbox="allow-forms allow-scripts allow-same-origin allow-presentation" allowfullscreen></iframe>`;
         }
 

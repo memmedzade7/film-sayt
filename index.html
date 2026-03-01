@@ -619,7 +619,7 @@
         .curtain {
             position: absolute;
             top: 0;
-            width: 50.5%;
+            width: 50.5%; /* Üst-üstə düşməsi üçün */
             height: 100%;
             background: #8b0000;
             background-image: repeating-linear-gradient(90deg, #8b0000 0px, #b30000 30px, #8b0000 60px);
@@ -1083,12 +1083,11 @@
             }
             
             const base = String(partyVideoUrl).split('?')[0].split('#')[0];
-            const autoPlayVal = (action === 'play' || action === 'forward' || action === 'rewind') ? '1' : '0';
-            const seekUrl = base + '?t=' + Math.floor(partyVideoTime) + '&autoplay=' + autoPlayVal + '&x=' + Date.now();
-            syncPartyPlayer(seekUrl);
+            const autoPlayFlag = (action === 'play' || action === 'forward' || action === 'rewind');
+            syncTime(base, Math.floor(partyVideoTime), autoPlayFlag);
             iframe.contentWindow.postMessage({ type: 'playerControl', action: action }, '*');
-            const data = { type: 'video-control', action: action, embedUrl: partyVideoUrl, currentTime: Math.floor(partyVideoTime) };
-            broadcast(data);
+            const syncMsg = { type: 'sync-time', action: action, embedUrl: partyVideoUrl, currentTime: Math.floor(partyVideoTime) };
+            broadcast(syncMsg);
             addChatMessage("Sistem", `Video ${action === 'play' ? 'başladıldı' : 'dayandırıldı/dəyişdirildi'}.`, true);
         }
 
@@ -1157,6 +1156,21 @@
                 if(data.type === 'sync-movie') {
                     partyVideoUrl = data.embedUrl || partyVideoUrl;
                     syncPartyPlayer(data.embedUrl);
+                }
+                if(data.type === 'sync-time') {
+                    if(!isHost) {
+                        partyVideoUrl = data.embedUrl || partyVideoUrl;
+                        partyVideoTime = Math.floor(data.currentTime || 0);
+                        var act = data.action || 'play';
+                        var autoPlayFlag = (act === 'play' || act === 'forward' || act === 'rewind');
+                        var base = String(partyVideoUrl).split('?')[0].split('#')[0];
+                        syncTime(base, partyVideoTime, autoPlayFlag);
+                        var iframe = document.querySelector('#party-player-container iframe');
+                        if(iframe) iframe.contentWindow.postMessage({ type: 'playerControl', action: act }, '*');
+                        addChatMessage("Sistem", "Video sinxronlandı.", true);
+                    } else {
+                        broadcast(data, conn);
+                    }
                 }
                 if(data.type === 'video-control') {
                     if(isHost) {
@@ -1256,6 +1270,12 @@
             
             box.appendChild(div);
             box.scrollTop = box.scrollHeight;
+        }
+
+        function syncTime(baseUrl, seconds, autoplay) {
+            const base = String(baseUrl).split('?')[0].split('#')[0];
+            const url = base + '?t=' + Math.floor(seconds || 0) + '&autoplay=' + (autoplay ? '1' : '0') + '&x=' + Date.now();
+            syncPartyPlayer(url);
         }
 
         function syncPartyPlayer(url) {
@@ -1378,7 +1398,7 @@
                         <h2>${tv.name}</h2>
                         <p>${tv.overview}</p>
                         <div class="cast-container">
-                            ${credits.cast.slice(0, 8).map c => `
+                            ${credits.cast.slice(0, 8).map(c => `
                                 <div class="cast-card" onclick="openActorDetails(${c.id})">
                                     <img src="${c.profile_path ? CAST_IMG_PATH + c.profile_path : 'https://via.placeholder.com/80x80'}">
                                     <div>${c.name}</div>
@@ -1447,7 +1467,7 @@
         function showFavorites() { isFavoritesView = true; main.innerHTML = ''; showMovies(favorites); }
 
         function filterByCountry(code, btn) {
-            document.querySelectorAll('.tab-btn').forEach b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             let type = currentMode === 'series' ? 'tv' : 'movie';
             currentApiUrl = code === 'all' ? `${BASE_URL}/discover/${type}?api_key=${API_KEY}&language=${LANG}` : `${BASE_URL}/discover/${type}?api_key=${API_KEY}&with_origin_country=${code}&language=${LANG}`;
@@ -1462,7 +1482,7 @@
 
         function renderGenres() {
             const container = document.getElementById('genres');
-            genres.forEach g => {
+            genres.forEach(g => {
                 const tag = document.createElement('div');
                 tag.className = 'genre-tag';
                 tag.innerText = g.name;

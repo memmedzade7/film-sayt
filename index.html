@@ -746,18 +746,17 @@
         }
         .toast-container {
             position: fixed;
-            top: 15px;
+            top: 20px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 7000;
+            z-index: 9999;
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
         .toast {
-            background: #161b22;
+            background: rgba(0,0,0,0.8);
             color: #fff;
-            border: 1px solid #30363d;
             padding: 10px 16px;
             border-radius: 10px;
             box-shadow: 0 10px 20px rgba(0,0,0,0.4);
@@ -1121,8 +1120,9 @@
                     partyVideoTime = 0;
                     if(partyVideoPlayInterval) { clearInterval(partyVideoPlayInterval); partyVideoPlayInterval = null; }
                     syncPartyPlayer(embed);
+                    broadcast({ type: 'sync-movie', embedUrl: embed });
                     document.getElementById('party-catalog-overlay').style.display = 'none';
-                    addChatMessage("Sistem", `"${m.title}" başladı (yalnız host).`, true);
+                    addChatMessage("Sistem", `"${m.title}" başladı`, true);
                     showToast(`"${m.title}" başladı`);
                 };
                 grid.appendChild(div);
@@ -1148,7 +1148,12 @@
                     addChatMessage(data.user, data.msg);
                     if(isHost) broadcast(data, conn);
                 }
-                
+                if(data.type === 'sync-movie') {
+                    partyVideoUrl = data.embedUrl || partyVideoUrl;
+                    if(data.embedUrl) syncPartyPlayer(data.embedUrl);
+                    addChatMessage("Sistem", "Host filmi paylaşdı, pleyer yeniləndi.", true);
+                    showToast("Film paylaşdı: pleyer yeniləndi");
+                }
                 if(data.type === 'notify') {
                     const txt = (data.user || 'İstifadəçi') + ' ' + (data.actionDetails || '');
                     addChatMessage("Sistem", txt, true);

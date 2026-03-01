@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="az">
 <head>
@@ -22,7 +20,6 @@
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3507/3507102.png">
 
     <style>
-        /* Mood-a görə dəyişən dinamik arxa fon təbəqəsi */
         #bg-overlay {
             position: fixed;
             top: 0;
@@ -424,7 +421,6 @@
 
         .loader { grid-column: 1/-1; text-align: center; padding: 20px; display: none; }
         
-        /* --- TƏKMİLLƏŞDİRİLMİŞ OTAQ STRUKTURU --- */
         .watch-party-layout {
             display: flex !important;
             flex-direction: row !important;
@@ -444,7 +440,6 @@
             order: 1;
         }
 
-        /* --- PROFESSIONAL CHAT DESIGN --- */
         .chat-container {
             width: 400px !important; 
             min-width: 400px;
@@ -603,7 +598,6 @@
             left: 0;
         }
 
-        /* Setup Ekranı - TAM EKRAN PƏRDƏLƏR VƏ MƏRKƏZ KART */
         .room-setup-screen { 
             position: fixed;
             top: 0;
@@ -621,7 +615,7 @@
         .curtain {
             position: absolute;
             top: 0;
-            width: 50.5%; /* Üst-üstə düşməsi üçün */
+            width: 50.5%;
             height: 100%;
             background: #8b0000;
             background-image: repeating-linear-gradient(90deg, #8b0000 0px, #b30000 30px, #8b0000 60px);
@@ -632,7 +626,6 @@
         .curtain-left { left: 0; transform: translateX(0); border-right: 3px solid #5a0000; }
         .curtain-right { right: 0; transform: translateX(0); border-left: 3px solid #5a0000; }
         
-        /* Otağa keçid edildikdə pərdələrin açılması */
         .room-setup-screen.open .curtain-left { transform: translateX(-100%); }
         .room-setup-screen.open .curtain-right { transform: translateX(100%); }
 
@@ -709,11 +702,10 @@
             padding-bottom: 100px;
         }
 
-        /* SINXRON İDARƏETMƏ PANELI */
         .sync-controls {
             background: #161b22;
             padding: 15px;
-            display: flex;
+            display: none;
             justify-content: center;
             gap: 20px;
             border-top: 1px solid #30363d;
@@ -726,15 +718,12 @@
             border-radius: 8px;
             cursor: pointer;
             transition: 0.3s;
-            display: flex;
+            display: none;
             align-items: center;
             gap: 8px;
             font-size: 0.9rem;
         }
-        .sync-btn:hover { background: var(--party-color); border-color: transparent; }
-        .sync-btn.host-only { border-color: #fbbf24; color: #fbbf24; }
 
-        /* Filmin altındakı axtarış paneli - vizual və animasiyalı */
         .film-links-bar-visual {
             background: linear-gradient(135deg, #0d0d0d 0%, #1a1a2e 50%, #0d0d0d 100%) !important;
             background-size: 200% 200% !important;
@@ -867,7 +856,6 @@
         let isFavoritesView = false;
         let isLoading = false;
 
-        // PeerJS Dəyişənləri
         let peer = null;
         let connections = []; 
         let myUsername = "";
@@ -1026,12 +1014,6 @@
                                 <div style="font-weight:bold;">Film hələ başladılmayıb</div>
                             </div>
                         </div>
-                        <div class="sync-controls">
-                            <button class="sync-btn" onclick="controlAction('play')">▶️ Başlat</button>
-                            <button class="sync-btn" onclick="controlAction('pause')">⏸️ Dayandır</button>
-                            <button class="sync-btn" onclick="controlAction('rewind')">⏪ -10s</button>
-                            <button class="sync-btn" onclick="controlAction('forward')">⏩ +10s</button>
-                        </div>
                     </div>
 
                     <div class="chat-container">
@@ -1052,9 +1034,24 @@
                 </div>
             `;
             document.getElementById('chat-input').addEventListener('keypress', e => { if(e.key === 'Enter') sendChatMessage(); });
+            if(isHost) document.addEventListener('keydown', handlePartyKeys, { passive: false });
         }
 
-        // Sinxron hərəkət funksiyası
+        function handlePartyKeys(e) {
+            if(!isHost) return;
+            if(!partyVideoUrl) return;
+            if(e.code === 'Space') {
+                e.preventDefault();
+                controlAction(partyVideoPlayInterval ? 'pause' : 'play');
+            } else if(e.code === 'ArrowRight') {
+                e.preventDefault();
+                controlAction('forward');
+            } else if(e.code === 'ArrowLeft') {
+                e.preventDefault();
+                controlAction('rewind');
+            }
+        }
+
         function controlAction(action) {
             if(!isHost) {
                 if(connections[0] && connections[0].open) connections[0].send({ type: 'video-control', action: action });
@@ -1079,7 +1076,7 @@
             const autoPlayVal = (action === 'play' || action === 'forward' || action === 'rewind') ? 'true' : 'false';
             const seekUrl = base + '?t=' + Math.floor(partyVideoTime) + '&autoPlay=' + autoPlayVal;
             syncPartyPlayer(seekUrl);
-            iframe.contentWindow.postMessage({ type: 'playerControl', action: action }, '*');
+            if(iframe && iframe.contentWindow) iframe.contentWindow.postMessage({ type: 'playerControl', action: action }, '*');
             const data = { type: 'video-control', action: action, embedUrl: partyVideoUrl, currentTime: Math.floor(partyVideoTime) };
             broadcast(data);
             addChatMessage("Sistem", `Video ${action === 'play' ? 'başladıldı' : 'dayandırıldı/dəyişdirildi'}.`, true);
@@ -1357,7 +1354,7 @@
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
                 <div class="video-container">
-                    <iframe id="main-player" src="https://vidsrc.cc/v2/embed/tv/${id}/1/1" width="100%" height="100%" frameborder="0" allow-forms allow-scripts allow-same-origin allow-presentation sandbox="allow-forms allow-scripts allow-same-origin allow-presentation" allowfullscreen></iframe>
+                    <iframe id="main-player" src="https://vidsrc.cc/v2/embed/tv/${id}/1/1" width="100%" height="100%" frameborder="0" allow-forms allow-scripts allow-same-origin allow-presentation sandbox="allow-forms allow-forms allow-scripts allow-same-origin allow-presentation" allowfullscreen></iframe>
                 </div>
                 <div class="film-links-bar film-links-bar-visual" style="display:flex; gap:15px; padding:15px 20px; background:#111; border-bottom:1px solid #222; flex-wrap:wrap;">
                     <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(tv.name + ' trailer')}" target="_blank" rel="noopener" class="player-btn film-link-btn" style="text-decoration:none;">Treyler</a>
@@ -1481,7 +1478,6 @@
             openDetails(data.results[Math.floor(Math.random() * 20)].id);
         }
 
-        // Reklam əngəlləmə (sadə səviyyə)
         window.open = function() { return null; };
 
         init();

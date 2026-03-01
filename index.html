@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="az">
 <head>
@@ -731,6 +733,31 @@
         }
         .sync-btn:hover { background: var(--party-color); border-color: transparent; }
         .sync-btn.host-only { border-color: #fbbf24; color: #fbbf24; }
+        
+        /* Üst Bildiriş Paneli */
+        .notify-container {
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 20;
+            pointer-events: none;
+        }
+        .notify {
+            background: rgba(17, 24, 39, 0.9);
+            color: #fff;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 8px 14px;
+            font-size: 0.9rem;
+            font-weight: 800;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            animation: notifyIn 0.2s ease;
+        }
+        @keyframes notifyIn { from { opacity: 0; transform: translate(-50%, -10px); } to { opacity: 1; transform: translate(-50%, 0); } }
     </style>
 </head>
 <body>
@@ -971,18 +998,12 @@
                                 <button class="player-btn" style="background:#ef4444; border:none;" onclick="location.reload()">Bağla</button>
                             </div>
                         </div>
+                        <div id="notify-container" class="notify-container"></div>
                         <div id="party-player-container">
                             <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:#555; background:#05070a;">
                                 <div style="font-size:3rem; margin-bottom:15px;">📽️</div>
                                 <div style="font-weight:bold;">Film hələ başladılmayıb</div>
                             </div>
-                        </div>
-                        <div class="sync-controls">
-                            <button class="sync-btn ${isHost ? 'host-only' : ''}" onclick="controlAction('play')">▶️ Başlat</button>
-                            <button class="sync-btn ${isHost ? 'host-only' : ''}" onclick="controlAction('pause')">⏸️ Dayandır</button>
-                            <button class="sync-btn ${isHost ? 'host-only' : ''}" onclick="controlAction('rewind')">⏪ -10s</button>
-                            <button class="sync-btn ${isHost ? 'host-only' : ''}" onclick="controlAction('forward')">⏩ +10s</button>
-                            ${isHost ? '<span style="color:#fbbf24; font-size:10px; align-self:center;">HOST İDARƏSİ</span>' : ''}
                         </div>
                     </div>
 
@@ -1016,9 +1037,9 @@
             }
 
             // Dostuna göndər
-            const data = { type: 'video-control', action: action };
+            const data = { type: 'video-control', action: action, user: myUsername };
             broadcast(data);
-            addChatMessage("Sistem", `Video ${action === 'play' ? 'başladıldı' : 'dayandırıldı/dəyişdirildi'}.`, true);
+            showNotify(formatControlMessage(myUsername, action));
         }
 
         function addEmojiToInput(emoji) {
@@ -1053,9 +1074,9 @@
                 div.onclick = () => {
                     const embed = `https://vidsrc.cc/v2/embed/movie/${m.id}`;
                     syncPartyPlayer(embed);
-                    broadcast({ type: 'sync-movie', embedUrl: embed });
+                    broadcast({ type: 'sync-movie', embedUrl: embed, user: myUsername });
                     document.getElementById('party-catalog-overlay').style.display = 'none';
-                    addChatMessage("Sistem", `"${m.title}" başladıldı!`, true);
+                    showNotify(`${myUsername} film başladı: ${m.title}`);
                 };
                 grid.appendChild(div);
             });
@@ -1079,14 +1100,15 @@
                 if(data.type === 'sync-movie') {
                     syncPartyPlayer(data.embedUrl);
                     if(isHost) broadcast(data, conn);
+                    if(data.user) showNotify(`${data.user} film başladı`);
                 }
                 if(data.type === 'video-control') {
                     const iframe = document.querySelector('#party-player-container iframe');
                     if(iframe) {
                         iframe.contentWindow.postMessage({ type: 'playerControl', action: data.action }, '*');
-                        addChatMessage("Sistem", "Host videonu idarə etdi.", true);
                     }
                     if(isHost) broadcast(data, conn);
+                    if(data.user) showNotify(formatControlMessage(data.user, data.action));
                 }
             });
 
@@ -1146,6 +1168,28 @@
             
             box.appendChild(div);
             box.scrollTop = box.scrollHeight;
+        }
+
+        function showNotify(text) {
+            const container = document.getElementById('notify-container');
+            if(!container) return;
+            const n = document.createElement('div');
+            n.className = 'notify';
+            n.textContent = text;
+            container.appendChild(n);
+            setTimeout(() => {
+                n.style.opacity = '0';
+                n.style.transition = 'opacity 0.3s';
+                setTimeout(() => n.remove(), 300);
+            }, 2500);
+        }
+
+        function formatControlMessage(user, action) {
+            if(action === 'play') return `${user} başladı`;
+            if(action === 'pause') return `${user} dayandırdı`;
+            if(action === 'rewind') return `${user} 10 saniyə geri etdi`;
+            if(action === 'forward') return `${user} 10 saniyə irəli etdi`;
+            return `${user} əməliyyat: ${action}`;
         }
 
         function syncPartyPlayer(url) {
@@ -1372,3 +1416,4 @@
     </script>
 </body>
 </html>
+

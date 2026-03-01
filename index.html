@@ -20,7 +20,6 @@
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3507/3507102.png">
 
     <style>
-        /* Mood-a görə dəyişən dinamik arxa fon təbəqəsi */
         #bg-overlay {
             position: fixed;
             top: 0;
@@ -422,7 +421,6 @@
 
         .loader { grid-column: 1/-1; text-align: center; padding: 20px; display: none; }
         
-        /* --- TƏKMİLLƏŞDİRİLMİŞ OTAQ STRUKTURU --- */
         .watch-party-layout {
             display: flex !important;
             flex-direction: row !important;
@@ -442,7 +440,6 @@
             order: 1;
         }
 
-        /* --- PROFESSIONAL CHAT DESIGN --- */
         .chat-container {
             width: 400px !important; 
             min-width: 400px;
@@ -601,7 +598,6 @@
             left: 0;
         }
 
-        /* Setup Ekranı - TAM EKRAN PƏRDƏLƏR VƏ MƏRKƏZ KART */
         .room-setup-screen { 
             position: fixed;
             top: 0;
@@ -619,7 +615,7 @@
         .curtain {
             position: absolute;
             top: 0;
-            width: 50.5%; /* Üst-üstə düşməsi üçün */
+            width: 50.5%;
             height: 100%;
             background: #8b0000;
             background-image: repeating-linear-gradient(90deg, #8b0000 0px, #b30000 30px, #8b0000 60px);
@@ -630,7 +626,6 @@
         .curtain-left { left: 0; transform: translateX(0); border-right: 3px solid #5a0000; }
         .curtain-right { right: 0; transform: translateX(0); border-left: 3px solid #5a0000; }
         
-        /* Otağa keçid edildikdə pərdələrin açılması */
         .room-setup-screen.open .curtain-left { transform: translateX(-100%); }
         .room-setup-screen.open .curtain-right { transform: translateX(100%); }
 
@@ -707,7 +702,6 @@
             padding-bottom: 100px;
         }
 
-        /* SINXRON İDARƏETMƏ PANELI */
         .sync-controls {
             background: #161b22;
             padding: 15px;
@@ -732,7 +726,6 @@
         .sync-btn:hover { background: var(--party-color); border-color: transparent; }
         .sync-btn.host-only { border-color: #fbbf24; color: #fbbf24; }
 
-        /* Filmin altındakı axtarış paneli - vizual və animasiyalı */
         .film-links-bar-visual {
             background: linear-gradient(135deg, #0d0d0d 0%, #1a1a2e 50%, #0d0d0d 100%) !important;
             background-size: 200% 200% !important;
@@ -865,7 +858,6 @@
         let isFavoritesView = false;
         let isLoading = false;
 
-        // PeerJS Dəyişənləri
         let peer = null;
         let connections = []; 
         let myUsername = "";
@@ -1015,6 +1007,7 @@
                             <span style="font-size:0.8rem; color:#8b949e;">Otaq ID: <b style="color:var(--party-color);">${roomId}</b></span>
                             <div style="display:flex; gap:10px;">
                                 ${isHost ? '<button class="player-btn active" onclick="openPartyCatalog()">🎬 Film Seç</button>' : '<span style="color:#6366f1; font-size:0.8rem; animation: pulse 2s infinite;">• Film gözlənilir</span>'}
+                                <button class="player-btn" onclick="syncNow()" ${isHost ? '' : 'disabled style="opacity:0.6; cursor:not-allowed;"'}>🔄 Sinxronizasiya Et</button>
                                 <button class="player-btn" style="background:#ef4444; border:none;" onclick="location.reload()">Bağla</button>
                             </div>
                         </div>
@@ -1061,6 +1054,15 @@
                 controlAction('rewind');
             }
         }
+        function syncNow() {
+            if(!isHost || !partyVideoUrl) return;
+            const base = String(partyVideoUrl).split('?')[0].split('#')[0];
+            const t = Math.floor(partyVideoTime || 0);
+            const embedWithHash = base + '#t=' + t;
+            syncPartyPlayer(embedWithHash);
+            broadcast({ type: 'sync-embed', embedUrl: embedWithHash, currentTime: t });
+            addChatMessage("Sistem", "Sinxronizasiya göndərildi.", true);
+        }
         // Sinxron hərəkət funksiyası
         function controlAction(action) {
             if(!isHost) {
@@ -1083,11 +1085,10 @@
             }
             
             const base = String(partyVideoUrl).split('?')[0].split('#')[0];
-            const autoPlayFlag = (action === 'play' || action === 'forward' || action === 'rewind');
-            syncTime(base, Math.floor(partyVideoTime), autoPlayFlag);
-            iframe.contentWindow.postMessage({ type: 'playerControl', action: action }, '*');
-            const syncMsg = { type: 'sync-time', action: action, embedUrl: partyVideoUrl, currentTime: Math.floor(partyVideoTime) };
-            broadcast(syncMsg);
+            const t = Math.floor(partyVideoTime || 0);
+            const embedWithHash = base + '#t=' + t;
+            syncPartyPlayer(embedWithHash);
+            broadcast({ type: 'sync-embed', embedUrl: embedWithHash, currentTime: t, action: action });
             addChatMessage("Sistem", `Video ${action === 'play' ? 'başladıldı' : 'dayandırıldı/dəyişdirildi'}.`, true);
         }
 
@@ -1156,6 +1157,17 @@
                 if(data.type === 'sync-movie') {
                     partyVideoUrl = data.embedUrl || partyVideoUrl;
                     syncPartyPlayer(data.embedUrl);
+                }
+                if(data.type === 'sync-embed') {
+                    const u = data.embedUrl;
+                    if(u) {
+                        const tHash = u.split('#t=')[1];
+                        if(tHash) partyVideoTime = Math.floor(parseInt(tHash, 10) || 0);
+                        partyVideoUrl = u.split('#')[0];
+                        syncPartyPlayer(u);
+                        addChatMessage("Sistem", "Eyni saniyəyə sinxron edildi.", true);
+                    }
+                    if(isHost) broadcast(data, conn);
                 }
                 if(data.type === 'sync-time') {
                     if(!isHost) {
@@ -1508,7 +1520,6 @@
             openDetails(data.results[Math.floor(Math.random() * 20)].id);
         }
 
-        // Reklam əngəlləmə (sadə səviyyə)
         window.open = function() { return null; };
 
         init();

@@ -768,6 +768,33 @@
         .film-link-btn:active {
             transform: translateY(-2px) scale(1.02) !important;
         }
+        .toast-container {
+            position: fixed;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 7000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .toast {
+            background: #161b22;
+            color: #fff;
+            border: 1px solid #30363d;
+            padding: 10px 16px;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity .2s ease, transform .2s ease;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
     </style>
 </head>
 <body>
@@ -1063,7 +1090,6 @@
             broadcast({ type: 'sync-embed', embedUrl: embedWithHash, currentTime: t });
             addChatMessage("Sistem", "Sinxronizasiya göndərildi.", true);
         }
-        // Sinxron hərəkət funksiyası
         function controlAction(action) {
             if(!isHost) {
                 if(connections[0] && connections[0].open) connections[0].send({ type: 'video-control', action: action });
@@ -1089,7 +1115,11 @@
             const embedWithHash = base + '#t=' + t;
             syncPartyPlayer(embedWithHash);
             broadcast({ type: 'sync-embed', embedUrl: embedWithHash, currentTime: t, action: action });
-            addChatMessage("Sistem", `Video ${action === 'play' ? 'başladıldı' : 'dayandırıldı/dəyişdirildi'}.`, true);
+            const details = action === 'pause' ? 'videonu dayandırdı' : (action === 'play' ? 'videonu başlatdı' : ('videonu ' + formatTime(t) + ' dəqiqəsinə çəkdi'));
+            const notifyText = myUsername + ' ' + details;
+            addChatMessage("Sistem", notifyText, true);
+            showToast(notifyText);
+            broadcast({ type: 'notify', user: myUsername, action: action, actionDetails: details, currentTime: t });
         }
 
         function addEmojiToInput(emoji) {
@@ -1183,6 +1213,11 @@
                     } else {
                         broadcast(data, conn);
                     }
+                }
+                if(data.type === 'notify') {
+                    const txt = (data.user || 'İstifadəçi') + ' ' + (data.actionDetails || '');
+                    addChatMessage("Sistem", txt, true);
+                    showToast(txt);
                 }
                 if(data.type === 'video-control') {
                     if(isHost) {
@@ -1282,6 +1317,35 @@
             
             box.appendChild(div);
             box.scrollTop = box.scrollHeight;
+        }
+
+        function formatTime(seconds) {
+            const s = Math.max(0, Math.floor(seconds || 0));
+            const m = Math.floor(s / 60);
+            const sec = s % 60;
+            return String(m).padStart(2, '0') + ':' + String(sec).padStart(2, '0');
+        }
+
+        function showToast(text) {
+            let cont = document.getElementById('toast-container');
+            if(!cont) {
+                cont = document.createElement('div');
+                cont.id = 'toast-container';
+                cont.className = 'toast-container';
+                document.body.appendChild(cont);
+            }
+            const t = document.createElement('div');
+            t.className = 'toast';
+            t.textContent = text;
+            cont.appendChild(t);
+            requestAnimationFrame(() => { t.classList.add('show'); });
+            setTimeout(() => {
+                t.classList.remove('show');
+                setTimeout(() => {
+                    if(t.parentNode) t.parentNode.removeChild(t);
+                    if(cont && cont.children.length === 0) cont.remove();
+                }, 200);
+            }, 3000);
         }
 
         function syncTime(baseUrl, seconds, autoplay) {

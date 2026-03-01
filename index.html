@@ -20,6 +20,7 @@
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3507/3507102.png">
 
     <style>
+        /* Mood-a görə dəyişən dinamik arxa fon təbəqəsi */
         #bg-overlay {
             position: fixed;
             top: 0;
@@ -421,6 +422,7 @@
 
         .loader { grid-column: 1/-1; text-align: center; padding: 20px; display: none; }
         
+        /* --- TƏKMİLLƏŞDİRİLMİŞ OTAQ STRUKTURU --- */
         .watch-party-layout {
             display: flex !important;
             flex-direction: row !important;
@@ -440,6 +442,7 @@
             order: 1;
         }
 
+        /* --- PROFESSIONAL CHAT DESIGN --- */
         .chat-container {
             width: 400px !important; 
             min-width: 400px;
@@ -598,6 +601,7 @@
             left: 0;
         }
 
+        /* Setup Ekranı - TAM EKRAN PƏRDƏLƏR VƏ MƏRKƏZ KART */
         .room-setup-screen { 
             position: fixed;
             top: 0;
@@ -626,6 +630,7 @@
         .curtain-left { left: 0; transform: translateX(0); border-right: 3px solid #5a0000; }
         .curtain-right { right: 0; transform: translateX(0); border-left: 3px solid #5a0000; }
         
+        /* Otağa keçid edildikdə pərdələrin açılması */
         .room-setup-screen.open .curtain-left { transform: translateX(-100%); }
         .room-setup-screen.open .curtain-right { transform: translateX(100%); }
 
@@ -702,10 +707,11 @@
             padding-bottom: 100px;
         }
 
+        /* SINXRON İDARƏETMƏ PANELI */
         .sync-controls {
             background: #161b22;
             padding: 15px;
-            display: none;
+            display: flex;
             justify-content: center;
             gap: 20px;
             border-top: 1px solid #30363d;
@@ -718,12 +724,15 @@
             border-radius: 8px;
             cursor: pointer;
             transition: 0.3s;
-            display: none;
+            display: flex;
             align-items: center;
             gap: 8px;
             font-size: 0.9rem;
         }
+        .sync-btn:hover { background: var(--party-color); border-color: transparent; }
+        .sync-btn.host-only { border-color: #fbbf24; color: #fbbf24; }
 
+        /* Filmin altındakı axtarış paneli - vizual və animasiyalı */
         .film-links-bar-visual {
             background: linear-gradient(135deg, #0d0d0d 0%, #1a1a2e 50%, #0d0d0d 100%) !important;
             background-size: 200% 200% !important;
@@ -856,6 +865,7 @@
         let isFavoritesView = false;
         let isLoading = false;
 
+        // PeerJS Dəyişənləri
         let peer = null;
         let connections = []; 
         let myUsername = "";
@@ -1051,7 +1061,7 @@
                 controlAction('rewind');
             }
         }
-
+        // Sinxron hərəkət funksiyası
         function controlAction(action) {
             if(!isHost) {
                 if(connections[0] && connections[0].open) connections[0].send({ type: 'video-control', action: action });
@@ -1073,10 +1083,10 @@
             }
             
             const base = String(partyVideoUrl).split('?')[0].split('#')[0];
-            const autoPlayVal = (action === 'play' || action === 'forward' || action === 'rewind') ? 'true' : 'false';
-            const seekUrl = base + '?t=' + Math.floor(partyVideoTime) + '&autoPlay=' + autoPlayVal;
+            const autoPlayVal = (action === 'play' || action === 'forward' || action === 'rewind') ? '1' : '0';
+            const seekUrl = base + '?t=' + Math.floor(partyVideoTime) + '&autoplay=' + autoPlayVal + '&x=' + Date.now();
             syncPartyPlayer(seekUrl);
-            if(iframe && iframe.contentWindow) iframe.contentWindow.postMessage({ type: 'playerControl', action: action }, '*');
+            iframe.contentWindow.postMessage({ type: 'playerControl', action: action }, '*');
             const data = { type: 'video-control', action: action, embedUrl: partyVideoUrl, currentTime: Math.floor(partyVideoTime) };
             broadcast(data);
             addChatMessage("Sistem", `Video ${action === 'play' ? 'başladıldı' : 'dayandırıldı/dəyişdirildi'}.`, true);
@@ -1162,8 +1172,8 @@
                         }
                         if(partyVideoUrl) {
                             var base = String(partyVideoUrl).split('?')[0].split('#')[0];
-                            var autoPlayVal = (act === 'play' || act === 'forward' || act === 'rewind') ? 'true' : 'false';
-                            var seekUrl = base + '?t=' + Math.floor(partyVideoTime) + '&autoPlay=' + autoPlayVal;
+                            var autoPlayVal = (act === 'play' || act === 'forward' || act === 'rewind') ? '1' : '0';
+                            var seekUrl = base + '?t=' + Math.floor(partyVideoTime) + '&autoplay=' + autoPlayVal + '&x=' + Date.now();
                             syncPartyPlayer(seekUrl);
                         }
                         broadcast({ type: 'video-control', action: act, embedUrl: partyVideoUrl, currentTime: Math.floor(partyVideoTime) });
@@ -1175,8 +1185,8 @@
                             const action = data.action || 'play';
                             if(baseUrl) {
                                 const base = String(baseUrl).split('?')[0].split('#')[0];
-                                const autoPlayVal = (action === 'play' || action === 'forward' || action === 'rewind') ? 'true' : 'false';
-                                const seekUrl = base + '?t=' + t + '&autoPlay=' + autoPlayVal;
+                                const autoPlayVal = (action === 'play' || action === 'forward' || action === 'rewind') ? '1' : '0';
+                                const seekUrl = base + '?t=' + t + '&autoplay=' + autoPlayVal + '&x=' + Date.now();
                                 syncPartyPlayer(seekUrl);
                             }
                             const iframe = document.querySelector('#party-player-container iframe');
@@ -1354,7 +1364,7 @@
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
                 <div class="video-container">
-                    <iframe id="main-player" src="https://vidsrc.cc/v2/embed/tv/${id}/1/1" width="100%" height="100%" frameborder="0" allow-forms allow-scripts allow-same-origin allow-presentation sandbox="allow-forms allow-forms allow-scripts allow-same-origin allow-presentation" allowfullscreen></iframe>
+                    <iframe id="main-player" src="https://vidsrc.cc/v2/embed/tv/${id}/1/1" width="100%" height="100%" frameborder="0" allow-forms allow-scripts allow-same-origin allow-presentation sandbox="allow-forms allow-scripts allow-same-origin allow-presentation" allowfullscreen></iframe>
                 </div>
                 <div class="film-links-bar film-links-bar-visual" style="display:flex; gap:15px; padding:15px 20px; background:#111; border-bottom:1px solid #222; flex-wrap:wrap;">
                     <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(tv.name + ' trailer')}" target="_blank" rel="noopener" class="player-btn film-link-btn" style="text-decoration:none;">Treyler</a>
@@ -1368,7 +1378,7 @@
                         <h2>${tv.name}</h2>
                         <p>${tv.overview}</p>
                         <div class="cast-container">
-                            ${credits.cast.slice(0, 8).map(c => `
+                            ${credits.cast.slice(0, 8).map c => `
                                 <div class="cast-card" onclick="openActorDetails(${c.id})">
                                     <img src="${c.profile_path ? CAST_IMG_PATH + c.profile_path : 'https://via.placeholder.com/80x80'}">
                                     <div>${c.name}</div>
@@ -1437,7 +1447,7 @@
         function showFavorites() { isFavoritesView = true; main.innerHTML = ''; showMovies(favorites); }
 
         function filterByCountry(code, btn) {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach b => b.classList.remove('active'));
             btn.classList.add('active');
             let type = currentMode === 'series' ? 'tv' : 'movie';
             currentApiUrl = code === 'all' ? `${BASE_URL}/discover/${type}?api_key=${API_KEY}&language=${LANG}` : `${BASE_URL}/discover/${type}?api_key=${API_KEY}&with_origin_country=${code}&language=${LANG}`;
@@ -1452,7 +1462,7 @@
 
         function renderGenres() {
             const container = document.getElementById('genres');
-            genres.forEach(g => {
+            genres.forEach g => {
                 const tag = document.createElement('div');
                 tag.className = 'genre-tag';
                 tag.innerText = g.name;
@@ -1478,6 +1488,7 @@
             openDetails(data.results[Math.floor(Math.random() * 20)].id);
         }
 
+        // Reklam əngəlləmə (sadə səviyyə)
         window.open = function() { return null; };
 
         init();

@@ -993,8 +993,9 @@
                     <div class="video-side">
                         <div style="padding:10px 20px; background:#111; border-bottom:1px solid #30363d; display:flex; justify-content:space-between; align-items:center;">
                             <span style="font-size:0.8rem; color:#8b949e;">Otaq ID: <b style="color:var(--party-color);">${roomId}</b></span>
-                            <div style="display:flex; gap:10px;">
-                                ${isHost ? '<button class="player-btn active" onclick="openPartyCatalog()">🎬 Film Seç</button>' : '<span style="color:#6366f1; font-size:0.8rem; animation: pulse 2s infinite;">• Film gözlənilir</span>'}
+                            <div style="display:flex; gap:10px; align-items:center; max-width:60%;">
+                                <input id="external-url-input" placeholder="YouTube / Google Drive linki" style="flex:1; min-width:260px; background:#0d1117; border:1px solid #30363d; color:#fff; border-radius:10px; padding:8px 12px; outline:none;">
+                                <button class="player-btn" onclick="startExternalLink()">Başlat</button>
                                 <button class="player-btn" style="background:#ef4444; border:none;" onclick="location.reload()">Bağla</button>
                             </div>
                         </div>
@@ -1083,6 +1084,48 @@
             isCatalogLoading = false;
         }
 
+        function startExternalLink() {
+            const inp = document.getElementById('external-url-input');
+            const raw = (inp.value || '').trim();
+            if(!raw) return showNotify("Link daxil edin");
+            const parsed = normalizeExternalUrl(raw);
+            if(!parsed) return showNotify("Link dəstəklənmir");
+            syncPartyPlayer(parsed.embed);
+            broadcast({ type: 'sync-external', embedUrl: parsed.embed, user: myUsername, source: parsed.source });
+            showNotify(`${myUsername} ${parsed.source} başladı`);
+        }
+
+        function normalizeExternalUrl(url) {
+            try {
+                const u = new URL(url);
+                // YouTube: watch?v=ID, youtu.be/ID, embed/ID
+                if(u.hostname.includes('youtube.com') || u.hostname.includes('youtu.be')) {
+                    let vid = '';
+                    if(u.hostname.includes('youtu.be')) {
+                        vid = u.pathname.replace('/', '');
+                    } else {
+                        vid = u.searchParams.get('v') || '';
+                        if(!vid && u.pathname.includes('/embed/')) vid = u.pathname.split('/embed/')[1];
+                    }
+                    if(vid) {
+                        const embed = `https://www.youtube.com/embed/${vid}?rel=0&modestbranding=1`;
+                        return { embed, source: 'YouTube' };
+                    }
+                }
+                // Google Drive: /file/d/ID/view -> /file/d/ID/preview
+                if(u.hostname.includes('drive.google.com')) {
+                    const m = u.pathname.match(/\/file\/d\/([^/]+)\//);
+                    if(m && m[1]) {
+                        const embed = `https://drive.google.com/file/d/${m[1]}/preview`;
+                        return { embed, source: 'Google Drive' };
+                    }
+                }
+                return null;
+            } catch(e) {
+                return null;
+            }
+        }
+
         function listenForConnections() {
             peer.on('connection', conn => {
                 connections.push(conn);
@@ -1101,6 +1144,11 @@
                     syncPartyPlayer(data.embedUrl);
                     if(isHost) broadcast(data, conn);
                     if(data.user) showNotify(`${data.user} film başladı`);
+                }
+                if(data.type === 'sync-external') {
+                    syncPartyPlayer(data.embedUrl);
+                    if(isHost) broadcast(data, conn);
+                    if(data.user) showNotify(`${data.user} ${data.source || 'xarici mənbə'} başladı`);
                 }
                 if(data.type === 'video-control') {
                     const iframe = document.querySelector('#party-player-container iframe');

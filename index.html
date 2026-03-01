@@ -1027,11 +1027,10 @@
                             </div>
                         </div>
                         <div class="sync-controls">
-                            <button class="sync-btn ${isHost ? 'host-only' : ''}" onclick="controlAction('play')">▶️ Başlat</button>
-                            <button class="sync-btn ${isHost ? 'host-only' : ''}" onclick="controlAction('pause')">⏸️ Dayandır</button>
-                            <button class="sync-btn ${isHost ? 'host-only' : ''}" onclick="controlAction('rewind')">⏪ -10s</button>
-                            <button class="sync-btn ${isHost ? 'host-only' : ''}" onclick="controlAction('forward')">⏩ +10s</button>
-                            ${isHost ? '<span style="color:#fbbf24; font-size:10px; align-self:center;">HOST İDARƏSİ</span>' : ''}
+                            <button class="sync-btn" onclick="controlAction('play')">▶️ Başlat</button>
+                            <button class="sync-btn" onclick="controlAction('pause')">⏸️ Dayandır</button>
+                            <button class="sync-btn" onclick="controlAction('rewind')">⏪ -10s</button>
+                            <button class="sync-btn" onclick="controlAction('forward')">⏩ +10s</button>
                         </div>
                     </div>
 
@@ -1058,7 +1057,8 @@
         // Sinxron hərəkət funksiyası
         function controlAction(action) {
             if(!isHost) {
-                alert("Yalnız Host (otağı yaradan) videonu idarə edə bilər!");
+                if(connections[0] && connections[0].open) connections[0].send({ type: 'video-control', action: action });
+                addChatMessage("Sistem", "Video idarəsi göndərildi.", true);
                 return;
             }
             
@@ -1144,20 +1144,41 @@
                     syncPartyPlayer(data.embedUrl);
                 }
                 if(data.type === 'video-control') {
-                    try {
-                        const baseUrl = data.embedUrl || partyVideoUrl;
-                        const t = Math.floor(data.currentTime || 0);
-                        const action = data.action || 'play';
-                        if(baseUrl) {
-                            const base = String(baseUrl).split('?')[0].split('#')[0];
-                            const autoPlayVal = (action === 'play' || action === 'forward' || action === 'rewind') ? 'true' : 'false';
-                            const seekUrl = base + '?t=' + t + '&autoPlay=' + autoPlayVal;
+                    if(isHost) {
+                        var act = data.action || 'play';
+                        if(act === 'forward') { partyVideoTime += 10; }
+                        if(act === 'rewind') { partyVideoTime = Math.max(0, partyVideoTime - 10); }
+                        if(act === 'pause') {
+                            if(partyVideoPlayInterval) { clearInterval(partyVideoPlayInterval); partyVideoPlayInterval = null; }
+                        }
+                        if(act === 'play') {
+                            if(partyVideoPlayInterval) { clearInterval(partyVideoPlayInterval); }
+                            partyVideoPlayInterval = setInterval(function() { partyVideoTime += 1; }, 1000);
+                        }
+                        if(partyVideoUrl) {
+                            var base = String(partyVideoUrl).split('?')[0].split('#')[0];
+                            var autoPlayVal = (act === 'play' || act === 'forward' || act === 'rewind') ? 'true' : 'false';
+                            var seekUrl = base + '?t=' + Math.floor(partyVideoTime) + '&autoPlay=' + autoPlayVal;
                             syncPartyPlayer(seekUrl);
                         }
-                        const iframe = document.querySelector('#party-player-container iframe');
-                        if(iframe) iframe.contentWindow.postMessage({ type: 'playerControl', action: action }, '*');
-                        addChatMessage("Sistem", "Host videonu idarə etdi.", true);
-                    } catch(err) { addChatMessage("Sistem", "Video sinxron xətası.", true); }
+                        broadcast({ type: 'video-control', action: act, embedUrl: partyVideoUrl, currentTime: Math.floor(partyVideoTime) });
+                        addChatMessage("Sistem", "Video idarə edildi.", true);
+                    } else {
+                        try {
+                            const baseUrl = data.embedUrl || partyVideoUrl;
+                            const t = Math.floor(data.currentTime || 0);
+                            const action = data.action || 'play';
+                            if(baseUrl) {
+                                const base = String(baseUrl).split('?')[0].split('#')[0];
+                                const autoPlayVal = (action === 'play' || action === 'forward' || action === 'rewind') ? 'true' : 'false';
+                                const seekUrl = base + '?t=' + t + '&autoPlay=' + autoPlayVal;
+                                syncPartyPlayer(seekUrl);
+                            }
+                            const iframe = document.querySelector('#party-player-container iframe');
+                            if(iframe) iframe.contentWindow.postMessage({ type: 'playerControl', action: action }, '*');
+                            addChatMessage("Sistem", "Host videonu idarə etdi.", true);
+                        } catch(err) { addChatMessage("Sistem", "Video sinxron xətası.", true); }
+                    }
                 }
             });
 

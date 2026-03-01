@@ -4,7 +4,7 @@
 <html lang="az">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=1200">
     
     <title>RM Film | Minlərlə film, Tək Məkan</title>
     <meta name="description" content="RM Film - Ən son filmlər, seriallar və aktyorlar haqqında məlumat, onlayn izləmə imkanı və şəxsi izləmə siyahısı.">
@@ -58,7 +58,8 @@
             color: var(--text-main);
             font-family: 'Plus Jakarta Sans', sans-serif;
             margin: 0;
-            overflow-x: hidden;
+            overflow-x: auto;
+            min-width: 1200px;
         }
 
         header {
@@ -758,22 +759,7 @@
         }
         @keyframes notifyIn { from { opacity: 0; transform: translate(-50%, -10px); } to { opacity: 1; transform: translate(-50%, 0); } }
         
-        @media (max-width: 768px) {
-            .watch-party-layout { flex-direction: column !important; height: auto !important; }
-            .video-side { order: 1; }
-            #party-player-container { min-height: 46vh; }
-            .video-container { height: auto; }
-            .chat-container { width: 100% !important; min-width: 0; height: 54vh; }
-            .player-btn { padding: 8px 12px; font-size: 0.8rem; }
-            #external-url-input { flex: 1 1 180px; }
-            .room-card { width: 95%; padding: 24px; border-radius: 20px; }
-            .room-input { padding: 12px; font-size: 0.95rem; }
-            .room-btn-main { padding: 12px; font-size: 1rem; }
-            .catalog-header { flex-wrap: wrap; }
-            .catalog-search { width: 100%; }
-            .nav-menu { flex-wrap: wrap; }
-            main { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; padding: 10px 3% 80px; }
-        }
+        /* (Mobil xüsusi dəyişikliklər ləğv edildi) */
     </style>
 </head>
 <body>

@@ -818,7 +818,11 @@
 
     <div id="party-catalog-overlay">
         <div class="catalog-header">
-            <h2 style="color:white; margin:0;">🎬 Film Seçin</h2>
+            <h2 id="catalog-title" style="color:white; margin:0;">🎬 Film Seçin</h2>
+            <div style="display:flex; gap:8px;">
+                <button class="player-btn" onclick="setCatalogType('movie')">🎬 Filmlər</button>
+                <button class="player-btn" onclick="setCatalogType('tv')">📺 Seriallar</button>
+            </div>
             <input type="text" id="catalog-search-inp" class="catalog-search" placeholder="Filmlərdə axtar...">
             <button class="player-btn" style="background:#ef4444;" onclick="document.getElementById('party-catalog-overlay').style.display='none'">Geri</button>
         </div>
@@ -856,6 +860,7 @@
         let catalogPage = 1;
         let catalogQuery = "";
         let isCatalogLoading = false;
+        let catalogType = 'movie';
 
         const genres = [
             { id: 28, name: 'Aksiyon' }, { id: 12, name: 'Macəra' },
@@ -994,6 +999,8 @@
                         <div style="padding:10px 20px; background:#111; border-bottom:1px solid #30363d; display:flex; justify-content:space-between; align-items:center;">
                             <span style="font-size:0.8rem; color:#8b949e;">Otaq ID: <b style="color:var(--party-color);">${roomId}</b></span>
                             <div style="display:flex; gap:10px; align-items:center; max-width:60%;">
+                                <button class="player-btn" onclick="openPartyCatalog('movie')">🎬 Film Seç</button>
+                                <button class="player-btn" onclick="openPartyCatalog('tv')">📺 Serial Seç</button>
                                 <input id="external-url-input" placeholder="YouTube / Google Drive linki" style="flex:1; min-width:260px; background:#0d1117; border:1px solid #30363d; color:#fff; border-radius:10px; padding:8px 12px; outline:none;">
                                 <button class="player-btn" onclick="startExternalLink()">Başlat</button>
                                 <button class="player-btn" style="background:#ef4444; border:none;" onclick="location.reload()">Bağla</button>
@@ -1049,8 +1056,19 @@
             input.focus();
         }
 
-        async function openPartyCatalog() {
+        async function openPartyCatalog(type = 'movie') {
+            setCatalogType(type);
             document.getElementById('party-catalog-overlay').style.display = 'block';
+            catalogPage = 1;
+            loadPartyCatalog(true);
+        }
+
+        function setCatalogType(type) {
+            catalogType = type === 'tv' ? 'tv' : 'movie';
+            const title = document.getElementById('catalog-title');
+            const search = document.getElementById('catalog-search-inp');
+            if(title) title.textContent = catalogType === 'movie' ? '🎬 Film Seçin' : '📺 Serial Seçin';
+            if(search) search.placeholder = catalogType === 'movie' ? 'Filmlərdə axtar...' : 'Seriallarda axtar...';
             catalogPage = 1;
             loadPartyCatalog(true);
         }
@@ -1059,9 +1077,10 @@
             isCatalogLoading = true;
             const grid = document.getElementById('party-catalog-grid');
             if(isNew) grid.innerHTML = '';
+            let typePath = catalogType === 'tv' ? 'tv' : 'movie';
             let url = catalogQuery 
-                ? `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${catalogQuery}&page=${catalogPage}&language=${LANG}`
-                : `${BASE_URL}/movie/popular?api_key=${API_KEY}&page=${catalogPage}&language=${LANG}`;
+                ? `${BASE_URL}/search/${typePath}?api_key=${API_KEY}&query=${catalogQuery}&page=${catalogPage}&language=${LANG}`
+                : `${BASE_URL}/${typePath}/popular?api_key=${API_KEY}&page=${catalogPage}&language=${LANG}`;
             const res = await fetch(url);
             const data = await res.json();
             data.results.forEach(m => {
@@ -1070,14 +1089,21 @@
                 div.style.transform = "none";
                 div.innerHTML = `
                     <img src="${m.poster_path ? CAST_IMG_PATH + m.poster_path : 'https://via.placeholder.com/150x225'}" style="height:250px;">
-                    <div style="padding:10px; font-size:0.8rem; text-align:center;">${m.title}</div>
+                    <div style="padding:10px; font-size:0.8rem; text-align:center;">${m.title || m.name}</div>
                 `;
                 div.onclick = () => {
-                    const embed = `https://vidsrc.cc/v2/embed/movie/${m.id}`;
-                    syncPartyPlayer(embed);
-                    broadcast({ type: 'sync-movie', embedUrl: embed, user: myUsername });
+                    if(catalogType === 'movie') {
+                        const embed = `https://vidsrc.cc/v2/embed/movie/${m.id}`;
+                        syncPartyPlayer(embed);
+                        broadcast({ type: 'sync-movie', embedUrl: embed, user: myUsername });
+                        showNotify(`${myUsername} film başladı: ${m.title}`);
+                    } else {
+                        const embed = `https://vidsrc.cc/v2/embed/tv/${m.id}/1/1`;
+                        syncPartyPlayer(embed);
+                        broadcast({ type: 'sync-tv', embedUrl: embed, user: myUsername });
+                        showNotify(`${myUsername} serial başladı: ${m.name}`);
+                    }
                     document.getElementById('party-catalog-overlay').style.display = 'none';
-                    showNotify(`${myUsername} film başladı: ${m.title}`);
                 };
                 grid.appendChild(div);
             });
@@ -1144,6 +1170,11 @@
                     syncPartyPlayer(data.embedUrl);
                     if(isHost) broadcast(data, conn);
                     if(data.user) showNotify(`${data.user} film başladı`);
+                }
+                if(data.type === 'sync-tv') {
+                    syncPartyPlayer(data.embedUrl);
+                    if(isHost) broadcast(data, conn);
+                    if(data.user) showNotify(`${data.user} serial başladı`);
                 }
                 if(data.type === 'sync-external') {
                     syncPartyPlayer(data.embedUrl);

@@ -21,7 +21,10 @@
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3507/3507102.png">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3507/3507102.png">
 
+    <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.2/dist/peerjs.min.js"></script>
+
     <style>
+
         /* Mood-a görə dəyişən dinamik arxa fon təbəqəsi */
         #bg-overlay {
             position: fixed;
@@ -819,6 +822,12 @@
         let isFavoritesView = false;
         let isLoading = false;
 
+        // Party globals
+        let peer, connections = [], isHost = false, myUsername = '';
+        let chatEmojis = ['😊','😂','❤️','👍','🔥','🎬','🍿'];
+        let catalogPage = 1, catalogQuery = '', isCatalogLoading = false;
+
+
 
 
 
@@ -885,9 +894,11 @@
                 movieContent.style.display = 'none';
                 currentApiUrl = `${BASE_URL}/person/popular?api_key=${API_KEY}&language=${LANG}`;
                 getActors(currentApiUrl);
+            } else if(mode === 'party') {
+                renderPartySetup();
             }
-
         }
+
 
 
 

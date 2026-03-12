@@ -736,7 +736,13 @@
         }
         .sync-btn:hover { background: var(--party-color); border-color: transparent; }
         .sync-btn.host-only { border-color: #fbbf24; color: #fbbf24; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
     </style>
+
 </head>
 <body>
 
@@ -751,9 +757,11 @@
             <nav class="nav-menu">
                 <div class="nav-link active" id="nav-home" onclick="switchTo('movies')">Filmlər</div>
                 <div class="nav-link" id="nav-series" onclick="switchTo('series')">Seriallar</div>
-                <div class="nav-link" id="nav-actors" onclick="switchTo('actors')">Aktyorlar</div>
+<div class="nav-link" id="nav-actors" onclick="switchTo('actors')">Aktyorlar</div>
+                <div class="nav-link party-nav" onclick="switchTo('party')">Otaq 🎬</div>
 
             </nav>
+
 
         </div>
         
@@ -794,6 +802,38 @@
     <div id="modal" class="modal">
         <div class="modal-content" id="modal-content"></div>
     </div>
+
+    <!-- Party Setup Screen -->
+    <div id="room-setup" class="room-setup-screen">
+        <div class="curtain curtain-left"></div>
+        <div class="projector-light"></div>
+        <div class="curtain curtain-right"></div>
+        <div class="room-card">
+            <h2 style="margin-bottom: 30px; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">🎬 Sinema Otağı</h2>
+            <input type="text" id="party-username" class="room-input" placeholder="Adınızı yazın...">
+            <button class="room-btn-main" onclick="initParty('host')">Otaq Yarat 🎥</button>
+            <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+                <h3 style="margin-bottom: 15px; color: var(--accent-gold);">Mövcud Otağa Qatıl</h3>
+                <input type="text" id="join-room-id" class="room-input" placeholder="Otaq ID-si">
+                <button class="room-btn-main" onclick="initParty('join')">Qatıl ➤</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Party Catalog Overlay -->
+    <div id="party-catalog-overlay">
+        <div style="position: fixed; top: 20px; right: 20px; z-index: 7000; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 12px; backdrop-filter: blur(10px);">
+            <button onclick="document.getElementById('party-catalog-overlay').style.display='none'" style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">×</button>
+        </div>
+        <div class="catalog-header">
+            <input id="catalog-search-inp" class="catalog-search" placeholder="Film axtar...">
+            <div style="display: flex; gap: 10px;">
+                <button class="player-btn" onclick="catalogQuery=''; catalogPage=1; loadPartyCatalog(true);">Populyar</button>
+            </div>
+        </div>
+        <div id="party-catalog-grid"></div>
+    </div>
+
 
 
 
@@ -856,41 +896,45 @@
                 }
             });
 
-            document.getElementById('party-catalog-grid').addEventListener('scroll', e => {
-                const el = e.target;
-                if (el.scrollHeight - el.scrollTop <= el.clientHeight + 100) {
-                    if(!isCatalogLoading) {
+            // Event delegation for catalog elements since they are added dynamically
+            document.addEventListener('input', e => {
+                if (e.target.id === 'catalog-search-inp') {
+                    catalogQuery = e.target.value;
+                    catalogPage = 1;
+                    loadPartyCatalog(true);
+                }
+            });
+
+            document.addEventListener('scroll', e => {
+                if (e.target.id === 'party-catalog-grid') {
+                    const el = e.target;
+                    if (el.scrollHeight - el.scrollTop <= el.clientHeight + 100 && !isCatalogLoading) {
                         catalogPage++;
                         loadPartyCatalog(false);
                     }
                 }
-            });
-
-            document.getElementById('catalog-search-inp').addEventListener('input', e => {
-                catalogQuery = e.target.value;
-                catalogPage = 1;
-                loadPartyCatalog(true);
-            });
+            }, {capture: true});
         }
+
+
 
         function switchTo(mode) {
             currentMode = mode;
             currentPage = 1;
             main.innerHTML = '';
             document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            const activeNav = document.querySelector(`[onclick="switchTo('${mode}')"]`);
+            if (activeNav) activeNav.classList.add('active');
             
             if(mode === 'movies') {
-                document.getElementById('nav-home').classList.add('active');
                 movieContent.style.display = 'block';
                 currentApiUrl = `${BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}&language=${LANG}`;
                 getMovies(currentApiUrl);
             } else if(mode === 'series') {
-                document.getElementById('nav-series').classList.add('active');
                 movieContent.style.display = 'block';
                 currentApiUrl = `${BASE_URL}/discover/tv?sort_by=popularity.desc&api_key=${API_KEY}&language=${LANG}`;
                 getSeries(currentApiUrl);
             } else if(mode === 'actors') {
-                document.getElementById('nav-actors').classList.add('active');
                 movieContent.style.display = 'none';
                 currentApiUrl = `${BASE_URL}/person/popular?api_key=${API_KEY}&language=${LANG}`;
                 getActors(currentApiUrl);
@@ -903,12 +947,18 @@
 
 
 
+
+        function renderPartySetup() {
+            document.getElementById('room-setup').style.display = 'flex';
+        }
+
         function initParty(type) {
             const user = document.getElementById('party-username').value;
             if(!user) return alert("Zəhmət olmasa ad seçin!");
             myUsername = user;
 
             document.getElementById('room-setup').classList.add('open');
+
 
             setTimeout(() => {
                 if(type === 'host') {

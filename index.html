@@ -863,6 +863,15 @@
         let catalogQuery = "";
         let isCatalogLoading = false;
         let catalogType = 'movie';
+let heartbeatInterval = null;
+        let reconnectAttempts = {};
+        let isConnected = false;
+        let lastHeartbeat = 0;
+        let connectionHealth = 'good';
+        let connectionStatusDiv = null;
+        let isConnected = false;
+        let lastHeartbeat = 0;
+        let connectionHealth = 'good';
 
         const genres = [
             { id: 28, name: 'Aksiyon' }, { id: 12, name: 'Macəra' },
@@ -995,7 +1004,16 @@
         }
 
         function renderActiveParty(roomId) {
+            connectionStatusDiv = document.getElementById('connection-status') || createStatusElement();
             main.innerHTML = `
+                <div class="watch-party-layout">
+                    <div class="video-side">
+                        <div style="padding:10px 20px; background:#111; border-bottom:1px solid #30363d; display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-size:0.8rem; color:#8b949e;">Otaq ID: <b style="color:var(--party-color);">${roomId}</b>
+                                <span id="connection-status" style="margin-left:10px; padding:4px 8px; border-radius:6px; font-size:0.7rem; font-weight:bold;">
+                                    <span id="status-dot" style="color:#23d160;">●</span> <span id="status-text">Aktiv</span> (${connections.length + 1})
+                                </span>
+                            </span>
                 <div class="watch-party-layout">
                     <div class="video-side">
                         <div style="padding:10px 20px; background:#111; border-bottom:1px solid #30363d; display:flex; justify-content:space-between; align-items:center;">
@@ -1035,21 +1053,110 @@
                 </div>
             `;
             document.getElementById('chat-input').addEventListener('keypress', e => { if(e.key === 'Enter') sendChatMessage(); });
+            updateConnectionStatus();
+            startHeartbeat();
+        }
+
+        function updateConnectionStatus() {
+            if (!connectionStatusDiv) return;
+
+            const count = connections.filter(c => c.open).length + 1;
+            const dot = document.getElementById('status-dot');
+            const text = document.getElementById('status-text');
+            
+            if (connectionHealth === 'good' && count > 0) {
+                connectionStatusDiv.style.background = '#23d16020';
+                connectionStatusDiv.style.color = '#23d160';
+                if (dot) dot.style.color = '#23d160';
+                if (text) text.textContent = 'Aktiv';
+            } else if (connectionHealth === 'warning') {
+                connectionStatusDiv.style.background = '#fbbf2420';
+                connectionStatusDiv.style.color = '#fbbf24';
+                if (dot) dot.style.color = '#fbbf24';
+                if (text) text.textContent = 'Xəbərdarlıq';
+            } else {
+                connectionStatusDiv.style.background = '#ef444420';
+                connectionStatusDiv.style.color = '#ef4444';
+                if (dot) dot.style.color = '#ef4444';
+                if (text) text.textContent = 'Kəsildi';
+            }
+            
+            connectionStatusDiv.innerHTML = `
+                <span id="status-dot" style="color:${dot ? dot.style.color : '#23d160'}">●</span>
+                <span id="status-text">${text ? text.textContent : 'Aktiv'}</span> (${count})
+            `;
+        }
+
+        function startHeartbeat() {
+            if (heartbeatInterval) clearInterval(heartbeatInterval);
+            
+            heartbeatInterval = setInterval(() => {
+                lastHeartbeat = Date.now();
+                
+                // Send heartbeat ping to all connections
+                const pingData = { type: 'heartbeat', timestamp: lastHeartbeat };
+                const aliveConns = [];
+                
+                connections.forEach(conn => {
+                    if (conn && conn.open) {
+                        try {
+                            conn.send(pingData);
+                            aliveConns.push(conn);
+                        } catch (e) {
+                            console.warn('Heartbeat send failed:', e);
+                        }
+                    }
+                });
+                
+                // Cleanup dead connections
+                connections = aliveConns.filter(c => c.open);
+                
+                // Update health based on responses (simplified - check open count)
+                const liveCount = connections.filter(c => c.open).length;
+                connectionHealth = liveCount > 0 ? 'good' : (Date.now() - lastHeartbeat > 10000 ? 'bad' : 'warning');
+                
+                updateConnectionStatus();
+                
+                if (liveCount === 0 && isHost) {
+                    addChatMessage('Sistem', 'Bütün bağlantılar kəsildi. Yenidən qoşulma gözlənilir...', true);
+                }
+            }, 5000);
         }
 
         // Sinxron hərəkət funksiyası
         function controlAction(action) {
-            // Host pleyerini yenilə (iframe yenilənməsi vasitəsilə)
             const iframe = document.querySelector('#party-player-container iframe');
-            if(iframe) {
-                // Burada iframe-ə mesaj göndərilir, vidsrc dəstəkləyirsə sinxron olacaq
+            
+            let syncData = { type: 'video-control', action: action, user: myUsername, time: currentVideoTime };
+            
+            // Apply locally first
+            if (iframe) {
                 iframe.contentWindow.postMessage({ type: 'playerControl', action: action }, '*');
             }
+            
+            if (action === 'forward') {
+                currentVideoTime += 10;
+                syncData.time = currentVideoTime;
+            } else if (action === 'rewind') {
+                currentVideoTime = Math.max(0, currentVideoTime - 10);
+                syncData.time = currentVideoTime;
+            }
+            
+            // Broadcast to peers
+            broadcast(syncData);
+            showNotify(formatControlMessage(myUsername, action, currentVideoTime));
+        }
 
-            // Dostuna göndər
-            const data = { type: 'video-control', action: action, user: myUsername };
-            broadcast(data);
-            showNotify(formatControlMessage(myUsername, action));
+        function formatControlMessage(user, action, time = 0) {
+            const min = Math.floor(time / 60);
+            const sec = time % 60;
+            const timeStr = `${min}:${sec.toString().padStart(2, '0')}`;
+            
+            if(action === 'play') return `${user} başladı (${timeStr})`;
+            if(action === 'pause') return `${user} dayandırdı (${timeStr})`;
+            if(action === 'rewind') return `${user} ${timeStr} -10s`;
+            if(action === 'forward') return `${user} ${timeStr} +10s`;
+            return `${user} ${timeStr} ${action}`;
         }
 
         function addEmojiToInput(emoji) {
@@ -1094,17 +1201,24 @@
                     <div style="padding:10px; font-size:0.8rem; text-align:center;">${m.title || m.name}</div>
                 `;
                 div.onclick = () => {
+                    const time = 0;
+                    let syncData = { user: myUsername, time };
+                    
                     if(catalogType === 'movie') {
                         const embed = `https://vidsrc.cc/v2/embed/movie/${m.id}`;
-                        syncPartyPlayer(embed);
-                        broadcast({ type: 'sync-movie', embedUrl: embed, user: myUsername });
+                        syncPartyPlayer(embed, time, true);
+                        syncData.type = 'sync-movie';
+                        syncData.embedUrl = embed;
                         showNotify(`${myUsername} film başladı: ${m.title}`);
                     } else {
                         const embed = `https://vidsrc.cc/v2/embed/tv/${m.id}/1/1`;
-                        syncPartyPlayer(embed);
-                        broadcast({ type: 'sync-tv', embedUrl: embed, user: myUsername });
+                        syncPartyPlayer(embed, time, true);
+                        syncData.type = 'sync-tv';
+                        syncData.embedUrl = embed;
                         showNotify(`${myUsername} serial başladı: ${m.name}`);
                     }
+                    
+                    broadcast(syncData);
                     document.getElementById('party-catalog-overlay').style.display = 'none';
                 };
                 grid.appendChild(div);
@@ -1114,51 +1228,77 @@
 
         function startExternalLink() {
             const inp = document.getElementById('external-url-input');
-            const raw = (inp.value || '').trim();
-            if(!raw) return showNotify("Link daxil edin");
+            const raw = inp.value.trim();
+            if (!raw) return showNotify("Link daxil edin");
+            
             const parsed = normalizeExternalUrl(raw);
-            if(!parsed) return showNotify("Link dəstəklənmir");
-            syncPartyPlayer(parsed.embed);
-            broadcast({ type: 'sync-external', embedUrl: parsed.embed, user: myUsername, source: parsed.source });
+            if (!parsed) return showNotify("Dəstəklənməyən link (YouTube/Google Drive)");
+            
+            syncPartyPlayer(parsed.embed, 0, true);
+            broadcast({ 
+                type: 'sync-external', 
+                embedUrl: parsed.embed, 
+                source: parsed.source, 
+                user: myUsername, 
+                time: 0 
+            });
+            inp.value = '';
             showNotify(`${myUsername} ${parsed.source} başladı`);
         }
 
-        function normalizeExternalUrl(url) {
+        function normalizeExternalUrl(rawUrl) {
             try {
-                const u = new URL(url);
-                // YouTube: watch?v=ID, youtu.be/ID, embed/ID
-                if(u.hostname.includes('youtube.com') || u.hostname.includes('youtu.be')) {
+                const u = new URL(rawUrl);
+                
+                // YouTube comprehensive parsing
+                if (u.hostname.includes('youtube.com') || u.hostname.includes('youtu.be') || u.hostname.includes('www.youtube.com')) {
                     let vid = '';
-                    if(u.hostname.includes('youtu.be')) {
-                        vid = u.pathname.replace('/', '');
+                    if (u.pathname.includes('/embed/')) {
+                        vid = u.pathname.split('/embed/')[1]?.split('?')[0] || u.pathname.split('/embed/')[1];
+                    } else if (u.hostname.includes('youtu.be')) {
+                        vid = u.pathname.slice(1);
                     } else {
-                        vid = u.searchParams.get('v') || '';
-                        if(!vid && u.pathname.includes('/embed/')) vid = u.pathname.split('/embed/')[1];
+                        vid = u.searchParams.get('v');
                     }
-                    if(vid) {
-                        const embed = `https://www.youtube.com/embed/${vid}?rel=0&modestbranding=1`;
-                        return { embed, source: 'YouTube' };
-                    }
-                }
-                // Google Drive: /file/d/ID/view -> /file/d/ID/preview
-                if(u.hostname.includes('drive.google.com')) {
-                    const m = u.pathname.match(/\/file\/d\/([^/]+)\//);
-                    if(m && m[1]) {
-                        const embed = `https://drive.google.com/file/d/${m[1]}/preview`;
-                        return { embed, source: 'Google Drive' };
+                    if (vid) {
+                        return { 
+                            embed: `https://www.youtube.com/embed/${vid}?rel=0&modestbranding=1&enablejsapi=1`,
+                            source: 'YouTube' 
+                        };
                     }
                 }
+                
+                // Google Drive
+                if (u.hostname.includes('drive.google.com')) {
+                    const match = u.pathname.match(/\/file\/d\/([a-zA-Z0-9-_]+)/);
+                    if (match) {
+                        return { 
+                            embed: `https://drive.google.com/file/d/${match[1]}/preview`,
+                            source: 'Google Drive' 
+                        };
+                    }
+                }
+                
+                // Fallback for other embeddable URLs (vidsrc pattern)
+                if (rawUrl.includes('vidsrc.cc') || rawUrl.includes('vidsrc.to')) {
+                    return { embed: rawUrl, source: 'Video Embed' };
+                }
+                
                 return null;
-            } catch(e) {
+            } catch (e) {
+                console.error('URL parse error:', e);
                 return null;
             }
         }
 
         function listenForConnections() {
             peer.on('connection', conn => {
+                conn.metadata = { username: conn.peer.substring(0, 8) }; // Default name
                 connections.push(conn);
                 setupConnHandlers(conn);
-                addChatMessage("Sistem", "Yeni iştirakçı daxil oldu!", true);
+                addChatMessage("Sistem", `Yeni iştirakçı "${conn.metadata.username}" daxil oldu!`, true);
+                updateConnectionStatus();
+                delete reconnectAttempts[conn.peer]; // Reset reconnect attempts
             });
         }
 
@@ -1174,7 +1314,7 @@
                     }
                 } 
                 else if(data.type === 'sync-movie' || data.type === 'sync-tv' || data.type === 'sync-external') {
-                    syncPartyPlayer(data.embedUrl);
+                    syncPartyPlayer(data.embedUrl, data.time || 0, true);
                     if(isHost) broadcast(data, conn);
                     const source = data.type === 'sync-movie' ? 'film' : 
                                   data.type === 'sync-tv' ? 'serial' : data.source || 'video';
@@ -1182,11 +1322,17 @@
                 }
                 else if(data.type === 'video-control') {
                     const iframe = document.querySelector('#party-player-container iframe');
-                    if(iframe) {
+                    if(iframe && data.action) {
                         iframe.contentWindow.postMessage({ type: 'playerControl', action: data.action }, '*');
                     }
+                    
+                    // Update local time tracking
+                    if(data.time !== undefined) {
+                        currentVideoTime = data.time;
+                    }
+                    
                     if(isHost) broadcast(data, conn);
-                    if(data.user) showNotify(formatControlMessage(data.user, data.action));
+                    if(data.user) showNotify(formatControlMessage(data.user, data.action, data.time || 0));
                 }
                 else if(data.type === 'typing') {
                     // Handle typing indicators
@@ -1210,14 +1356,44 @@
             
             // Connection close handling
             conn.on('close', () => {
+                console.log('Connection closed, attempting reconnect...');
+                const peerId = conn.peer;
                 connections = connections.filter(c => c !== conn);
-                addChatMessage('Sistem', `${data.user || 'İştirakçı'} otağı tərk etdi`, true);
+                addChatMessage('Sistem', `${conn.metadata?.username || 'İştirakçı'} otağı tərk etdi`, true);
                 updateConnectionStatus();
+                
+                // Auto-reconnect logic
+                if (isHost && peerId && reconnectAttempts[peerId] < 5) {
+                    setTimeout(() => {
+                        if (reconnectAttempts[peerId] === undefined) reconnectAttempts[peerId] = 0;
+                        reconnectAttempts[peerId]++;
+                        addChatMessage('Sistem', `Yenidən qoşulma cəhdi ${reconnectAttempts[peerId]}/5...`, true);
+                        const newConn = peer.connect(peerId);
+                        newConn.metadata = { username: conn.metadata?.username };
+                        setupConnHandlers(newConn);
+                    }, 3000 * reconnectAttempts[peerId]);
+                }
             });
 
             conn.on('error', err => {
                 console.error('Connection error:', err);
-                addChatMessage('Sistem', 'Bağlantı xətası', true);
+                addChatMessage('Sistem', 'Bağlantı xətası: ' + err.type, true);
+                updateConnectionStatus();
+                
+                // Attempt reconnection on certain errors
+                const peerId = conn.peer;
+                if (err.type === 'network' || err.type === 'timeout') {
+                    setTimeout(() => {
+                        if (reconnectAttempts[peerId] === undefined) reconnectAttempts[peerId] = 0;
+                        reconnectAttempts[peerId]++;
+                        if (reconnectAttempts[peerId] <= 5) {
+                            addChatMessage('Sistem', `Xəta sonrası yenidən qoşulma ${reconnectAttempts[peerId]}/5...`, true);
+                            const newConn = peer.connect(peerId);
+                            newConn.metadata = { username: conn.metadata?.username };
+                            setupConnHandlers(newConn);
+                        }
+                    }, 5000);
+                }
             });
 
             if(!isHost) connections = [conn];
@@ -1328,9 +1504,47 @@
             return `${user} əməliyyat: ${action}`;
         }
 
-        function syncPartyPlayer(url) {
+let currentVideoTime = 0;
+        let videoSyncInterval = null;
+        let periodicSyncInterval = null;
+        let lastSyncTime = 0;
+        let currentVideoSource = null; // Track {type: 'movie'|'tv'|'external', id: ..., embedUrl: ..., source: ...}
+
+        function buildVideoUrl(baseUrl, time = 0, autoplay = true) {
+            const params = new URLSearchParams({ autoPlay: autoplay ? 'true' : 'false' });
+            if (time > 0) params.set('t', Math.floor(time));
+            return baseUrl.includes('?') ? `${baseUrl}&${params.toString()}` : `${baseUrl}?${params.toString()}`;
+        }
+
+        function syncPartyPlayer(embedUrl, time = 0, autoplay = true) {
             const container = document.getElementById('party-player-container');
-            container.innerHTML = `<iframe src="${url}" allow-forms allow-scripts allow-same-origin allow-presentation sandbox="allow-forms allow-scripts allow-same-origin allow-presentation" allowfullscreen></iframe>`;
+            if (!container) return console.error('Player container not found');
+            
+            if (videoSyncInterval) clearInterval(videoSyncInterval);
+            if (periodicSyncInterval) clearInterval(periodicSyncInterval);
+            
+            currentVideoTime = time;
+            currentVideoSource = { embedUrl, time, autoplay };
+            
+            const finalUrl = buildVideoUrl(embedUrl, time, autoplay);
+            container.innerHTML = `<iframe src="${finalUrl}" allow="autoplay; fullscreen" allowfullscreen 
+                allow-forms allow-scripts allow-same-origin allow-presentation 
+                sandbox="allow-forms allow-scripts allow-same-origin allow-presentation"></iframe>`;
+            
+            // Host time tracking + periodic sync
+            if (isHost) {
+                videoSyncInterval = setInterval(() => currentVideoTime += 1, 1000);
+                periodicSyncInterval = setInterval(() => {
+                    if (currentVideoSource) {
+                        broadcast({
+                            type: 'periodic-sync',
+                            source: currentVideoSource,
+                            currentTime: currentVideoTime,
+                            user: myUsername
+                        });
+                    }
+                }, 5000);
+            }
         }
 
         async function getMovies(url, isNew = true) {

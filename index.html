@@ -1164,26 +1164,23 @@
 
         function setupConnHandlers(conn) {
             conn.on('data', data => {
+                console.log('Received:', data.type, 'from', data.user || 'unknown');
+                
                 if(data.type === 'chat') {
                     addChatMessage(data.user, data.msg);
-                    if(isHost) broadcast(data, conn);
-                }
-                if(data.type === 'sync-movie') {
+                    // Host rebroadcasts to ALL other connections (not sender)
+                    if(isHost) {
+                        broadcast(data, conn);
+                    }
+                } 
+                else if(data.type === 'sync-movie' || data.type === 'sync-tv' || data.type === 'sync-external') {
                     syncPartyPlayer(data.embedUrl);
                     if(isHost) broadcast(data, conn);
-                    if(data.user) showNotify(`${data.user} film başladı`);
+                    const source = data.type === 'sync-movie' ? 'film' : 
+                                  data.type === 'sync-tv' ? 'serial' : data.source || 'video';
+                    if(data.user) showNotify(`${data.user} ${source} başladı`);
                 }
-                if(data.type === 'sync-tv') {
-                    syncPartyPlayer(data.embedUrl);
-                    if(isHost) broadcast(data, conn);
-                    if(data.user) showNotify(`${data.user} serial başladı`);
-                }
-                if(data.type === 'sync-external') {
-                    syncPartyPlayer(data.embedUrl);
-                    if(isHost) broadcast(data, conn);
-                    if(data.user) showNotify(`${data.user} ${data.source || 'xarici mənbə'} başladı`);
-                }
-                if(data.type === 'video-control') {
+                else if(data.type === 'video-control') {
                     const iframe = document.querySelector('#party-player-container iframe');
                     if(iframe) {
                         iframe.contentWindow.postMessage({ type: 'playerControl', action: data.action }, '*');
@@ -1191,34 +1188,92 @@
                     if(isHost) broadcast(data, conn);
                     if(data.user) showNotify(formatControlMessage(data.user, data.action));
                 }
+                else if(data.type === 'typing') {
+                    // Handle typing indicators
+                    let typingMsg = document.querySelector('.chat-msg.typing');
+                    if(data.isTyping) {
+                        if(!typingMsg || typingMsg.dataset.user !== data.user) {
+                            if(typingMsg) typingMsg.remove();
+                            typingMsg = document.createElement('div');
+                            typingMsg.className = 'chat-msg typing';
+                            typingMsg.dataset.user = data.user;
+                            typingMsg.innerHTML = `<div class="msg-info"><span class="msg-user">${data.user}</span></div><div>${data.user} yazır...</div>`;
+                            document.getElementById('chat-messages').appendChild(typingMsg);
+                        }
+                    } else {
+                        if(typingMsg && typingMsg.dataset.user === data.user) {
+                            typingMsg.remove();
+                        }
+                    }
+                }
+            });
+            
+            // Connection close handling
+            conn.on('close', () => {
+                connections = connections.filter(c => c !== conn);
+                addChatMessage('Sistem', `${data.user || 'İştirakçı'} otağı tərk etdi`, true);
+                updateConnectionStatus();
+            });
+
+            conn.on('error', err => {
+                console.error('Connection error:', err);
+                addChatMessage('Sistem', 'Bağlantı xətası', true);
             });
 
             if(!isHost) connections = [conn];
         }
 
         function broadcast(data, excludeConn = null) {
+            let sent = 0;
             connections.forEach(c => {
-                if(c !== excludeConn && c.open) {
-                    c.send(data);
+                if(c !== excludeConn && c && c.open) {
+                    try {
+                        c.send(data);
+                        sent++;
+                    } catch(e) {
+                        console.error('Broadcast failed to conn:', e);
+                    }
                 }
             });
+            console.log(`Broadcast ${data.type} to ${sent}/${connections.length} connections`);
+        }
+
+        // Helper: Safe message sending with validation
+        function safeSend(data, targetConnections = null) {
+            const targets = targetConnections || connections;
+            let sent = 0;
+            for(let conn of targets) {
+                if(conn && conn.open) {
+                    try {
+                        conn.send(data);
+                        sent++;
+                    } catch(e) {
+                        console.error('Send failed:', e);
+                    }
+                }
+            }
+            return sent > 0;
         }
 
         function sendChatMessage() {
             const inp = document.getElementById('chat-input');
-            const msg = inp.value;
+            const msg = inp.value.trim();
             if(!msg) return;
             
-            const chatData = { type: 'chat', user: myUsername, msg: msg };
+            const chatData = { type: 'chat', user: myUsername, msg: msg, timestamp: Date.now() };
             
-            if(isHost) {
-                broadcast(chatData);
-            } else if(connections[0]) {
-                connections[0].send(chatData);
-            }
-            
+            // Always add locally first
             addChatMessage(myUsername, msg, false, true);
             inp.value = '';
+            
+            // Send to network
+            if(safeSend(chatData)) {
+                // Typing indicator cleanup if active
+                const typingMsg = document.querySelector('.chat-msg.typing');
+                if(typingMsg) typingMsg.remove();
+            } else {
+                addChatMessage('Sistem', 'Bağlantı xətası - mesaj göndərilə bilmədi', true);
+            }
         }
 
         function addChatMessage(user, msg, isSystem = false, isMine = false) {
@@ -1238,13 +1293,13 @@
                 div.style.alignSelf = "center";
                 div.innerHTML = `<span>📢 ${msg}</span>`;
             } else {
-                div.innerHTML = `
-                    <div class="msg-info">
-                        <span class="msg-user">${user}</span>
-                        <span class="msg-time">${time}</span>
-                    </div>
-                    <div class="msg-text">${msg}</div>
-                `;
+            div.innerHTML = `
+                <div class="msg-info">
+                    <span class="msg-user">${user}</span>
+                    <span class="msg-time">${time}</span>
+                </div>
+                ${msg}
+            `;
             }
             
             box.appendChild(div);
@@ -1415,7 +1470,7 @@
             loader.style.display = 'none';
         }
 
-        async function openActorDetails(id) {
+async function openActorDetails(id) {
             modal.style.display = 'flex';
             const [pRes, mRes] = await Promise.all([
                 fetch(`${BASE_URL}/person/${id}?api_key=${API_KEY}&language=${LANG}`),

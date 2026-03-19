@@ -1,3 +1,78 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="az">
 <head>
@@ -292,6 +367,13 @@
             display: flex;
             flex-direction: column;
             gap: 4px;
+        }
+        .quick-view-data a {
+            transition: opacity 0.2s;
+        }
+        .quick-view-data a:hover {
+            opacity: 0.8;
+            text-decoration: underline;
         }
 
         .movie:hover .quick-view-data { opacity: 1; }
@@ -900,15 +982,25 @@
 
     <div id="party-catalog-overlay">
         <div class="catalog-header">
-            <h2 id="catalog-title" style="color:white; margin:0;">🎬 Film Seçin</h2>
-            <div style="display:flex; gap:8px;">
-                <button class="player-btn" onclick="setCatalogType('movie')">🎬 Filmlər</button>
-                <button class="player-btn" onclick="setCatalogType('tv')">📺 Seriallar</button>
+            <div style="display:flex; gap:10px; margin-bottom:10px;">
+                <button class="player-btn active" id="catalog-movies-tab" onclick="switchPartyCatalog('movies')">🎬 Filmlər</button>
+                <button class="player-btn" id="catalog-series-tab" onclick="switchPartyCatalog('series')">📺 Seriallar</button>
             </div>
-            <input type="text" id="catalog-search-inp" class="catalog-search" placeholder="Filmlərdə axtar...">
+            <input type="text" id="catalog-search-inp" class="catalog-search" placeholder="Axtar...">
             <button class="player-btn" style="background:#ef4444;" onclick="document.getElementById('party-catalog-overlay').style.display='none'">Geri</button>
         </div>
         <div id="party-catalog-grid"></div>
+    </div>
+    
+    <div id="season-episode-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.98); z-index:7000; padding:30px 5%;">
+      <div style="background:var(--card-bg); border-radius:25px; padding:30px; max-width:600px; margin:auto; max-height:80vh; overflow-y:auto;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
+          <h2 id="picker-title" style="margin:0; color:white;">Bölüm seçin</h2>
+          <button class="player-btn" style="background:#ef4444;" onclick="closeSeasonPicker()">❌</button>
+        </div>
+        <div id="seasons-grid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:15px; margin-bottom:25px;"></div>
+        <div id="episodes-grid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(80px,1fr)); gap:10px;"></div>
+      </div>
     </div>
 
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
@@ -941,6 +1033,7 @@
         let isHost = false;
         let catalogPage = 1;
         let catalogQuery = "";
+        let partyCatalogMode = 'movies';
         let isCatalogLoading = false;
         let catalogType = 'movie';
 
@@ -1155,42 +1248,107 @@
             loadPartyCatalog(true);
         }
 
-        async function loadPartyCatalog(isNew = true) {
-            isCatalogLoading = true;
-            const grid = document.getElementById('party-catalog-grid');
-            if(isNew) grid.innerHTML = '';
-            let typePath = catalogType === 'tv' ? 'tv' : 'movie';
-            let url = catalogQuery 
-                ? `${BASE_URL}/search/${typePath}?api_key=${API_KEY}&query=${catalogQuery}&page=${catalogPage}&language=${LANG}`
-                : `${BASE_URL}/${typePath}/popular?api_key=${API_KEY}&page=${catalogPage}&language=${LANG}`;
-            const res = await fetch(url);
-            const data = await res.json();
-            data.results.forEach(m => {
-                const div = document.createElement('div');
-                div.className = 'movie';
-                div.style.transform = "none";
-                div.innerHTML = `
-                    <img src="${m.poster_path ? CAST_IMG_PATH + m.poster_path : 'https://via.placeholder.com/150x225'}" style="height:250px;">
-                    <div style="padding:10px; font-size:0.8rem; text-align:center;">${m.title || m.name}</div>
-                `;
-                div.onclick = () => {
-                    if(catalogType === 'movie') {
-                        const embed = `https://vidsrc.cc/v2/embed/movie/${m.id}`;
-                        syncPartyPlayer(embed);
-                        broadcast({ type: 'sync-movie', embedUrl: embed, user: myUsername });
-                        showNotify(`${myUsername} film başladı: ${m.title}`);
-                    } else {
-                        const embed = `https://vidsrc.cc/v2/embed/tv/${m.id}/1/1`;
-                        syncPartyPlayer(embed);
-                        broadcast({ type: 'sync-tv', embedUrl: embed, user: myUsername });
-                        showNotify(`${myUsername} serial başladı: ${m.name}`);
-                    }
-                    document.getElementById('party-catalog-overlay').style.display = 'none';
-                };
-                grid.appendChild(div);
-            });
-            isCatalogLoading = false;
-        }
+function switchPartyCatalog(mode) {
+  partyCatalogMode = mode;
+  document.getElementById('catalog-movies-tab').classList.toggle('active', mode === 'movies');
+  document.getElementById('catalog-series-tab').classList.toggle('active', mode === 'series');
+  catalogPage = 1;
+  loadPartyCatalog(true);
+}
+
+let currentSeriesData = null;
+let currentSeasons = [];
+
+async function showSeasonEpisodePicker(series) {
+  currentSeriesData = series;
+  document.getElementById('picker-title').textContent = `${series.name || series.title}`;
+  document.getElementById('season-episode-overlay').style.display = 'flex';
+  
+  const seasonsRes = await fetch(`${BASE_URL}/tv/${series.id}?api_key=${API_KEY}&language=${LANG}`);
+  const seriesData = await seasonsRes.json();
+  currentSeasons = seriesData.seasons.filter(s => s.season_number > 0 && s.season_number < 10); // Limit 9 seasons
+  
+  const seasonsGrid = document.getElementById('seasons-grid');
+  seasonsGrid.innerHTML = '';
+  currentSeasons.forEach((season, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'player-btn';
+    btn.textContent = `S${season.season_number}`;
+    btn.onclick = () => loadEpisodes(season.season_number);
+    seasonsGrid.appendChild(btn);
+  });
+}
+
+function loadEpisodes(seasonNum) {
+  const season = currentSeasons.find(s => s.season_number === seasonNum);
+  document.getElementById('seasons-grid').querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+  event.target.classList.add('active');
+  
+  fetch(`${BASE_URL}/tv/${currentSeriesData.id}/season/${seasonNum}?api_key=${API_KEY}&language=${LANG}`)
+    .then(res => res.json())
+    .then(data => {
+      const episodesGrid = document.getElementById('episodes-grid');
+      episodesGrid.innerHTML = '';
+      (data.episodes || []).slice(0, 20).forEach((ep, idx) => { // Limit 20 eps
+        const btn = document.createElement('button');
+        btn.className = 'player-btn';
+        btn.style.fontSize = '0.9rem';
+        btn.textContent = `B${ep.episode_number}`;
+        btn.onclick = () => playPartyEpisode(seasonNum, ep.episode_number, ep.name);
+        episodesGrid.appendChild(btn);
+      });
+    });
+}
+
+function playPartyEpisode(seasonNum, epNum, epName) {
+  const embed = `https://vidsrc.cc/v2/embed/tv/${currentSeriesData.id}/${seasonNum}/${epNum}`;
+  syncPartyPlayer(embed);
+  broadcast({ type: 'sync-tv', embedUrl: embed, title: `${currentSeriesData.name} S${seasonNum} B${epNum} - ${epName}` });
+  showNotify(`${myUsername} serial başladı: ${currentSeriesData.name} S${seasonNum}B${epNum}`);
+  closeSeasonPicker();
+  addChatMessage("Sistem", `"${currentSeriesData.name} S${seasonNum}B${epNum}" başladıldı!`, true);
+}
+
+function closeSeasonPicker() {
+  document.getElementById('season-episode-overlay').style.display = 'none';
+}
+
+async function loadPartyCatalog(isNew = true) {
+  isCatalogLoading = true;
+  const grid = document.getElementById('party-catalog-grid');
+  if(isNew) grid.innerHTML = '';
+  const isSeries = partyCatalogMode === 'series';
+  const type = isSeries ? 'tv' : 'movie';
+  const endpoint = catalogQuery ? `/search/${type}` : `/${isSeries ? 'tv' : 'movie'}/popular`;
+  let url = `${BASE_URL}${endpoint}?api_key=${API_KEY}${catalogQuery ? `&query=${catalogQuery}` : ''}&page=${catalogPage}&language=${LANG}`;
+  const res = await fetch(url);
+  const data = await res.json();
+  data.results.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'movie';
+    div.style.transform = "none";
+    const title = item.title || item.name;
+    const icon = isSeries ? '📺' : '🎬';
+    div.innerHTML = `
+      <img src="${item.poster_path ? CAST_IMG_PATH + item.poster_path : 'https://via.placeholder.com/150x225'}" style="height:250px;">
+      <div style="padding:10px; font-size:0.8rem; text-align:center;">${icon} ${title}</div>
+    `;
+    div.onclick = () => {
+      if(isSeries) {
+        showSeasonEpisodePicker(item);
+      } else {
+        const embed = `https://vidsrc.cc/v2/embed/movie/${item.id}`;
+        syncPartyPlayer(embed);
+        broadcast({ type: 'sync-movie', embedUrl: embed, title });
+        showNotify(`${myUsername} film başladı: ${title}`);
+        document.getElementById('party-catalog-overlay').style.display = 'none';
+        addChatMessage("Sistem", `"${title}" başladıldı!`, true);
+      }
+    };
+    grid.appendChild(div);
+  });
+  isCatalogLoading = false;
+}
 
         function startExternalLink() {
             const inp = document.getElementById('external-url-input');
@@ -1453,7 +1611,10 @@
                         <div class="rating">${item.vote_average.toFixed(1)}</div>
                         <div class="quick-view-data">
                             <span>📅 ${ (item.release_date || item.first_air_date || '').split('-')[0] }</span>
-                            <span style="color:var(--accent-gold); font-size: 10px;">DETALLARA BAX</span>
+                            <a href="https://www.google.com/search?q=${encodeURIComponent('türkçe dublaj ' + title)}" target="_blank" rel="noopener" style="color:var(--accent-gold); font-size: 0.85rem; text-decoration:none;">🇹🇷 Dublaj</a>
+                            <a href="https://www.google.com/search?q=${encodeURIComponent('перевод ' + title)}" target="_blank" rel="noopener" style="color:#60a5fa; font-size: 0.85rem; text-decoration:none;">🇷🇺 Перевод</a>
+                            <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(title)}" target="_blank" rel="noopener" style="color:#ff0000; font-size: 0.85rem; text-decoration:none;">📺 YouTube</a>
+                            <span style="color:var(--accent-gold); font-size: 10px; cursor:pointer;" onclick="openDetails(${item.id})">DETALLARA BAX</span>
                         </div>
                     </div>
                 `;

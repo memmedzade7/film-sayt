@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="az">
 <head>
     <meta charset="UTF-8">
@@ -1536,11 +1536,11 @@ async function loadPartyCatalog(isNew = true) {
                         <div class="rating">${item.vote_average.toFixed(1)}</div>
                         <div class="quick-view-data">
                             <span>📅 ${ (item.release_date || item.first_air_date || '').split('-')[0] }</span>
-                            <a href="https://www.google.com/search?q=${encodeURIComponent('türkçe dublaj ' + title)}" target="_blank" rel="noopener" style="color:var(--accent-gold); font-size: 0.85rem; text-decoration:none;">🇹🇷 Dublaj</a>
-                            <a href="https://www.google.com/search?q=${encodeURIComponent('перевод ' + title)}" target="_blank" rel="noopener" style="color:#60a5fa; font-size: 0.85rem; text-decoration:none;">🇷🇺 Перевод</a>
-                            <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(title)}" target="_blank" rel="noopener" style="color:#ff0000; font-size: 0.85rem; text-decoration:none;">📺 YouTube</a>
+                            <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(title + ' trailer')}" target="_blank" rel="noopener" style="color:#ff0000; font-size: 0.85rem; text-decoration:none;">📺 Treyler</a>
+                            <a href="https://www.google.com/search?q=${encodeURIComponent('az dublaj ' + title)}" target="_blank" rel="noopener" style="color:var(--accent-gold); font-size: 0.85rem; text-decoration:none;">🇦🇿 AZ Dublaj</a>
+                            <a href="https://www.google.com/search?q=${encodeURIComponent('türkçe dublaj ' + title)}" target="_blank" rel="noopener" style="color:var(--accent-gold); font-size: 0.85rem; text-decoration:none;">🇹🇷 Türkçe</a>
+                            <a href="https://www.google.com/search?q=${encodeURIComponent('перевод ' + title)}" target="_blank" rel="noopener" style="color:#60a5fa; font-size: 0.85rem; text-decoration:none;">🇷🇺 Rusça</a>
                             <span style="color:var(--accent-gold); font-size: 10px; cursor:pointer;" onclick="openDetails(${item.id})">DETALLARA BAX</span>
-                        </div>
                     </div>
                 `;
                 el.onclick = () => isTV ? openTVDetails(item.id) : openDetails(item.id);

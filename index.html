@@ -1,4 +1,4 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="az">
 <head>
     <meta charset="UTF-8">
@@ -285,14 +285,33 @@
             opacity: 0;
             transition: opacity 0.3s ease;
             margin-top: 10px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--text-muted);
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             padding-top: 10px;
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 3px;
+            max-height: 100px;
+            overflow-y: auto;
         }
+        .dub-btn {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .dub-trailer { background: rgba(255,0,0,0.1); color: #ff4444; border: 1px solid rgba(255,68,68,0.3); }
+        .dub-az { background: rgba(251,191,36,0.2); color: #fbbf24; border: 1px solid rgba(251,191,36,0.4); }
+        .dub-tr { background: rgba(251,191,36,0.2); color: #fbbf24; border: 1px solid rgba(251,191,36,0.4); }
+        .dub-ru { background: rgba(96,165,250,0.2); color: #60a5fa; border: 1px solid rgba(96,165,250,0.4); }
+        .dub-sub { background: rgba(168,85,247,0.2); color: #a855f7; border: 1px solid rgba(168,85,247,0.4); }
+        .dub-btn:hover { opacity: 0.9; transform: translateX(2px); }
         .quick-view-data a {
             transition: opacity 0.2s;
         }
@@ -1536,11 +1555,13 @@ async function loadPartyCatalog(isNew = true) {
                         <div class="rating">${item.vote_average.toFixed(1)}</div>
                         <div class="quick-view-data">
                             <span>📅 ${ (item.release_date || item.first_air_date || '').split('-')[0] }</span>
-                            <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(title + ' trailer')}" target="_blank" rel="noopener" style="color:#ff0000; font-size: 0.85rem; text-decoration:none;">📺 Treyler</a>
-                            <a href="https://www.google.com/search?q=${encodeURIComponent('az dublaj ' + title)}" target="_blank" rel="noopener" style="color:var(--accent-gold); font-size: 0.85rem; text-decoration:none;">🇦🇿 AZ Dublaj</a>
-                            <a href="https://www.google.com/search?q=${encodeURIComponent('türkçe dublaj ' + title)}" target="_blank" rel="noopener" style="color:var(--accent-gold); font-size: 0.85rem; text-decoration:none;">🇹🇷 Türkçe</a>
-                            <a href="https://www.google.com/search?q=${encodeURIComponent('перевод ' + title)}" target="_blank" rel="noopener" style="color:#60a5fa; font-size: 0.85rem; text-decoration:none;">🇷🇺 Rusça</a>
+                            <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(title + ' trailer')}" target="_blank" rel="noopener" class="dub-btn dub-trailer">📺 Treyler</a>
+                            <a href="https://www.google.com/search?q=${encodeURIComponent('az dublaj ' + title)}" target="_blank" rel="noopener" class="dub-btn dub-az">🇦🇿 AZ Dublaj</a>
+                            <a href="https://www.google.com/search?q=${encodeURIComponent('türkçe dublaj ' + title)}" target="_blank" rel="noopener" class="dub-btn dub-tr">🇹🇷 TR Dublaj</a>
+                            <a href="https://www.google.com/search?q=${encodeURIComponent('перевод ' + title)}" target="_blank" rel="noopener" class="dub-btn dub-ru">🇷🇺 Rus Dublaj</a>
+                            <a href="https://www.google.com/search?q=${encodeURIComponent('altyazı ' + title + ' türkçe')}" target="_blank" rel="noopener" class="dub-btn dub-sub">🇹🇷 TR Altyazı</a>
                             <span style="color:var(--accent-gold); font-size: 10px; cursor:pointer;" onclick="openDetails(${item.id})">DETALLARA BAX</span>
+                        </div>
                     </div>
                 `;
                 el.onclick = () => isTV ? openTVDetails(item.id) : openDetails(item.id);
@@ -1562,6 +1583,13 @@ async function loadPartyCatalog(isNew = true) {
                 <span class="close-modal" onclick="closeModal()">&times;</span>
                 <div class="video-container">
                     <iframe id="main-player" src="https://vidsrc.cc/v2/embed/movie/${id}" width="100%" height="100%" frameborder="0" allow-forms allow-scripts allow-same-origin allow-presentation sandbox="allow-forms allow-scripts allow-same-origin allow-presentation" allowfullscreen></iframe>
+                </div>
+                <div class="dub-bar">
+                    <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(movie.title + ' official trailer')}" target="_blank" rel="noopener" class="dub-btn dub-trailer" style="font-size:1rem;">🎬 Ofisial Treyler</a>
+                    <a href="https://www.google.com/search?q=${encodeURIComponent('azərbaycan dublaj ' + movie.title)}" target="_blank" rel="noopener" class="dub-btn dub-az" style="font-size:1rem;">🇦🇿 AZ Dublaj</a>
+                    <a href="https://www.google.com/search?q=${encodeURIComponent('türkçe dublaj ' + movie.title)}" target="_blank" rel="noopener" class="dub-btn dub-tr" style="font-size:1rem;">🇹🇷 TR Dublaj</a>
+                    <a href="https://www.google.com/search?q=${encodeURIComponent('русский дубляж ' + movie.title)}" target="_blank" rel="noopener" class="dub-btn dub-ru" style="font-size:1rem;">🇷🇺 RU Dublaj</a>
+                    <a href="https://www.opensubtitles.org/en/search/sublanguageid-tur/moviename-${encodeURIComponent(movie.title)}" target="_blank" rel="noopener" class="dub-btn dub-sub" style="font-size:1rem;">📄 TR Altyazı</a>
                 </div>
                 <div class="details-grid">
                     <img src="${IMG_PATH + movie.poster_path}">
@@ -1594,6 +1622,13 @@ async function loadPartyCatalog(isNew = true) {
                 <span class="close-modal" onclick="closeModal()">&times;</span>
                 <div class="video-container">
                     <iframe id="main-player" src="https://vidsrc.cc/v2/embed/tv/${id}/1/1" width="100%" height="100%" frameborder="0" allow-forms allow-scripts allow-same-origin allow-presentation sandbox="allow-forms allow-scripts allow-same-origin allow-presentation" allowfullscreen></iframe>
+                </div>
+                <div class="dub-bar">
+                    <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(tv.name + ' official trailer')}" target="_blank" rel="noopener" class="dub-btn dub-trailer" style="font-size:1rem;">🎬 Ofisial Treyler</a>
+                    <a href="https://www.google.com/search?q=${encodeURIComponent('azərbaycan dublaj ' + tv.name)}" target="_blank" rel="noopener" class="dub-btn dub-az" style="font-size:1rem;">🇦🇿 AZ Dublaj</a>
+                    <a href="https://www.google.com/search?q=${encodeURIComponent('türkçe dublaj ' + tv.name)}" target="_blank" rel="noopener" class="dub-btn dub-tr" style="font-size:1rem;">🇹🇷 TR Dublaj</a>
+                    <a href="https://www.google.com/search?q=${encodeURIComponent('русский дубляж ' + tv.name)}" target="_blank" rel="noopener" class="dub-btn dub-ru" style="font-size:1rem;">🇷🇺 RU Dublaj</a>
+                    <a href="https://www.opensubtitles.org/en/search/sublanguageid-tur/moviename-${encodeURIComponent(tv.name)}" target="_blank" rel="noopener" class="dub-btn dub-sub" style="font-size:1rem;">📄 TR Altyazı</a>
                 </div>
                 <div class="details-grid">
                     <img src="${IMG_PATH + tv.poster_path}">

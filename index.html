@@ -1245,7 +1245,7 @@ function loadEpisodes(seasonNum) {
 }
 
 function playPartyEpisode(seasonNum, epNum, epName) {
-  const embed = `https://vidsrc.cc/v2/embed/tv/${currentSeriesData.id}/${seasonNum}/${epNum}`;
+`https://vidsrc.me/embed/tv?tmdb=${currentSeriesData.id}&eps=${seasonNum}/${epNum}&lang=tr`
   syncPartyPlayer(embed);
   broadcast({ type: 'sync-tv', embedUrl: embed, title: `${currentSeriesData.name} S${seasonNum} B${epNum} - ${epName}` });
   showNotify(`${myUsername} serial başladı: ${currentSeriesData.name} S${seasonNum}B${epNum}`);
@@ -1281,7 +1281,7 @@ async function loadPartyCatalog(isNew = true) {
       if(isSeries) {
         showSeasonEpisodePicker(item);
       } else {
-        const embed = `https://vidsrc.cc/v2/embed/movie/${item.id}`;
+`https://vidsrc.me/embed/movie?tmdb=${item.id}&lang=tr`
         syncPartyPlayer(embed);
         broadcast({ type: 'sync-movie', embedUrl: embed, title });
         showNotify(`${myUsername} film başladı: ${title}`);
@@ -1582,7 +1582,7 @@ async function loadPartyCatalog(isNew = true) {
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
                 <div class="video-container">
-                    <iframe id="main-player" src="https://vidsrc.cc/v2/embed/movie/${id}" width="100%" height="100%" frameborder="0" allow-forms allow-scripts allow-same-origin allow-presentation sandbox="allow-forms allow-scripts allow-same-origin allow-presentation" allowfullscreen></iframe>
+src="https://vidsrc.me/embed/movie?tmdb=${id}&lang=tr"
                 </div>
                 <div class="dub-bar">
                     <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(movie.title + ' official trailer')}" target="_blank" rel="noopener" class="dub-btn dub-trailer" style="font-size:1rem;">🎬 Ofisial Treyler</a>
@@ -1621,7 +1621,7 @@ async function loadPartyCatalog(isNew = true) {
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
                 <div class="video-container">
-                    <iframe id="main-player" src="https://vidsrc.cc/v2/embed/tv/${id}/1/1" width="100%" height="100%" frameborder="0" allow-forms allow-scripts allow-same-origin allow-presentation sandbox="allow-forms allow-scripts allow-same-origin allow-presentation" allowfullscreen></iframe>
+src="https://vidsrc.me/embed/tv?tmdb=${id}&lang=tr"
                 </div>
                 <div class="dub-bar">
                     <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(tv.name + ' official trailer')}" target="_blank" rel="noopener" class="dub-btn dub-trailer" style="font-size:1rem;">🎬 Ofisial Treyler</a>

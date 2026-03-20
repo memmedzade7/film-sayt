@@ -1564,10 +1564,10 @@ modalContent.innerHTML = `
                     <iframe id="main-player" src="https://vidsrc.cc/v2/embed/movie/${id}" width="100%" height="100%" frameborder="0" allow-forms allow-scripts allow-same-origin allow-presentation sandbox="allow-forms allow-scripts allow-same-origin allow-presentation" allowfullscreen></iframe>
                 </div>
                 <div class="search-options" style="background: #111; padding: 15px; display: flex; gap: 10px; border-bottom: 1px solid #222; overflow-x: auto;">
-                    <button onclick="searchFromModal('${movie.title}', 'trailer')" class="player-btn alt-source" style="font-size: 0.8rem;">📺 Treyler</button>
-                    <button onclick="searchFromModal('${movie.title}', 'az dublaj')" class="player-btn" style="font-size: 0.8rem;">🇦🇿 AZ Dublaj</button>
-                    <button onclick="searchFromModal('${movie.title}', 'türkçe dublaj')" class="player-btn" style="font-size: 0.8rem;">🇹🇷 Türkçe</button>
-                    <button onclick="searchFromModal('${movie.title}', 'rus dublaj')" class="player-btn" style="font-size: 0.8rem;">🇷🇺 Rusça</button>
+                    <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(movie.title + ' trailer')}" target="_blank" rel="noopener" class="player-btn alt-source" style="font-size: 0.8rem;">📺 Treyler</a>
+                    <a href="https://www.google.com/search?q=${encodeURIComponent('az dublaj ' + movie.title)}" target="_blank" rel="noopener" class="player-btn" style="font-size: 0.8rem;">🇦🇿 AZ Dublaj</a>
+                    <a href="https://www.google.com/search?q=${encodeURIComponent('türkçe dublaj ' + movie.title)}" target="_blank" rel="noopener" class="player-btn" style="font-size: 0.8rem;">🇹🇷 Türkçe</a>
+                    <a href="https://www.google.com/search?q=${encodeURIComponent('перевод ' + movie.title)}" target="_blank" rel="noopener" class="player-btn" style="font-size: 0.8rem;">🇷🇺 Rusça</a>
                 </div>
                 <div class="details-grid">
                     <img src="${IMG_PATH + movie.poster_path}">
@@ -1602,10 +1602,10 @@ modalContent.innerHTML = `
                     <iframe id="main-player" src="https://vidsrc.cc/v2/embed/tv/${id}/1/1" width="100%" height="100%" frameborder="0" allow-forms allow-scripts allow-same-origin allow-presentation sandbox="allow-forms allow-scripts allow-same-origin allow-presentation" allowfullscreen></iframe>
                 </div>
                 <div class="search-options" style="background: #111; padding: 15px; display: flex; gap: 10px; border-bottom: 1px solid #222; overflow-x: auto;">
-                    <button onclick="searchFromModal('${tv.name || tv.title}', 'trailer')" class="player-btn alt-source" style="font-size: 0.8rem;">📺 Treyler</button>
-                    <button onclick="searchFromModal('${tv.name || tv.title}', 'az dublaj')" class="player-btn" style="font-size: 0.8rem;">🇦🇿 AZ Dublaj</button>
-                    <button onclick="searchFromModal('${tv.name || tv.title}', 'türkçe dublaj')" class="player-btn" style="font-size: 0.8rem;">🇹🇷 Türkçe</button>
-                    <button onclick="searchFromModal('${tv.name || tv.title}', 'rus dublaj')" class="player-btn" style="font-size: 0.8rem;">🇷🇺 Rusça</button>
+                    <a href="https://www.youtube.com/results?search_query=${encodeURIComponent((tv.name || tv.title) + ' trailer')}" target="_blank" rel="noopener" class="player-btn alt-source" style="font-size: 0.8rem;">📺 Treyler</a>
+                    <a href="https://www.google.com/search?q=${encodeURIComponent('az dublaj ' + (tv.name || tv.title))}" target="_blank" rel="noopener" class="player-btn" style="font-size: 0.8rem;">🇦🇿 AZ Dublaj</a>
+                    <a href="https://www.google.com/search?q=${encodeURIComponent('türkçe dublaj ' + (tv.name || tv.title))}" target="_blank" rel="noopener" class="player-btn" style="font-size: 0.8rem;">🇹🇷 Türkçe</a>
+                    <a href="https://www.google.com/search?q=${encodeURIComponent('перевод ' + (tv.name || tv.title))}" target="_blank" rel="noopener" class="player-btn" style="font-size: 0.8rem;">🇷🇺 Rusça</a>
                 </div>
                 <div class="details-grid">
                     <img src="${IMG_PATH + tv.poster_path}">
@@ -1666,14 +1666,6 @@ async function openActorDetails(id) {
                     </div>
                 </div>
             `;
-        }
-
-        function searchFromModal(title, searchType) {
-            const query = encodeURIComponent(`${searchType} ${title}`);
-            currentApiUrl = `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${query}&language=${LANG}`;
-            currentMode = 'movies';
-            getMovies(currentApiUrl, true);
-            closeModal();
         }
 
         function closeModal() { modal.style.display = 'none'; document.body.style.overflow = 'auto'; if(document.getElementById('main-player')) document.getElementById('main-player').src = ''; }

@@ -954,7 +954,7 @@
         const BASE_URL = 'https://api.themoviedb.org/3';
         const IMG_PATH = 'https://image.tmdb.org/t/p/w1280';
         const CAST_IMG_PATH = 'https://image.tmdb.org/t/p/w200'; 
-        const LANG = 'tr-TR'; 
+        const LANG = 'az-AZ'; 
 
         const main = document.getElementById('main');
         const loader = document.getElementById('loader');
@@ -1245,7 +1245,7 @@ function loadEpisodes(seasonNum) {
 }
 
 function playPartyEpisode(seasonNum, epNum, epName) {
-`https://vidsrc.me/embed/tv?tmdb=${currentSeriesData.id}&eps=${seasonNum}/${epNum}&lang=tr`
+`https://vidsrc.me/embed/tv?tmdb=${currentSeriesData.id}&eps=${seasonNum}/${epNum}`
   syncPartyPlayer(embed);
   broadcast({ type: 'sync-tv', embedUrl: embed, title: `${currentSeriesData.name} S${seasonNum} B${epNum} - ${epName}` });
   showNotify(`${myUsername} serial başladı: ${currentSeriesData.name} S${seasonNum}B${epNum}`);
@@ -1281,7 +1281,7 @@ async function loadPartyCatalog(isNew = true) {
       if(isSeries) {
         showSeasonEpisodePicker(item);
       } else {
-`https://vidsrc.me/embed/movie?tmdb=${item.id}&lang=tr`
+`https://vidsrc.me/embed/movie?tmdb=${item.id}`
         syncPartyPlayer(embed);
         broadcast({ type: 'sync-movie', embedUrl: embed, title });
         showNotify(`${myUsername} film başladı: ${title}`);
@@ -1582,7 +1582,7 @@ async function loadPartyCatalog(isNew = true) {
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
                 <div class="video-container">
-src="https://vidsrc.me/embed/movie?tmdb=${id}&lang=tr"
+                    <iframe src="https://vidsrc.me/embed/movie?tmdb=${id}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                 </div>
                 <div class="dub-bar">
                     <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(movie.title + ' official trailer')}" target="_blank" rel="noopener" class="dub-btn dub-trailer" style="font-size:1rem;">🎬 Ofisial Treyler</a>
@@ -1621,7 +1621,7 @@ src="https://vidsrc.me/embed/movie?tmdb=${id}&lang=tr"
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
                 <div class="video-container">
-src="https://vidsrc.me/embed/tv?tmdb=${id}&lang=tr"
+                    <iframe src="https://vidsrc.me/embed/tv?tmdb=${id}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                 </div>
                 <div class="dub-bar">
                     <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(tv.name + ' official trailer')}" target="_blank" rel="noopener" class="dub-btn dub-trailer" style="font-size:1rem;">🎬 Ofisial Treyler</a>

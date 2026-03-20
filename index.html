@@ -1,5 +1,3 @@
-
-
     <!DOCTYPE html>
 <html lang="az">
 <head>
@@ -1566,7 +1564,7 @@ modalContent.innerHTML = `
                     <iframe id="main-player" src="https://vidsrc.cc/v2/embed/movie/${id}" width="100%" height="100%" frameborder="0" allow-forms allow-scripts allow-same-origin allow-presentation sandbox="allow-forms allow-scripts allow-same-origin allow-presentation" allowfullscreen></iframe>
                 </div>
                 <div class="search-options" style="background: #111; padding: 15px; display: flex; gap: 10px; border-bottom: 1px solid #222; overflow-x: auto;">
-                    <button onclick="playTrailer(${id}, false)" class="player-btn alt-source" style="font-size: 0.8rem;">📺 Treyler</button>
+                    <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(movie.title + ' trailer')}" target="_blank" rel="noopener" class="player-btn alt-source" style="font-size: 0.8rem;">📺 Treyler</a>
                     <a href="https://www.google.com/search?q=${encodeURIComponent('az dublaj ' + movie.title)}" target="_blank" rel="noopener" class="player-btn" style="font-size: 0.8rem;">🇦🇿 AZ Dublaj</a>
                     <a href="https://www.google.com/search?q=${encodeURIComponent('türkçe dublaj ' + movie.title)}" target="_blank" rel="noopener" class="player-btn" style="font-size: 0.8rem;">🇹🇷 Türkçe</a>
                     <a href="https://www.google.com/search?q=${encodeURIComponent('перевод ' + movie.title)}" target="_blank" rel="noopener" class="player-btn" style="font-size: 0.8rem;">🇷🇺 Rusça</a>
@@ -1604,7 +1602,7 @@ modalContent.innerHTML = `
                     <iframe id="main-player" src="https://vidsrc.cc/v2/embed/tv/${id}/1/1" width="100%" height="100%" frameborder="0" allow-forms allow-scripts allow-same-origin allow-presentation sandbox="allow-forms allow-scripts allow-same-origin allow-presentation" allowfullscreen></iframe>
                 </div>
                 <div class="search-options" style="background: #111; padding: 15px; display: flex; gap: 10px; border-bottom: 1px solid #222; overflow-x: auto;">
-                    <button onclick="playTrailer(${id}, true)" class="player-btn alt-source" style="font-size: 0.8rem;">📺 Treyler</button>
+                    <a href="https://www.youtube.com/results?search_query=${encodeURIComponent((tv.name || tv.title) + ' trailer')}" target="_blank" rel="noopener" class="player-btn alt-source" style="font-size: 0.8rem;">📺 Treyler</a>
                     <a href="https://www.google.com/search?q=${encodeURIComponent('az dublaj ' + (tv.name || tv.title))}" target="_blank" rel="noopener" class="player-btn" style="font-size: 0.8rem;">🇦🇿 AZ Dublaj</a>
                     <a href="https://www.google.com/search?q=${encodeURIComponent('türkçe dublaj ' + (tv.name || tv.title))}" target="_blank" rel="noopener" class="player-btn" style="font-size: 0.8rem;">🇹🇷 Türkçe</a>
                     <a href="https://www.google.com/search?q=${encodeURIComponent('перевод ' + (tv.name || tv.title))}" target="_blank" rel="noopener" class="player-btn" style="font-size: 0.8rem;">🇷🇺 Rusça</a>
@@ -1668,31 +1666,6 @@ async function openActorDetails(id) {
                     </div>
                 </div>
             `;
-        }
-
-        async function playTrailer(id, isTV) {
-            try {
-                const endpoint = isTV ? `/tv/${id}/videos` : `/movie/${id}/videos`;
-                const res = await fetch(`${BASE_URL}${endpoint}?api_key=${API_KEY}&language=${LANG}`);
-                const data = await res.json();
-                const trailers = data.results.filter(v => v.site === 'YouTube' && v.type === 'Trailer');
-                if (trailers.length > 0) {
-                    const trailerKey = trailers[0].key;
-                    const player = document.getElementById('main-player');
-                    if (player.tagName === 'IFRAME') {
-                        player.src = `https://www.youtube.com/embed/${trailerKey}?autoplay=1&rel=0`;
-                    }
-                } else {
-                    const player = document.getElementById('main-player');
-                    player.src = '';
-                    player.outerHTML = '<div id="main-player" style="color: white; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; height: 100%;">📺 Treyler mövcud deyil</div>';
-                }
-            } catch (error) {
-                console.error('Trailer error:', error);
-                const player = document.getElementById('main-player');
-                player.src = '';
-                player.outerHTML = '<div id="main-player" style="color: white; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; height: 100%;">Treyler yüklənmədi</div>';
-            }
         }
 
         function closeModal() { modal.style.display = 'none'; document.body.style.overflow = 'auto'; if(document.getElementById('main-player')) document.getElementById('main-player').src = ''; }

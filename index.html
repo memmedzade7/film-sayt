@@ -943,8 +943,11 @@
             const [countries, setCountries] = useState({ features: [] });
             const [hoverD, setHoverD] = useState();
             const [selectedCountry, setSelectedCountry] = useState(null);
+            const [selectedCountryCode, setSelectedCountryCode] = useState(null);
             const [movies, setMovies] = useState([]);
             const [loading, setLoading] = useState(false);
+            const [page, setPage] = useState(1);
+            const [hasMore, setHasMore] = useState(true);
             const [dimensions, setDimensions] = useState({ 
                 width: window.innerWidth, 
                 height: window.innerHeight - 85 // Header height roughly 85px
@@ -968,21 +971,52 @@
                 return () => window.removeEventListener('resize', handleResize);
             }, []);
 
-            const fetchMoviesByCountry = async (countryCode, countryName) => {
-                setLoading(true);
-                setSelectedCountry(countryName);
-                try {
-                    const res = await fetch(`${window.BASE_URL}/discover/movie?api_key=${window.API_KEY}&with_origin_country=${countryCode}&language=${window.LANG}&sort_by=popularity.desc`);
-                    const data = await res.json();
-                    setMovies(data.results || []);
+            // Infinite scroll listener
+            useEffect(() => {
+                const handleScroll = () => {
+                    if (loading || !hasMore || !selectedCountryCode) return;
                     
-                    // Smooth scroll to results after a short delay for render
-                    setTimeout(() => {
-                        const resultsEl = document.getElementById('globe-results');
-                        if (resultsEl) {
-                            resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        }
-                    }, 300);
+                    if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 1000) {
+                        fetchMoviesByCountry(selectedCountryCode, selectedCountry, page + 1, true);
+                    }
+                };
+
+                window.addEventListener('scroll', handleScroll);
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, [loading, hasMore, selectedCountryCode, page]);
+
+            const fetchMoviesByCountry = async (countryCode, countryName, pageNum = 1, isLoadMore = false) => {
+                if (loading) return;
+                setLoading(true);
+                
+                if (!isLoadMore) {
+                    setSelectedCountry(countryName);
+                    setSelectedCountryCode(countryCode);
+                    setMovies([]);
+                    setPage(1);
+                    setHasMore(true);
+                }
+
+                try {
+                    const res = await fetch(`${window.BASE_URL}/discover/movie?api_key=${window.API_KEY}&with_origin_country=${countryCode}&language=${window.LANG}&sort_by=popularity.desc&page=${pageNum}`);
+                    const data = await res.json();
+                    
+                    const newMovies = data.results || [];
+                    if (isLoadMore) {
+                        setMovies(prev => [...prev, ...newMovies]);
+                    } else {
+                        setMovies(newMovies);
+                        // Smooth scroll to results after a short delay for render
+                        setTimeout(() => {
+                            const resultsEl = document.getElementById('globe-results');
+                            if (resultsEl) {
+                                resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            }
+                        }, 300);
+                    }
+
+                    setPage(pageNum);
+                    setHasMore(pageNum < data.total_pages);
                 } catch (err) {
                     console.error("Movie fetch error:", err);
                 }
@@ -1271,22 +1305,32 @@
             main.innerHTML = `
                 <div class="watch-party-layout">
                     <div class="video-side">
-                        <div style="padding:10px 20px; background:#111; border-bottom:1px solid #30363d; display:flex; justify-content:space-between; align-items:center;">
+                        <div style="padding:10px 20px; background:#111; border-bottom:1px solid #30363d; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
                             <span style="font-size:0.8rem; color:#8b949e;">Otaq ID: <b style="color:var(--party-color);">${roomId}</b></span>
-                            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; max-width:100%; justify-content:flex-end;">
+                            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
                                 <button class="player-btn" onclick="openPartyCatalog('movie')">🎬 Film Seç</button>
                                 <button class="player-btn" onclick="openPartyCatalog('tv')">📺 Serial Seç</button>
-                                <input id="external-url-input" placeholder="YouTube / Google Drive linki" style="flex:1 1 220px; min-width:0; background:#0d1117; border:1px solid #30363d; color:#fff; border-radius:10px; padding:8px 12px; outline:none;">
+                                <input id="external-url-input" placeholder="YouTube / Google Drive linki" style="width:180px; background:#0d1117; border:1px solid #30363d; color:#fff; border-radius:10px; padding:8px 12px; outline:none; font-size:0.8rem;">
                                 <button class="player-btn" onclick="startExternalLink()">Başlat</button>
                                 <button class="player-btn" style="background:#ef4444; border:none;" onclick="location.reload()">Bağla</button>
                             </div>
                         </div>
+                        
                         <div id="notify-container" class="notify-container"></div>
+                        
                         <div id="party-player-container">
                             <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:#555; background:#05070a;">
                                 <div style="font-size:3rem; margin-bottom:15px;">📽️</div>
                                 <div style="font-weight:bold;">Film hələ başladılmayıb</div>
                             </div>
+                        </div>
+
+                        <!-- Sync Controls Bar -->
+                        <div class="sync-controls" style="background: #0d1117; border-top: 1px solid #30363d; padding: 15px; display: flex; justify-content: center; gap: 15px;">
+                            <button class="sync-btn" onclick="controlAction('rewind')" title="10 san geri">⏪ 10s</button>
+                            <button class="sync-btn" onclick="controlAction('pause')" title="Dayandır">⏸️</button>
+                            <button class="sync-btn" onclick="controlAction('play')" title="Başlat">▶️</button>
+                            <button class="sync-btn" onclick="controlAction('forward')" title="10 san irəli">⏩ 10s</button>
                         </div>
                     </div>
 

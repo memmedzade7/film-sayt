@@ -20,9 +20,7 @@
 
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3507/3507102.png">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3507/3507102.png">
-<script src="https://unpkg.com/three"></script>
-<script src="https://unpkg.com/three-globe"></script>
-<script src="https://cdn.tailwindcss.com"></script>
+
     <style>
         /* Mood-a görə dəyişən dinamik arxa fon təbəqəsi */
         #bg-overlay {
@@ -836,20 +834,7 @@
         }
 
         @keyframes pulse { from { opacity: 0.5; } to { opacity: 1; } }
-#globe-section { display: none; background: #05070a; min-height: 100vh; }
-#globe-container { width: 100%; height: 75vh; position: relative; cursor: grab; }
-#globe-container:active { cursor: grabbing; }
-.globe-tooltip {
-    position: fixed; padding: 10px 15px; background: rgba(17, 24, 39, 0.95);
-    border: 1px solid rgba(99, 102, 241, 0.5); color: white; border-radius: 12px;
-    font-size: 14px; font-weight: bold; pointer-events: none; z-index: 9999;
-    display: none; backdrop-filter: blur(8px); box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-}
-.globe-results { padding: 40px 5%; }
-.globe-results-title { 
-    font-size: 1.8rem; font-weight: 800; margin-bottom: 30px; 
-    color: #fff; border-left: 5px solid #6366f1; padding-left: 20px;
-}
+
     </style>
 </head>
 <body>
@@ -871,17 +856,6 @@
     </div>
 
     <header>
-        <div id="globe-section">
-    <div id="globe-container">
-        <div id="globe-viz"></div>
-        <div id="globe-tooltip" class="globe-tooltip"></div>
-    </div>
-    <div id="globe-results" class="globe-results">
-        <h2 id="globe-country-name" class="globe-results-title">Ölkə seçin...</h2>
-        <div id="globe-movies-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
-            </div>
-    </div>
-</div>
         <div style="display: flex; align-items: center;">
             <div class="brand">
                 <h1 class="logo" onclick="location.reload()">RM Film</h1>
@@ -892,7 +866,6 @@
                 <div class="nav-link" id="nav-series" onclick="switchTo('series')">Seriallar</div>
                 <div class="nav-link" id="nav-actors" onclick="switchTo('actors')">Aktyorlar</div>
                 <div class="nav-link party-nav" id="nav-party" onclick="switchTo('party')">Otaq </div>
-                <div class="nav-link" id="nav-globe" onclick="switchTo('globe')">Qlobus</div>
             </nav>
         </div>
         
@@ -1769,118 +1742,7 @@ async function openActorDetails(id) {
 
         // Reklam əngəlləmə (sadə səviyyə)
         window.open = function() { return null; };
-let globeInstance = null;
 
-// Mövcud switchTo funksiyasını genişləndiririk (heç nəyi silmədən)
-const originalSwitchTo = switchTo;
-switchTo = function(mode) {
-    // Əvvəlcə qlobus bölməsini gizlədirik
-    document.getElementById('globe-section').style.display = 'none';
-    document.getElementById('nav-globe').classList.remove('active');
-    
-    if(mode === 'globe') {
-        currentMode = 'globe';
-        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-        document.getElementById('nav-globe').classList.add('active');
-        movieContent.style.display = 'none';
-        main.innerHTML = '';
-        document.getElementById('globe-section').style.display = 'block';
-        init3DGlobe();
-    } else {
-        originalSwitchTo(mode);
-    }
-};
-
-function init3DGlobe() {
-    if (globeInstance) return;
-
-    const globeElem = document.getElementById('globe-viz');
-    globeInstance = new ThreeGlobe()
-        .globeImageUrl('//unpkg.com/three-globe/example/img/earth-dark.jpg')
-        .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
-        .onPolygonHover(hoverD => {
-            const tooltip = document.getElementById('globe-tooltip');
-            if (hoverD) {
-                tooltip.style.display = 'block';
-                tooltip.innerHTML = `📍 ${hoverD.properties.NAME}`;
-            } else {
-                tooltip.style.display = 'none';
-            }
-        })
-        .onPolygonClick(d => {
-            fetchMoviesForGlobe(d.properties.ISO_A2, d.properties.NAME);
-            window.scrollTo({ top: window.innerHeight * 0.7, behavior: 'smooth' });
-        })
-        .polygonSideColor(() => 'rgba(99, 102, 241, 0.1)')
-        .polygonStrokeColor(() => '#6366f1')
-        .polygonCapColor(() => 'rgba(99, 102, 241, 0.3)');
-
-    fetch('https://raw.githubusercontent.com/vasturiano/three-globe/master/example/data/ne_110m_admin_0_countries.json')
-        .then(res => res.json())
-        .then(countries => {
-            globeInstance.polygonsData(countries.features);
-        });
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(window.innerWidth, window.innerHeight * 0.75);
-    globeElem.appendChild(renderer.domElement);
-
-    const scene = new THREE.Scene();
-    scene.add(globeInstance);
-    scene.add(new THREE.AmbientLight(0xffffff, 0.7));
-    
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / (window.innerHeight * 0.75));
-    camera.position.z = 400;
-
-    window.addEventListener('mousemove', e => {
-        const tooltip = document.getElementById('globe-tooltip');
-        tooltip.style.left = e.clientX + 20 + 'px';
-        tooltip.style.top = e.clientY + 20 + 'px';
-    });
-
-    (function animate() {
-        globeInstance.rotation.y += 0.0015;
-        renderer.render(scene, camera);
-        requestAnimationFrame(animate);
-    })();
-}
-
-async function fetchMoviesForGlobe(isoCode, countryName) {
-    const grid = document.getElementById('globe-movies-grid');
-    const title = document.getElementById('globe-country-name');
-    title.innerText = `${countryName} Üzrə Kəşf Et`;
-    grid.innerHTML = '<div class="loader" style="display:block">Filmlər gətirilir...</div>';
-
-    try {
-        const res = await fetch(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_origin_country=${isoCode}&language=${LANG}&sort_by=popularity.desc`);
-        const data = await res.json();
-        grid.innerHTML = '';
-
-        if (data.results.length === 0) {
-            grid.innerHTML = '<p class="text-gray-500">Bu ölkə üçün hələlik film tapılmadı.</p>';
-            return;
-        }
-
-        data.results.forEach(movie => {
-            const movieDiv = document.createElement('div');
-            movieDiv.className = 'movie relative group rounded-2xl bg-gray-900 border border-gray-800 hover:border-indigo-500 transition-all';
-            movieDiv.innerHTML = `
-                <img src="${movie.poster_path ? IMG_PATH + movie.poster_path : 'https://via.placeholder.com/500x750'}" class="w-full h-72 object-cover rounded-t-2xl">
-                <div class="p-4">
-                    <h3 class="text-sm font-bold text-white truncate">${movie.title}</h3>
-                    <div class="flex justify-between items-center mt-2">
-                        <span class="text-xs text-indigo-400 font-bold">${movie.release_date ? movie.release_date.split('-')[0] : 'N/A'}</span>
-                        <span class="text-xs text-yellow-500">★ ${movie.vote_average.toFixed(1)}</span>
-                    </div>
-                </div>
-            `;
-            movieDiv.onclick = () => openDetails(movie.id);
-            grid.appendChild(movieDiv);
-        });
-    } catch (err) {
-        grid.innerHTML = '<p class="text-red-500">Məlumat yüklənərkən xəta baş verdi.</p>';
-    }
-}
         init();
     </script>
 </body>

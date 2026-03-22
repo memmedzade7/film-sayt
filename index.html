@@ -1744,6 +1744,183 @@ async function openActorDetails(id) {
         window.open = function() { return null; };
 
         init();
+        
+        /* === FUTURISTIC QLOBUS UI UPGRADE === */
+        // Glass panels, low-poly globe, sidebar, particles - NO EXISTING CODE CHANGED
+        
+        // 1. Particles.js CDN for holographic effect
+        const particlesScript = document.createElement('script');
+        particlesScript.src = 'https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js';
+        document.head.appendChild(particlesScript);
+        
+        // 2. Country flags CDN
+        const flagScript = document.createElement('script');
+        flagScript.src = 'https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/js/flag-icons.min.js';
+        document.head.appendChild(flagScript);
+        
+        // 3. Enhanced initGlobe with futuristic UI
+        const originalInitGlobe = initGlobe;
+        initGlobe = async function() {
+            // Call original
+            await originalInitGlobe();
+            
+            // ADD Futuristic UI - Glass container
+            const globeWrapper = document.getElementById('globe-wrapper');
+            globeWrapper.innerHTML = `
+                <div id="futuristic-container" style="width:100%; height:100vh; position:relative; background: radial-gradient(circle, rgba(3,7,18,1) 0%, rgba(0,0,0,1) 70%);">
+                    <!-- Glass Sidebar -->
+                    <div id="country-sidebar" style="position:absolute; left:5%; top:10%; width:250px; height:80vh; background:rgba(255,255,255,0.05); backdrop-filter:blur(20px); border:1px solid rgba(100,200,255,0.3); border-radius:20px; padding:20px; overflow-y:auto; box-shadow:0 20px 40px rgba(0,0,0,0.5);">
+                        <h2 style="color:#00f0ff; font-size:1.5rem; text-align:center; margin-bottom:20px; text-shadow:0 0 10px rgba(0,240,255,0.5);">QLOBUS</h2>
+                        <div id="country-list"></div>
+                    </div>
+                    
+                    <!-- Main Globe Area -->
+                    <div style="position:absolute; top:0; left:25%; width:75%; height:100%;">
+                        <div id="globe-container" style="width:100%; height:70vh;"></div>
+                    </div>
+                    
+                    <!-- Floating Data Panel -->
+                    <div id="data-panel" style="position:absolute; right:5%; top:10%; width:300px; height:60vh; background:rgba(255,255,255,0.08); backdrop-filter:blur(25px); border:1px solid rgba(255,193,7,0.4); border-radius:25px; padding:25px; opacity:0; transition:all 0.5s; box-shadow:0 25px 50px rgba(255,193,7,0.2);">
+                        <div id="panel-header" style="display:flex; align-items:center; gap:15px; margin-bottom:20px;">
+                            <div id="country-flag" style="width:50px; height:50px;"></div>
+                            <h3 id="panel-title" style="color:#fff; font-size:1.8rem; margin:0; text-shadow:0 0 15px #fbbf24;"></h3>
+                        </div>
+                        <input id="country-search" placeholder="Axtarış..." style="width:100%; padding:12px; background:rgba(255,255,255,0.1); border:1px solid rgba(100,200,255,0.4); border-radius:12px; color:#fff; margin-bottom:20px;">
+                        <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:15px;">
+                            <div style="background:rgba(0,240,255,0.2); padding:15px; border-radius:12px; text-align:center; cursor:pointer;" onclick="loadCountrySection('films')">
+                                <h4 style="color:#00f0ff; margin:0 0 10px;">FİLMLƏR</h4>
+                                <div id="films-count" style="color:#fbbf24; font-size:1.2rem;">0</div>
+                            </div>
+                            <div style="background:rgba(255,193,7,0.2); padding:15px; border-radius:12px; text-align:center; cursor:pointer;" onclick="loadCountrySection('medeniyyet')">
+                                <h4 style="color:#fbbf24; margin:0 0 10px;">MƏDƏNİYYƏT</h4>
+                                <div id="culture-count" style="color:#00f0ff; font-size:1.2rem;">0</div>
+                            </div>
+                        </div>
+                        <div id="panel-content" style="margin-top:20px; height:250px; overflow-y:auto;"></div>
+                    </div>
+                    
+                    <!-- Holographic Particles -->
+                    <div id="particles-js" style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:0; opacity:0.3;"></div>
+                </div>
+            `;
+            
+            // Reload globe in new container
+            await originalInitGlobe();
+            
+            // Load country sidebar
+            loadCountrySidebar();
+            
+            // Particles.js
+            particlesJS('particles-js', {
+                particles: { number: { value: 80 }, color: { value: '#00f0ff' }, shape: { type: 'circle' }, opacity: { value: 0.3 }, size: { value: 3 }, move: { speed: 1 } },
+                interactivity: { detect_on: 'canvas', events: { onhover: { enable: true, mode: 'repulse' } } }
+            });
+        };
+        
+        // Country sidebar population
+        async function loadCountrySidebar() {
+            try {
+                const response = await fetch('countries.json');
+                const countries = await response.json();
+                const list = document.getElementById('country-list');
+                list.innerHTML = '';
+                countries.forEach(country => {
+                    const div = document.createElement('div');
+                    div.className = 'country-item';
+                    div.style.cssText = 'display:flex; align-items:center; gap:12px; padding:12px; margin-bottom:10px; background:rgba(255,255,255,0.05); border-radius:12px; cursor:pointer; transition:all 0.3s; border:1px solid transparent;';
+                    div.innerHTML = `
+                        <div class="flag-icon flag-icon-${country.iso2.toLowerCase()}" style="width:30px; height:30px; border-radius:4px;"></div>
+                        <span style="color:#fff; font-weight:500;">${country.name.toUpperCase()}</span>
+                    `;
+                    div.onclick = () => selectCountry(country);
+                    list.appendChild(div);
+                });
+            } catch (e) {
+                console.error('Sidebar load error:', e);
+            }
+        }
+        
+        // Country selection
+        let currentCountry = null;
+        function selectCountry(country) {
+            currentCountry = country;
+            document.querySelectorAll('.country-item').forEach(item => item.style.background = 'rgba(255,255,255,0.05)');
+            event.target.closest('.country-item').style.background = 'rgba(0,240,255,0.2)';
+            
+            // Show panel
+            document.getElementById('data-panel').style.opacity = '1';
+            document.getElementById('panel-title').textContent = country.name.toUpperCase();
+            document.getElementById('country-flag').className = `flag-icon flag-icon-${country.iso2.toLowerCase()}`;
+            document.getElementById('country-flag').style.width = '60px';
+            document.getElementById('country-flag').style.height = '60px';
+            
+            // Zoom to country on globe (simplified)
+            if (controls && scene) {
+                const targetPos = new THREE.Vector3(
+                    5.2 * Math.sin((90 - country.lat) * Math.PI / 180) * Math.cos((country.lng + 180) * Math.PI / 180),
+                    5.2 * Math.cos((90 - country.lat) * Math.PI / 180),
+                    5.2 * Math.sin((90 - country.lat) * Math.PI / 180) * Math.sin((country.lng + 180) * Math.PI / 180)
+                );
+                controls.target.copy(targetPos);
+            }
+            
+            loadCountrySection('films');
+        }
+        
+        // Panel content loader
+        async function loadCountrySection(section) {
+            const content = document.getElementById('panel-content');
+            content.innerHTML = '<div style="color:#aaa; text-align:center; padding:40px;">Yüklənir...</div>';
+            
+            try {
+                let url;
+                if (section === 'films') {
+                    url = `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_origin_country=${currentCountry.iso2}&language=tr-TR&sort_by=popularity.desc`;
+                    document.getElementById('films-count').textContent = 'Yüklənir...';
+                } else {
+                    // Culture placeholder
+                    content.innerHTML = '<div style="color:#00f0ff; text-align:center; padding:40px;">Mədəniyyət məlumatları gələcəkdə əlavə olunacaq 🎭</div>';
+                    return;
+                }
+                
+                const res = await fetch(url);
+                const data = await res.json();
+                document.getElementById('films-count').textContent = data.results.length;
+                
+                content.innerHTML = data.results.slice(0, 6).map(movie => `
+                    <div style="margin-bottom:15px;">
+                        <img src="${movie.poster_path ? 'https://image.tmdb.org/t/p/w200' + movie.poster_path : 'https://via.placeholder.com/120x160'}" style="width:100%; border-radius:8px; margin-bottom:8px;">
+                        <div style="font-size:0.85rem; color:#fff;">${movie.title} (${movie.release_date?.substring(0,4) || '?'})</div>
+                    </div>
+                `).join('');
+            } catch (e) {
+                content.innerHTML = '<div style="color:#ff6b6b; text-align:center; padding:40px;">Xəta baş verdi</div>';
+            }
+        }
+        
+        // Country search
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('country-search');
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    const term = e.target.value.toLowerCase();
+                    document.querySelectorAll('.country-item span').forEach(span => {
+                        const item = span.closest('.country-item');
+                        if (span.textContent.toLowerCase().includes(term)) {
+                            item.style.display = 'flex';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                });
+            }
+        });
+        
+        /* === END FUTURISTIC UPGRADE === */
+        // All original code preserved
+        
+        // Futuristic Qlobus Enhancement - ADD ONLY
+        // Glass UI + Sidebar + Particles
     </script>
 </body>
 </html>

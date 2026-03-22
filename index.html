@@ -1,6 +1,4 @@
-
-
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="az">
 <head>
     <meta charset="UTF-8">
@@ -20,6 +18,9 @@
 
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3507/3507102.png">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3507/3507102.png">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
         /* Mood-a görə dəyişən dinamik arxa fon təbəqəsi */
@@ -865,6 +866,7 @@
                 <div class="nav-link active" id="nav-home" onclick="switchTo('movies')">Filmlər</div>
                 <div class="nav-link" id="nav-series" onclick="switchTo('series')">Seriallar</div>
                 <div class="nav-link" id="nav-actors" onclick="switchTo('actors')">Aktyorlar</div>
+                <div class="nav-link" id="nav-globe" onclick="switchTo('globe')">Qlobus</div>
                 <div class="nav-link party-nav" id="nav-party" onclick="switchTo('party')">Otaq </div>
             </nav>
         </div>
@@ -932,12 +934,136 @@
 
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 
+    <script type="module">
+        import React, { useState, useEffect } from 'https://esm.sh/react';
+        import ReactDOM from 'https://esm.sh/react-dom/client';
+        import Globe from 'https://esm.sh/react-globe.gl';
+
+        const GlobeComponent = () => {
+            const [countries, setCountries] = useState({ features: [] });
+            const [hoverD, setHoverD] = useState();
+            const [selectedCountry, setSelectedCountry] = useState(null);
+            const [movies, setMovies] = useState([]);
+            const [loading, setLoading] = useState(false);
+
+            useEffect(() => {
+                fetch('https://raw.githubusercontent.com/vasturiano/react-globe.gl/master/example/datasets/ne_110m_admin_0_countries.geojson')
+                    .then(res => res.json())
+                    .then(setCountries);
+            }, []);
+
+            const fetchMoviesByCountry = async (countryCode, countryName) => {
+                setLoading(true);
+                setSelectedCountry(countryName);
+                try {
+                    const res = await fetch(`${window.BASE_URL}/discover/movie?api_key=${window.API_KEY}&with_origin_country=${countryCode}&language=${window.LANG}&sort_by=popularity.desc`);
+                    const data = await res.json();
+                    setMovies(data.results || []);
+                } catch (err) {
+                    console.error(err);
+                }
+                setLoading(false);
+            };
+
+            return React.createElement('div', { className: 'flex flex-col items-center w-full p-6 md:p-10 bg-[#05070a] text-white min-h-screen animate-in fade-in duration-700' },
+                React.createElement('div', { className: 'text-center mb-10' },
+                    React.createElement('h2', { className: 'text-4xl md:text-5xl font-black mb-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent uppercase tracking-tighter' }, 'Dünya Sineması'),
+                    React.createElement('p', { className: 'text-gray-400 text-sm md:text-base font-medium tracking-wide' }, 'Ölkə seçərək o regionun ən populyar filmlərini kəşf edin')
+                ),
+                React.createElement('div', { className: 'relative w-full max-w-6xl h-[500px] md:h-[650px] rounded-[40px] overflow-hidden border border-white/10 shadow-[0_0_50px_rgba(99,102,241,0.2)] bg-[#05070a] group' },
+                    React.createElement(Globe, {
+                        globeImageUrl: 'https://unpkg.com/three-globe/example/img/earth-dark.jpg',
+                        backgroundImageUrl: 'https://unpkg.com/three-globe/example/img/night-sky.png',
+                        lineHoverPrecision: 0,
+                        polygonsData: countries.features,
+                        polygonAltitude: d => d === hoverD ? 0.12 : 0.06,
+                        polygonCapColor: d => d === hoverD ? 'rgba(99, 102, 241, 0.6)' : 'rgba(168, 85, 247, 0.15)',
+                        polygonSideColor: () => 'rgba(0, 0, 0, 0.2)',
+                        polygonStrokeColor: () => '#111',
+                        polygonLabel: ({ properties: d }) => `
+                            <div class="bg-gray-900/95 backdrop-blur-xl p-4 rounded-2xl border border-white/10 shadow-2xl min-w-[150px] animate-in zoom-in duration-200">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+                                    <b class="text-white text-base">${d.ADMIN}</b>
+                                </div>
+                                <div class="text-[10px] text-indigo-400 font-bold uppercase tracking-wider">Filmləri görmək üçün kliklə</div>
+                            </div>
+                        `,
+                        onPolygonHover: setHoverD,
+                        onPolygonClick: ({ properties: d }) => fetchMoviesByCountry(d.ISO_A2, d.ADMIN),
+                        polygonsTransitionDuration: 400
+                    }),
+                    React.createElement('div', { className: 'absolute bottom-6 left-6 flex items-center gap-3 bg-black/40 backdrop-blur-md p-3 rounded-2xl border border-white/5 text-[10px] text-gray-400 uppercase tracking-widest font-bold' },
+                        React.createElement('span', { className: 'flex h-2 w-2 rounded-full bg-green-500' }),
+                        'İnteraktiv Rejim Aktivdir'
+                    )
+                ),
+                selectedCountry && React.createElement('div', { className: 'w-full max-w-7xl mt-16 pb-20 animate-in slide-in-from-bottom duration-700' },
+                    React.createElement('div', { className: 'flex items-center justify-between mb-10 border-b border-white/5 pb-6' },
+                        React.createElement('h3', { className: 'text-2xl md:text-3xl font-bold flex items-center gap-4' }, 
+                            React.createElement('span', { className: 'bg-indigo-500/10 p-3 rounded-2xl text-2xl' }, '📍'),
+                            React.createElement('div', null,
+                                React.createElement('span', { className: 'text-gray-500 text-sm block uppercase tracking-widest' }, 'Seçilmiş Ölkə'),
+                                `${selectedCountry} Filmləri`
+                            )
+                        ),
+                        React.createElement('div', { className: 'text-gray-500 text-sm font-medium' }, `${movies.length} film tapıldı`)
+                    ),
+                    loading ? React.createElement('div', { className: 'flex flex-col items-center justify-center py-20 gap-4' }, 
+                        React.createElement('div', { className: 'w-12 h-12 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin' }),
+                        React.createElement('p', { className: 'text-gray-500 animate-pulse font-medium' }, 'Filmlər axtarılır...')
+                    ) :
+                    React.createElement('div', { className: 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 md:gap-8' },
+                        movies.length > 0 ? movies.map(movie => 
+                            React.createElement('div', { 
+                                key: movie.id, 
+                                className: 'bg-[#111827] rounded-[24px] overflow-hidden border border-white/5 hover:border-indigo-500/50 hover:shadow-[0_20px_40px_rgba(0,0,0,0.6)] transition-all duration-500 cursor-pointer group relative',
+                                onClick: () => window.openDetails(movie.id)
+                            },
+                                React.createElement('div', { className: 'relative overflow-hidden aspect-[2/3]' },
+                                    React.createElement('img', { 
+                                        src: movie.poster_path ? window.IMG_PATH + movie.poster_path : 'https://via.placeholder.com/500x750?text=No+Poster',
+                                        className: 'w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 brightness-90 group-hover:brightness-100'
+                                    }),
+                                    React.createElement('div', { className: 'absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500' })
+                                ),
+                                React.createElement('div', { className: 'p-4' },
+                                    React.createElement('h4', { className: 'font-bold text-sm truncate group-hover:text-indigo-400 transition-colors' }, movie.title),
+                                    React.createElement('div', { className: 'flex items-center justify-between mt-2' },
+                                        React.createElement('span', { className: 'text-[10px] text-gray-500 font-bold bg-white/5 px-2 py-1 rounded-md' }, movie.release_date ? movie.release_date.split('-')[0] : 'N/A'),
+                                        React.createElement('span', { className: 'text-[10px] text-amber-400 font-black' }, `★ ${movie.vote_average.toFixed(1)}`)
+                                    )
+                                )
+                            )
+                        ) : React.createElement('div', { className: 'col-span-full flex flex-col items-center justify-center py-20 bg-white/5 rounded-[40px] border border-dashed border-white/10' },
+                            React.createElement('span', { className: 'text-4xl mb-4' }, '🔍'),
+                            React.createElement('p', { className: 'text-gray-400 font-medium' }, 'Bu ölkə üçün hələlik film tapılmadı.')
+                        )
+                    )
+                )
+            );
+        };
+
+        window.renderGlobe = () => {
+            const main = document.getElementById('main');
+            main.innerHTML = '<div id="globe-root"></div>';
+            const root = ReactDOM.createRoot(document.getElementById('globe-root'));
+            root.render(React.createElement(GlobeComponent));
+        };
+    </script>
+
     <script>
         const API_KEY = '34d4692f40f9b4827503c570ebda8db7';
         const BASE_URL = 'https://api.themoviedb.org/3';
         const IMG_PATH = 'https://image.tmdb.org/t/p/w1280';
         const CAST_IMG_PATH = 'https://image.tmdb.org/t/p/w200'; 
         const LANG = 'tr-TR'; 
+
+        // Global dəyişənləri window-a bağlayırıq (React modulunda istifadə üçün)
+        window.API_KEY = API_KEY;
+        window.BASE_URL = BASE_URL;
+        window.IMG_PATH = IMG_PATH;
+        window.LANG = LANG;
 
         const main = document.getElementById('main');
         const loader = document.getElementById('loader');
@@ -979,7 +1105,7 @@
             getMovies(currentApiUrl);
             updateWatchlistCount();
             window.addEventListener('scroll', () => {
-                if (isLoading || isFavoritesView || currentMode === 'party') return;
+                if (isLoading || isFavoritesView || currentMode === 'party' || currentMode === 'globe') return;
                 if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
                     currentPage++;
                     if(currentMode === 'movies') getMovies(currentApiUrl, false);
@@ -1030,6 +1156,10 @@
                 document.getElementById('nav-party').classList.add('active');
                 movieContent.style.display = 'none';
                 renderPartySetup();
+            } else if(mode === 'globe') {
+                document.getElementById('nav-globe').classList.add('active');
+                movieContent.style.display = 'none';
+                if(window.renderGlobe) window.renderGlobe();
             }
         }
 
@@ -1348,7 +1478,7 @@ async function loadPartyCatalog(isNew = true) {
                 else if(data.type === 'video-control') {
                     const iframe = document.querySelector('#party-player-container iframe');
                     if(iframe) {
-                        iframe.contentWindow.postMessage({ type: 'playerControl', action: data.action }, '*');
+                        iframe.contentWindow.postMessage({ type: 'playerControl', action: action }, '*');
                     }
                     if(isHost) broadcast(data, conn);
                     if(data.user) showNotify(formatControlMessage(data.user, data.action));
@@ -1542,7 +1672,7 @@ async function loadPartyCatalog(isNew = true) {
                             <a href="https://www.google.com/search?q=${encodeURIComponent('az dublaj ' + title)}" target="_blank" rel="noopener" style="color:var(--accent-gold); font-size: 0.85rem; text-decoration:none;">🇦🇿 AZ Dublaj</a>
                             <a href="https://www.google.com/search?q=${encodeURIComponent('türkçe dublaj ' + title)}" target="_blank" rel="noopener" style="color:var(--accent-gold); font-size: 0.85rem; text-decoration:none;">🇹🇷 Türkçe</a>
                             <a href="https://www.google.com/search?q=${encodeURIComponent('перевод ' + title)}" target="_blank" rel="noopener" style="color:#60a5fa; font-size: 0.85rem; text-decoration:none;">🇷🇺 Rusça</a>
-                            <span style="color:var(--accent-gold); font-size: 10px; cursor:pointer;" onclick="openDetails(${item.id})">DETALLARA BAX</span>
+                            <span style="color:var(--accent-gold); font-size: 10px; cursor:pointer;" onclick="window.openDetails(${item.id})">DETALLARA BAX</span>
                     </div>
                 `;
                 el.onclick = () => isTV ? openTVDetails(item.id) : openDetails(item.id);
@@ -1588,6 +1718,9 @@ modalContent.innerHTML = `
                 </div>
             `;
         }
+
+        // Window-a bağlayırıq ki, React komponentindən çağıra bilək
+        window.openDetails = openDetails;
 
         async function openTVDetails(id) {
             modal.style.display = 'flex';

@@ -1308,13 +1308,13 @@
                         <div style="padding:10px 20px; background:#111; border-bottom:1px solid #30363d; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
                             <span style="font-size:0.8rem; color:#8b949e;">Otaq ID: <b style="color:var(--party-color);">${roomId}</b></span>
                             <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
-                                <button class="player-btn" onclick="openPartyCatalog('movie')">🎬 Film Seç</button>
-                                <button class="player-btn" onclick="openPartyCatalog('tv')">📺 Serial Seç</button>
-                                <input id="external-url-input" placeholder="YouTube / Google Drive linki" style="width:180px; background:#0d1117; border:1px solid #30363d; color:#fff; border-radius:10px; padding:8px 12px; outline:none; font-size:0.8rem;">
-                                <button class="player-btn" onclick="startExternalLink()">Başlat</button>
+                                <button class="player-btn" onclick="openPartyCatalog('movie')">🎬 Film</button>
+                                <button class="player-btn" onclick="openPartyCatalog('tv')">📺 Serial</button>
+                                <button class="player-btn" style="background:#fbbf24; color:#000;" onclick="syncTimeAction()">🕒 Zamanı Sinxron Et</button>
                                 <button class="player-btn" style="background:#ef4444; border:none;" onclick="location.reload()">Bağla</button>
                             </div>
                         </div>
+                        <input id="external-url-input" placeholder="YouTube / Google Drive linki" style="width:100%; background:#0d1117; border-bottom:1px solid #30363d; color:#fff; padding:8px 20px; outline:none; font-size:0.8rem;">
                         
                         <div id="notify-container" class="notify-container"></div>
                         
@@ -1323,14 +1323,6 @@
                                 <div style="font-size:3rem; margin-bottom:15px;">📽️</div>
                                 <div style="font-weight:bold;">Film hələ başladılmayıb</div>
                             </div>
-                        </div>
-
-                        <!-- Sync Controls Bar -->
-                        <div class="sync-controls" style="background: #0d1117; border-top: 1px solid #30363d; padding: 15px; display: flex; justify-content: center; gap: 15px;">
-                            <button class="sync-btn" onclick="controlAction('rewind')" title="10 san geri">⏪ 10s</button>
-                            <button class="sync-btn" onclick="controlAction('pause')" title="Dayandır">⏸️</button>
-                            <button class="sync-btn" onclick="controlAction('play')" title="Başlat">▶️</button>
-                            <button class="sync-btn" onclick="controlAction('forward')" title="10 san irəli">⏩ 10s</button>
                         </div>
                     </div>
 
@@ -1355,18 +1347,20 @@
         }
 
         // Sinxron hərəkət funksiyası
-        function controlAction(action) {
-            // Host pleyerini yenilə (iframe yenilənməsi vasitəsilə)
-            const iframe = document.querySelector('#party-player-container iframe');
-            if(iframe) {
-                // Burada iframe-ə mesaj göndərilir, vidsrc dəstəkləyirsə sinxron olacaq
-                iframe.contentWindow.postMessage({ type: 'playerControl', action: action }, '*');
-            }
-
-            // Dostuna göndər
-            const data = { type: 'video-control', action: action, user: myUsername };
+        function controlAction(action, time = null) {
+            const data = { type: 'video-control', action: action, user: myUsername, time: time };
             broadcast(data);
-            showNotify(formatControlMessage(myUsername, action));
+            
+            // Öz çatına da əlavə et
+            const msg = formatControlMessage(myUsername, action, time);
+            addChatMessage("Sistem", msg, true);
+        }
+
+        function syncTimeAction() {
+            const time = prompt("Hal-hazırkı dəqiqə və saniyəni daxil edin (məsələn: 1:23):");
+            if(time) {
+                controlAction('seek', time);
+            }
         }
 
         function addEmojiToInput(emoji) {
@@ -1563,12 +1557,12 @@ async function loadPartyCatalog(isNew = true) {
                     if(data.user) showNotify(`${data.user} ${source} başladı`);
                 }
                 else if(data.type === 'video-control') {
-                    const iframe = document.querySelector('#party-player-container iframe');
-                    if(iframe) {
-                        iframe.contentWindow.postMessage({ type: 'playerControl', action: data.action }, '*');
-                    }
                     if(isHost) broadcast(data, conn);
-                    if(data.user) showNotify(formatControlMessage(data.user, data.action));
+                    if(data.user) {
+                        const msg = formatControlMessage(data.user, data.action, data.time);
+                        addChatMessage("Sistem", msg, true);
+                        showNotify(msg);
+                    }
                 }
                 else if(data.type === 'typing') {
                     // Handle typing indicators
@@ -1702,12 +1696,11 @@ async function loadPartyCatalog(isNew = true) {
             }, 2500);
         }
 
-        function formatControlMessage(user, action) {
-            if(action === 'play') return `${user} başladı`;
-            if(action === 'pause') return `${user} dayandırdı`;
-            if(action === 'rewind') return `${user} 10 saniyə geri etdi`;
-            if(action === 'forward') return `${user} 10 saniyə irəli etdi`;
-            return `${user} əməliyyat: ${action}`;
+        function formatControlMessage(user, action, time = null) {
+            if(action === 'play') return `${user} videonu başlatdı`;
+            if(action === 'pause') return `${user} videonu dayandırdı`;
+            if(action === 'seek') return `${user} videonu ${time} dəqiqəsinə çəkdi`;
+            return `${user} hərəkət etdi: ${action}`;
         }
 
         function syncPartyPlayer(url) {

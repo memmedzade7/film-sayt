@@ -1314,10 +1314,16 @@
                                 <button class="player-btn" style="background:#ef4444; border:none;" onclick="location.reload()">Bağla</button>
                             </div>
                         </div>
-                        <div style="display:flex; background:#0d1117; border-bottom:1px solid #30363d;">
-                            <input id="external-url-input" placeholder="Video linki, YouTube və ya birbaşa MP4 linki yapışdırın..." style="flex:1; background:transparent; border:none; color:#fff; padding:12px 20px; outline:none; font-size:0.85rem;">
-                            <button class="player-btn" style="margin:5px; background:#3b82f6; color:#fff;" onclick="googleSearchHelper()">🔍 Tap</button>
-                            <button class="player-btn" style="margin:5px; background:var(--party-color); color:#000; font-weight:bold;" onclick="startExternalLink()">🚀 Başlat</button>
+                        <div style="display:flex; flex-direction:column; background:#0d1117; border-bottom:1px solid #30363d;">
+                            <div style="display:flex; width:100%;">
+                                <input id="external-url-input" placeholder="Video linkini bura yapışdırın (YouTube, MP4 və ya Movie Embed)..." style="flex:1; background:transparent; border:none; color:#fff; padding:12px 20px; outline:none; font-size:0.85rem;">
+                                <button class="player-btn" style="margin:5px; background:#3b82f6; color:#fff; padding:8px 15px;" onclick="googleSearchHelper()">🔍 Tap</button>
+                                <button class="player-btn" style="margin:5px; background:var(--party-color); color:#000; font-weight:bold; padding:8px 20px;" onclick="startExternalLink()">🚀 Başlat</button>
+                            </div>
+                            <div id="player-warning" style="display:none; padding:5px 20px; background:#450a0a; color:#fecaca; font-size:0.7rem; border-top:1px solid #7f1d1d;">
+                                ⚠️ Bəzi saytlar birbaşa qoşulmağı bloklayır. Əgər video açılmasa, "Yeni Tabda Aç" düyməsini yoxlayın.
+                                <button onclick="openInNewTab()" style="margin-left:10px; text-decoration:underline; font-weight:bold;">[Yeni Tabda Aç]</button>
+                            </div>
                         </div>
                         
                         <div id="notify-container" class="notify-container"></div>
@@ -1493,15 +1499,31 @@ async function loadPartyCatalog(isNew = true) {
   isCatalogLoading = false;
 }
 
+        let currentVideoUrl = "";
+
+        function openInNewTab() {
+            if(currentVideoUrl) window.open(currentVideoUrl, '_blank');
+        }
+
         function startExternalLink() {
             const inp = document.getElementById('external-url-input');
             const raw = (inp.value || '').trim();
             if(!raw) return showNotify("Link daxil edin");
+            
+            currentVideoUrl = raw;
             const parsed = normalizeExternalUrl(raw);
             if(!parsed) return showNotify("Link dəstəklənmir");
+            
+            // Show warning for external non-direct links
+            const warning = document.getElementById('player-warning');
+            if (warning) {
+                warning.style.display = (parsed.source === 'Web Video') ? 'block' : 'none';
+            }
+
             syncPartyPlayer(parsed.embed);
             broadcast({ type: 'sync-external', embedUrl: parsed.embed, user: myUsername, source: parsed.source });
             showNotify(`${myUsername} ${parsed.source} başladı`);
+            addChatMessage("Sistem", `${myUsername} xarici link başlatdı: ${parsed.source}`, true);
         }
 
         function googleSearchHelper() {

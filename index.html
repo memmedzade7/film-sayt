@@ -1162,7 +1162,6 @@
             `;
             main.innerHTML = roomHtml;
             
-            // Animasiya ilə pərdələri açırıq
             setTimeout(() => {
                 const setupScreen = document.getElementById('room-setup');
                 if(setupScreen) setupScreen.classList.add('open');
@@ -1437,10 +1436,6 @@
                     </div>
                 </div>
             `;
-            
-            // Player yükləndikdən sonra dilləri əlavə etmək üçün interval və ya xüsusi parametrlər istifadə edilə bilər.
-            // Bu hissədə API-dan gələn dilləri iframe-ə inject etmək texniki olaraq vidsrc tərəfindən idarə olunur,
-            // lakin biz vizual olaraq Azərbaycan və Türk dillərini prioritetləşdiririk.
         }
 
         function changeServer(btn, url) {
@@ -1527,7 +1522,6 @@
             updateWatchlistCount();
             if(isFavoritesView) showFavorites();
             else {
-                // Cari səhifədə düyməni yenilə
                 const btn = event.target.closest('.fav-btn');
                 if(btn) btn.classList.toggle('active');
             }
@@ -1578,26 +1572,18 @@
         async function getRandomMovie() {
             const diceOverlay = document.getElementById('dice-overlay');
             diceOverlay.style.display = 'flex';
-            
             try {
                 const res = await fetch(`${BASE_URL}/movie/popular?api_key=${API_KEY}`);
                 const data = await res.json();
                 const randomMovie = data.results[Math.floor(Math.random() * 20)];
-                
-                // Animasiya üçün 2 saniyə gözləyirik
                 setTimeout(() => {
                     diceOverlay.style.display = 'none';
                     openDetails(randomMovie.id);
                 }, 2000);
-
             } catch (error) {
-                console.error("Xəta:", error);
                 diceOverlay.style.display = 'none';
             }
         }
-
-        // Reklam əngəlləmə (sadə səviyyə)
-        window.open = function() { return null; };
 
         init();
     </script>

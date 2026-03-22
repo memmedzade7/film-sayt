@@ -1315,7 +1315,8 @@
                             </div>
                         </div>
                         <div style="display:flex; background:#0d1117; border-bottom:1px solid #30363d;">
-                            <input id="external-url-input" placeholder="YouTube / Google Drive linkini bura yapışdırın..." style="flex:1; background:transparent; border:none; color:#fff; padding:12px 20px; outline:none; font-size:0.85rem;">
+                            <input id="external-url-input" placeholder="Video linki, YouTube və ya birbaşa MP4 linki yapışdırın..." style="flex:1; background:transparent; border:none; color:#fff; padding:12px 20px; outline:none; font-size:0.85rem;">
+                            <button class="player-btn" style="margin:5px; background:#3b82f6; color:#fff;" onclick="googleSearchHelper()">🔍 Tap</button>
                             <button class="player-btn" style="margin:5px; background:var(--party-color); color:#000; font-weight:bold;" onclick="startExternalLink()">🚀 Başlat</button>
                         </div>
                         
@@ -1330,7 +1331,7 @@
                     </div>
 
                     <div class="chat-container">
-                        <div class="chat-header">Canlı</div>
+                        <div class="chat-header">Canlı Söhbət</div>
                         <div id="chat-messages"></div>
                         <div class="chat-input-area">
                             <div class="chat-controls">
@@ -1503,9 +1504,24 @@ async function loadPartyCatalog(isNew = true) {
             showNotify(`${myUsername} ${parsed.source} başladı`);
         }
 
+        function googleSearchHelper() {
+            const query = prompt("Hansı filmi axtarırsınız? (Birbaşa Google-dan MP4 linkləri tapılacaq):");
+            if (query) {
+                const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query + ' index of mp4 OR "google drive" movie')}`;
+                window.open(searchUrl, '_blank');
+                addChatMessage("Sistem", `"${query}" üçün Google axtarışı açıldı. Tapdığınız linki bura yapışdırın.`, true);
+            }
+        }
+
         function normalizeExternalUrl(url) {
             try {
+                // If it's a direct video file link
+                if (url.match(/\.(mp4|mkv|webm|mov|avi)$/i)) {
+                    return { embed: url, source: 'Direct Video', isFile: true };
+                }
+
                 const u = new URL(url);
+                
                 // YouTube: watch?v=ID, youtu.be/ID, embed/ID
                 if(u.hostname.includes('youtube.com') || u.hostname.includes('youtu.be')) {
                     let vid = '';
@@ -1516,20 +1532,24 @@ async function loadPartyCatalog(isNew = true) {
                         if(!vid && u.pathname.includes('/embed/')) vid = u.pathname.split('/embed/')[1];
                     }
                     if(vid) {
-                        const embed = `https://www.youtube.com/embed/${vid}?rel=0&modestbranding=1`;
-                        return { embed, source: 'YouTube' };
+                        return { embed: `https://www.youtube.com/embed/${vid}?rel=0&modestbranding=1`, source: 'YouTube' };
                     }
                 }
                 // Google Drive: /file/d/ID/view -> /file/d/ID/preview
                 if(u.hostname.includes('drive.google.com')) {
                     const m = u.pathname.match(/\/file\/d\/([^/]+)\//);
                     if(m && m[1]) {
-                        const embed = `https://drive.google.com/file/d/${m[1]}/preview`;
-                        return { embed, source: 'Google Drive' };
+                        return { embed: `https://drive.google.com/file/d/${m[1]}/preview`, source: 'Google Drive' };
                     }
                 }
-                return null;
+                
+                // Any other link - treat as general iframe
+                return { embed: url, source: 'Web Video' };
             } catch(e) {
+                // Not a valid URL? Try if it's an ID for vidsrc
+                if (url.length > 5 && !url.includes(' ')) {
+                    return { embed: `https://vidsrc.cc/v2/embed/movie/${url}`, source: 'Movie ID' };
+                }
                 return null;
             }
         }
@@ -1709,7 +1729,17 @@ async function loadPartyCatalog(isNew = true) {
 
         function syncPartyPlayer(url) {
             const container = document.getElementById('party-player-container');
-            container.innerHTML = `<iframe src="${url}" allow-forms allow-scripts allow-same-origin allow-presentation sandbox="allow-forms allow-scripts allow-same-origin allow-presentation" allowfullscreen></iframe>`;
+            
+            // Check if it's a direct video file (ends with extension)
+            if (url.match(/\.(mp4|mkv|webm|mov|avi)$/i)) {
+                container.innerHTML = `
+                    <video controls autoplay style="width:100%; height:100%; background:#000;">
+                        <source src="${url}" type="video/mp4">
+                        Sizin brauzeriniz bu videonu dəstəkləmir.
+                    </video>`;
+            } else {
+                container.innerHTML = `<iframe src="${url}" allow-forms allow-scripts allow-same-origin allow-presentation sandbox="allow-forms allow-scripts allow-same-origin allow-presentation" allowfullscreen></iframe>`;
+            }
         }
 
         async function getMovies(url, isNew = true) {

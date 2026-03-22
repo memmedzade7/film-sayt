@@ -945,11 +945,27 @@
             const [selectedCountry, setSelectedCountry] = useState(null);
             const [movies, setMovies] = useState([]);
             const [loading, setLoading] = useState(false);
+            const [dimensions, setDimensions] = useState({ 
+                width: window.innerWidth, 
+                height: window.innerHeight - 85 // Header height roughly 85px
+            });
 
             useEffect(() => {
+                const handleResize = () => {
+                    setDimensions({
+                        width: window.innerWidth,
+                        height: window.innerHeight - 85
+                    });
+                };
+                window.addEventListener('resize', handleResize);
+                
+                // Fetch GeoJSON for countries
                 fetch('https://raw.githubusercontent.com/vasturiano/react-globe.gl/master/example/datasets/ne_110m_admin_0_countries.geojson')
                     .then(res => res.json())
-                    .then(setCountries);
+                    .then(setCountries)
+                    .catch(err => console.error("GeoJSON load error:", err));
+
+                return () => window.removeEventListener('resize', handleResize);
             }, []);
 
             const fetchMoviesByCountry = async (countryCode, countryName) => {
@@ -959,46 +975,65 @@
                     const res = await fetch(`${window.BASE_URL}/discover/movie?api_key=${window.API_KEY}&with_origin_country=${countryCode}&language=${window.LANG}&sort_by=popularity.desc`);
                     const data = await res.json();
                     setMovies(data.results || []);
+                    
+                    // Smooth scroll to results after a short delay for render
+                    setTimeout(() => {
+                        const resultsEl = document.getElementById('globe-results');
+                        if (resultsEl) {
+                            resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    }, 300);
                 } catch (err) {
-                    console.error(err);
+                    console.error("Movie fetch error:", err);
                 }
                 setLoading(false);
             };
 
-            return React.createElement('div', { className: 'flex flex-col items-center w-full p-6 md:p-10 bg-[#05070a] text-white min-h-screen animate-in fade-in duration-700' },
-                React.createElement('div', { className: 'text-center mb-10' },
-                    React.createElement('h2', { className: 'text-4xl md:text-5xl font-black mb-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent uppercase tracking-tighter' }, 'Dünya Sineması'),
-                    React.createElement('p', { className: 'text-gray-400 text-sm md:text-base font-medium tracking-wide' }, 'Ölkə seçərək o regionun ən populyar filmlərini kəşf edin')
+            return React.createElement('div', { className: 'relative w-full bg-[#05070a] text-white overflow-x-hidden' },
+                // UI Overlay
+                React.createElement('div', { className: 'absolute top-10 left-0 right-0 z-10 pointer-events-none flex flex-col items-center px-6' },
+                    React.createElement('h2', { className: 'text-5xl md:text-7xl font-black mb-4 bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent uppercase tracking-tighter drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)]' }, 'Dünya Sineması'),
+                    React.createElement('p', { className: 'text-indigo-200/70 text-sm md:text-lg font-semibold tracking-widest bg-indigo-500/10 backdrop-blur-md px-8 py-2 rounded-full border border-indigo-500/20 shadow-xl' }, 'KƏŞF ETMƏK ÜÇÜN ÖLKƏ SEÇİN')
                 ),
-                React.createElement('div', { className: 'relative w-full max-w-6xl h-[500px] md:h-[650px] rounded-[40px] overflow-hidden border border-white/10 shadow-[0_0_50px_rgba(99,102,241,0.2)] bg-[#05070a] group' },
+                
+                // Globe Container
+                React.createElement('div', { className: 'w-full flex justify-center bg-[#05070a]' },
                     React.createElement(Globe, {
+                        width: dimensions.width,
+                        height: dimensions.height,
                         globeImageUrl: 'https://unpkg.com/three-globe/example/img/earth-dark.jpg',
                         backgroundImageUrl: 'https://unpkg.com/three-globe/example/img/night-sky.png',
                         lineHoverPrecision: 0,
                         polygonsData: countries.features,
                         polygonAltitude: d => d === hoverD ? 0.12 : 0.06,
-                        polygonCapColor: d => d === hoverD ? 'rgba(99, 102, 241, 0.6)' : 'rgba(168, 85, 247, 0.15)',
-                        polygonSideColor: () => 'rgba(0, 0, 0, 0.2)',
-                        polygonStrokeColor: () => '#111',
+                        polygonCapColor: d => d === hoverD ? 'rgba(99, 102, 241, 0.7)' : 'rgba(168, 85, 247, 0.2)',
+                        polygonSideColor: () => 'rgba(0, 0, 0, 0.3)',
+                        polygonStrokeColor: () => 'rgba(255, 255, 255, 0.1)',
                         polygonLabel: ({ properties: d }) => `
-                            <div class="bg-gray-900/95 backdrop-blur-xl p-4 rounded-2xl border border-white/10 shadow-2xl min-w-[150px] animate-in zoom-in duration-200">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
-                                    <b class="text-white text-base">${d.ADMIN}</b>
+                            <div class="bg-[#0d1117]/95 backdrop-blur-2xl p-5 rounded-3xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] min-w-[180px] animate-in zoom-in duration-300">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <div class="w-3 h-3 rounded-full bg-indigo-500 animate-ping"></div>
+                                    <b class="text-white text-lg tracking-tight">${d.ADMIN}</b>
                                 </div>
-                                <div class="text-[10px] text-indigo-400 font-bold uppercase tracking-wider">Filmləri görmək üçün kliklə</div>
+                                <div class="text-[10px] text-indigo-300 font-black uppercase tracking-[0.2em] opacity-80">Filmləri görmək üçün kliklə</div>
                             </div>
                         `,
                         onPolygonHover: setHoverD,
                         onPolygonClick: ({ properties: d }) => fetchMoviesByCountry(d.ISO_A2, d.ADMIN),
-                        polygonsTransitionDuration: 400
-                    }),
-                    React.createElement('div', { className: 'absolute bottom-6 left-6 flex items-center gap-3 bg-black/40 backdrop-blur-md p-3 rounded-2xl border border-white/5 text-[10px] text-gray-400 uppercase tracking-widest font-bold' },
-                        React.createElement('span', { className: 'flex h-2 w-2 rounded-full bg-green-500' }),
-                        'İnteraktiv Rejim Aktivdir'
-                    )
+                        polygonsTransitionDuration: 500,
+                        atmosphereColor: '#6366f1',
+                        atmosphereAltitude: 0.15
+                    })
                 ),
-                selectedCountry && React.createElement('div', { className: 'w-full max-w-7xl mt-16 pb-20 animate-in slide-in-from-bottom duration-700' },
+
+                // Bottom Indicator
+                React.createElement('div', { className: 'absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-4 bg-black/40 backdrop-blur-xl p-5 rounded-3xl border border-white/5 text-xs text-indigo-300/80 uppercase tracking-[0.3em] font-black shadow-2xl z-10' },
+                    React.createElement('span', { className: 'flex h-3 w-3 rounded-full bg-indigo-500 shadow-[0_0_15px_#6366f1] animate-pulse' }),
+                    '3D İnteraktiv Qlobus'
+                ),
+
+                // Results Section
+                selectedCountry && React.createElement('div', { id: 'globe-results', className: 'w-full max-w-7xl mx-auto px-6 md:px-10 mt-20 pb-32 animate-in slide-in-from-bottom duration-1000' },
                     React.createElement('div', { className: 'flex items-center justify-between mb-10 border-b border-white/5 pb-6' },
                         React.createElement('h3', { className: 'text-2xl md:text-3xl font-bold flex items-center gap-4' }, 
                             React.createElement('span', { className: 'bg-indigo-500/10 p-3 rounded-2xl text-2xl' }, '📍'),
@@ -1137,6 +1172,10 @@
             main.innerHTML = '';
             document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
             
+            // Reset main styles
+            main.style.display = 'grid';
+            main.style.padding = '20px 5% 100px';
+
             if(mode === 'movies') {
                 document.getElementById('nav-home').classList.add('active');
                 movieContent.style.display = 'block';
@@ -1155,10 +1194,14 @@
             } else if(mode === 'party') {
                 document.getElementById('nav-party').classList.add('active');
                 movieContent.style.display = 'none';
+                main.style.display = 'block';
+                main.style.padding = '0';
                 renderPartySetup();
             } else if(mode === 'globe') {
                 document.getElementById('nav-globe').classList.add('active');
                 movieContent.style.display = 'none';
+                main.style.display = 'block';
+                main.style.padding = '0';
                 if(window.renderGlobe) window.renderGlobe();
             }
         }
@@ -1478,7 +1521,7 @@ async function loadPartyCatalog(isNew = true) {
                 else if(data.type === 'video-control') {
                     const iframe = document.querySelector('#party-player-container iframe');
                     if(iframe) {
-                        iframe.contentWindow.postMessage({ type: 'playerControl', action: action }, '*');
+                        iframe.contentWindow.postMessage({ type: 'playerControl', action: data.action }, '*');
                     }
                     if(isHost) broadcast(data, conn);
                     if(data.user) showNotify(formatControlMessage(data.user, data.action));

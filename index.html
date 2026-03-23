@@ -1119,6 +1119,7 @@
                 <div class="nav-link" id="nav-series" onclick="switchTo('series')">Seriallar</div>
                 <div class="nav-link" id="nav-actors" onclick="switchTo('actors')">Aktyorlar</div>
                 <div class="nav-link" id="nav-globe" onclick="switchTo('globe')">Qlobus</div>
+                <div class="nav-link" id="nav-telif" onclick="openTelifModal()">Telif</div>
                 <div class="nav-link party-nav" id="nav-party" onclick="switchTo('party')">Otaq </div>
             </nav>
         </div>
@@ -1223,6 +1224,19 @@
         <div class="modal-content" id="modal-content"></div>
     </div>
 
+    <!-- Telif Modalı -->
+    <div id="telif-modal" class="modal">
+        <div class="modal-content" style="max-width: 600px; padding: 40px; text-align: center;">
+            <span class="close-modal" onclick="closeTelifModal()">&times;</span>
+            <h2 style="color: white; margin-bottom: 25px; font-size: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px;">Hüquqi Qeyd / Copyright</h2>
+            <div style="color: #d1d5db; line-height: 1.8; text-align: left; font-size: 0.95rem;">
+                <p style="margin-bottom: 20px;">RM Film (rmfilm.az) veb-saytı internetdə mövcud olan film və seriallar haqqında məlumat toplamaq və kənar mənbələrdən gələn video keçidləri təqdim etmək məqsədi daşıyır.</p>
+                <p style="border-top: 1px dashed rgba(255,255,255,0.1); pt-4; margin-top: 20px; padding-top: 20px;">RM Film does not host or upload any video files on its servers. All video content provided on this website is hosted on third-party websites and is available freely on the internet.</p>
+            </div>
+            <button class="room-btn-main" style="margin-top: 30px; max-width: 200px;" onclick="closeTelifModal()">Anladım</button>
+        </div>
+    </div>
+
     <div id="party-catalog-overlay">
         <div class="catalog-header">
             <div style="display:flex; gap:10px; margin-bottom:10px;">
@@ -1245,11 +1259,6 @@
         <div id="episodes-grid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(80px,1fr)); gap:10px;"></div>
       </div>
     </div>
-
-    <footer style="text-align: center; padding: 20px 5%; font-size: 12px; color: #6b7280; border-top: 1px solid rgba(255, 255, 255, 0.05); margin-top: 50px;">
-        <p>RM Film (rmfilm.az) veb-saytı internetdə mövcud olan film və seriallar haqqında məlumat toplamaq və kənar mənbələrdən gələn video keçidləri təqdim etmək məqsədi daşıyır.</p>
-        <p style="margin-top: 10px;">RM Film does not host or upload any video files on its servers. All video content provided on this website is hosted on third-party websites and is available freely on the internet.</p>
-    </footer>
 
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 
@@ -2376,6 +2385,16 @@ async function openActorDetails(id) {
 
         function closeModal() { modal.style.display = 'none'; document.body.style.overflow = 'auto'; if(document.getElementById('main-player')) document.getElementById('main-player').src = ''; }
         
+        function openTelifModal() {
+            document.getElementById('telif-modal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeTelifModal() {
+            document.getElementById('telif-modal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
         function toggleFav(item, btn) {
             const idx = favorites.findIndex(f => f.id === item.id);
             if(idx > -1) { favorites.splice(idx, 1); btn.classList.remove('active'); }

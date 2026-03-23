@@ -909,11 +909,11 @@
             position: relative;
             font-family: 'Courier New', Courier, monospace;
             box-shadow: 
-                0 30px 60px rgba(139, 69, 19, 0.4), /* Qəhvəyi tonlarda əsas kölgə */
-                0 0 0 10px rgba(139, 69, 19, 0.1), /* Qəhvəyi tonlarda xarici haşiyə kölgəsi */
-                inset 0 0 20px rgba(139, 69, 19, 0.1); /* Daxili qəhvəyi kölgə */
+                0 30px 60px rgba(101, 45, 11, 0.5), /* Daha tünd kölgə */
+                0 0 0 10px rgba(101, 45, 11, 0.15), 
+                inset 0 0 30px rgba(101, 45, 11, 0.3); /* Daha tünd daxili kölgə */
             display: none;
-            border: 1px solid #d2b48c;
+            border: 1px solid #a58e74; /* Daha tünd kənar */
             overflow: visible;
             transform: rotate(-0.5deg);
         }
@@ -1047,16 +1047,17 @@
         .qr-text { font-size: 8px; margin-top: 12px; color: #8b4513; text-align: center; font-weight: bold; letter-spacing: 2px; opacity: 0.8; }
 
         .ticket-footer {
-            margin-top: 45px;
+            margin-top: 30px;
             display: flex;
-            justify-content: space-around; /* Dəyişdirildi */
+            flex-direction: column;
             align-items: center;
+            gap: 5px;
             font-size: 10px;
             color: #8b4513;
             font-weight: bold;
             opacity: 0.6;
             padding-top: 15px;
-            border-top: 1px dashed rgba(139, 69, 19, 0.1);
+            border-top: 1px dashed rgba(139, 69, 19, 0.2);
         }
         .ticket-footer span {
             letter-spacing: 2px;
@@ -1210,8 +1211,8 @@
                 </div>
             </div>
             <div class="ticket-footer">
-                <span>RM FILM OFFICIAL TICKET</span>
                 <span>Minlərlə film, Tək Məkan</span>
+                <span>RM FILM OFFICIAL TICKET</span>
                 <span>NO REFUND</span>
             </div>
         </div>

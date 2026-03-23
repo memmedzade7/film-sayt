@@ -897,64 +897,122 @@
         .ticket-form input:focus { border-color: #a855f7; }
 
         .retro-ticket {
-            background: #f3e5ab; /* Old paper color */
+            background: #fdf5e6; /* Better paper color */
+            background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
             color: #2c1810;
-            width: 500px;
-            padding: 30px;
-            border-radius: 10px;
+            width: 550px;
+            padding: 35px;
+            border-radius: 4px;
             position: relative;
             font-family: 'Courier New', Courier, monospace;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.7);
             display: none;
-            border: 2px dashed #8b4513;
+            border: 2px solid #8b4513;
+            overflow: hidden;
         }
 
         .retro-ticket::before, .retro-ticket::after {
             content: '';
             position: absolute;
             top: 50%;
-            width: 30px;
-            height: 30px;
+            width: 40px;
+            height: 40px;
             background: #000;
             border-radius: 50%;
             transform: translateY(-50%);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
         }
-        .retro-ticket::before { left: -15px; }
-        .retro-ticket::after { right: -15px; }
+        .retro-ticket::before { left: -25px; border-right: 2px solid #8b4513; }
+        .retro-ticket::after { right: -25px; border-left: 2px solid #8b4513; }
 
         .ticket-header {
-            border-bottom: 2px solid #8b4513;
-            padding-bottom: 15px;
-            margin-bottom: 15px;
+            border-bottom: 3px double #8b4513;
+            padding-bottom: 20px;
+            margin-bottom: 25px;
             text-align: center;
+            position: relative;
         }
-        .ticket-header h1 { margin: 0; font-size: 24px; text-transform: uppercase; letter-spacing: 5px; }
+        .ticket-header h1 { 
+            margin: 0; 
+            font-size: 28px; 
+            text-transform: uppercase; 
+            letter-spacing: 8px; 
+            color: #5d2e0a;
+            text-shadow: 1px 1px 0px rgba(255,255,255,0.5);
+        }
+        .ticket-header .serial-no {
+            position: absolute;
+            top: -20px;
+            right: -10px;
+            font-size: 10px;
+            color: #a0522d;
+            font-weight: bold;
+        }
 
-        .ticket-body { display: flex; justify-content: space-between; align-items: center; }
-        .ticket-info { flex: 1; }
-        .ticket-info div { margin-bottom: 10px; }
-        .ticket-info label { font-size: 10px; color: #8b4513; display: block; text-transform: uppercase; }
-        .ticket-info span { font-weight: bold; font-size: 16px; }
+        .ticket-body { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: stretch; 
+            gap: 20px;
+        }
+        .ticket-info { 
+            flex: 1; 
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .ticket-info .full-width { grid-column: span 2; }
+        .ticket-info div { 
+            border-bottom: 1px dashed rgba(139, 69, 19, 0.3);
+            padding-bottom: 5px;
+        }
+        .ticket-info label { 
+            font-size: 9px; 
+            color: #8b4513; 
+            display: block; 
+            text-transform: uppercase; 
+            margin-bottom: 3px;
+            font-weight: bold;
+        }
+        .ticket-info span { 
+            font-weight: 900; 
+            font-size: 15px; 
+            color: #3e1f0a;
+            display: block;
+            min-height: 18px;
+        }
+
+        .qr-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-left: 2px dashed rgba(139, 69, 19, 0.3);
+            padding-left: 20px;
+        }
 
         .qr-code {
-            width: 120px;
-            height: 120px;
+            width: 100px;
+            height: 100px;
             background: white;
-            padding: 10px;
-            border-radius: 5px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            padding: 8px;
+            border: 1px solid #8b4513;
+            border-radius: 4px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
-        .qr-code img { width: 100%; height: 100%; }
+        .qr-code img { width: 100%; height: 100%; filter: contrast(1.2); }
+        .qr-text { font-size: 8px; margin-top: 5px; color: #8b4513; text-align: center; font-weight: bold; }
 
         .ticket-footer {
-            margin-top: 20px;
-            border-top: 1px dashed #8b4513;
-            padding-top: 10px;
+            margin-top: 30px;
+            border-top: 3px double #8b4513;
+            padding-top: 15px;
             text-align: center;
-            font-size: 12px;
-            opacity: 0.7;
+            font-size: 11px;
+            color: #5d2e0a;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: bold;
         }
         .close-ticket {
             position: absolute;
@@ -1059,15 +1117,16 @@
         <div id="retro-ticket-screen" class="retro-ticket">
             <span class="close-ticket" onclick="closeTicketModal()">&times;</span>
             <div class="ticket-header">
+                <div class="serial-no" id="t-serial">#000000</div>
                 <h1>RM FILM TICKET</h1>
             </div>
             <div class="ticket-body">
                 <div class="ticket-info">
-                    <div>
+                    <div class="full-width">
                         <label>FİLMİN ADI</label>
                         <span id="t-movie-name">...</span>
                     </div>
-                    <div>
+                    <div class="full-width">
                         <label>TAM ADI</label>
                         <span id="t-full-name">...</span>
                     </div>
@@ -1080,8 +1139,9 @@
                         <span>VTO / 01</span>
                     </div>
                 </div>
-                <div class="qr-code" id="t-qr-code">
-                    <!-- QR Code here -->
+                <div class="qr-section">
+                    <div class="qr-code" id="t-qr-code"></div>
+                    <div class="qr-text">SKAN ET</div>
                 </div>
             </div>
             <div class="ticket-footer">
@@ -2040,9 +2100,14 @@ async function loadPartyCatalog(isNew = true) {
                 return;
             }
 
-            document.getElementById('t-movie-name').innerText = "VTO";
+            // Filmin adını avtomatik götürürük
+            document.getElementById('t-movie-name').innerText = currentMovieForTicket.title;
             document.getElementById('t-full-name').innerText = `${name} ${surname}`;
             document.getElementById('t-date').innerText = date;
+            
+            // Random Serial No
+            const serial = "RM-" + Math.floor(Math.random() * 900000 + 100000);
+            document.getElementById('t-serial').innerText = serial;
             
             // Generate QR Code pointing to current site
             const siteUrl = window.location.origin + window.location.pathname;

@@ -1,9 +1,10 @@
 
+
 <!DOCTYPE html>
 <html lang="az">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=1200">
     
     <title>RM Film | Minlərlə film, Tək Məkan</title>
     <meta name="description" content="RM Film - Ən son filmlər, seriallar və aktyorlar haqqında məlumat, onlayn izləmə imkanı və şəxsi izləmə siyahısı.">
@@ -60,7 +61,8 @@
             color: var(--text-main);
             font-family: 'Plus Jakarta Sans', sans-serif;
             margin: 0;
-            overflow-x: hidden;
+            overflow-x: auto;
+            min-width: 1200px;
         }
 
         header {
@@ -428,12 +430,7 @@
             text-align: right;
             width: 100%;
         }
-        .search-container { 
-            display: flex; 
-            flex-direction: column; 
-            align-items: flex-end; 
-            gap: 10px;
-        }
+        .search-container { display: flex; flex-direction: column; align-items: flex-end; }
 
         .loader { grid-column: 1/-1; text-align: center; padding: 20px; display: none; }
         
@@ -901,22 +898,54 @@
         .ticket-form input:focus { border-color: #a855f7; }
 
         .retro-ticket {
-            background: #fdf5e6; /* Better paper color */
-            background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+            background: #fdf5e6;
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(255,255,255,0.3) 0%, rgba(0,0,0,0.05) 100%),
+                url('https://www.transparenttextures.com/patterns/paper-fibers.png');
             color: #2c1810;
-            width: 600px;
-            padding: 45px;
-            border-radius: 12px;
+            width: 700px;
+            padding: 50px;
+            border-radius: 4px;
             position: relative;
             font-family: 'Courier New', Courier, monospace;
-            box-shadow: 0 40px 80px rgba(0,0,0,0.8);
+            box-shadow: 
+                0 30px 60px rgba(0,0,0,0.7),
+                0 0 0 10px rgba(253, 245, 230, 0.05);
             display: none;
-            border: 4px solid #8b4513;
+            border: 1px solid #d2b48c;
             overflow: visible;
+            transform: rotate(-0.5deg);
         }
 
-        .retro-ticket::before, .retro-ticket::after {
+        /* Üst və alt kənar nöqtələri */
+        .retro-ticket::before {
+            content: '••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••';
+            position: absolute;
+            top: 2px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 10px;
+            color: rgba(139, 69, 19, 0.1);
+            letter-spacing: 5px;
+            overflow: hidden;
+            height: 10px;
+            pointer-events: none;
+        }
+
+        /* Perforasiya xətti */
+        .retro-ticket::after {
             content: '';
+            position: absolute;
+            top: 0;
+            right: 200px;
+            bottom: 0;
+            border-left: 2px dashed rgba(139, 69, 19, 0.3);
+            z-index: 2;
+        }
+
+        /* Yanlardakı kəsiklər */
+        .ticket-cut-left, .ticket-cut-right {
             position: absolute;
             top: 50%;
             width: 50px;
@@ -924,110 +953,123 @@
             background: #000;
             border-radius: 50%;
             transform: translateY(-50%);
-            box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
-            z-index: 1;
+            z-index: 5;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.9);
         }
-        .retro-ticket::before { left: -30px; border-right: 3px solid #8b4513; }
-        .retro-ticket::after { right: -30px; border-left: 3px solid #8b4513; }
+        .ticket-cut-left { left: -25px; }
+        .ticket-cut-right { right: -25px; }
 
         .ticket-header {
-            border-bottom: 4px double #8b4513;
+            border-bottom: 2px solid #8b4513;
             padding-bottom: 25px;
             margin-bottom: 30px;
-            text-align: center;
+            text-align: left;
             position: relative;
         }
         .ticket-header h1 { 
             margin: 0; 
-            font-size: 32px; 
+            font-size: 30px; 
             text-transform: uppercase; 
-            letter-spacing: 10px; 
+            letter-spacing: 3px; 
             color: #5d2e0a;
-            text-shadow: 2px 2px 0px rgba(255,255,255,0.6);
             font-weight: 900;
+            opacity: 0.9;
         }
         .ticket-header .serial-no {
             position: absolute;
-            top: -30px;
+            top: -15px;
             right: 0;
-            font-size: 12px;
-            color: #a0522d;
+            font-size: 14px;
+            color: #b22222;
             font-weight: bold;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
+            transform: rotate(4deg);
+            border: 2px solid #b22222;
+            padding: 3px 10px;
+            border-radius: 4px;
+            opacity: 0.8;
+            background: rgba(178, 34, 34, 0.05);
         }
 
         .ticket-body { 
             display: flex; 
             justify-content: space-between; 
-            align-items: stretch; 
-            gap: 30px;
+            align-items: flex-start; 
+            gap: 50px;
         }
         .ticket-info { 
             flex: 1; 
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            gap: 25px;
         }
         .ticket-info .full-width { grid-column: span 2; }
         .ticket-info div { 
-            border-bottom: 2px dashed rgba(139, 69, 19, 0.4);
-            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(139, 69, 19, 0.15);
+            padding-bottom: 5px;
         }
         .ticket-info label { 
-            font-size: 11px; 
+            font-size: 9px; 
             color: #8b4513; 
             display: block; 
             text-transform: uppercase; 
-            margin-bottom: 5px;
+            margin-bottom: 3px;
             font-weight: bold;
-            opacity: 0.8;
+            letter-spacing: 1px;
+            opacity: 0.6;
         }
         .ticket-info span { 
             font-weight: 900; 
-            font-size: 18px; 
+            font-size: 17px; 
             color: #3e1f0a;
             display: block;
-            min-height: 22px;
-            letter-spacing: 1px;
+            text-transform: uppercase;
         }
 
         .qr-section {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            border-left: 3px dashed rgba(139, 69, 19, 0.4);
-            padding-left: 30px;
+            width: 150px;
+            padding-right: 10px;
         }
 
         .qr-code {
             width: 120px;
             height: 120px;
-            background: white;
-            padding: 10px;
-            border: 2px solid #8b4513;
-            border-radius: 8px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            background: #fff;
+            padding: 8px;
+            border: 1px solid #d2b48c;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
-        .qr-code img { width: 100%; height: 100%; filter: contrast(1.3); }
-        .qr-text { font-size: 10px; margin-top: 8px; color: #8b4513; text-align: center; font-weight: bold; letter-spacing: 2px; }
+        .qr-code img { width: 100%; height: 100%; mix-blend-mode: multiply; filter: contrast(1.1); }
+        .qr-text { font-size: 8px; margin-top: 12px; color: #8b4513; text-align: center; font-weight: bold; letter-spacing: 2px; opacity: 0.8; }
 
         .ticket-footer {
-            margin-top: 35px;
-            border-top: 4px double #8b4513;
-            padding-top: 20px;
-            text-align: center;
-            font-size: 13px;
-            color: #5d2e0a;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            font-weight: 900;
+            margin-top: 45px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 10px;
+            color: #8b4513;
+            font-weight: bold;
+            opacity: 0.6;
+            padding-top: 15px;
+            border-top: 1px dashed rgba(139, 69, 19, 0.1);
+        }
+        .ticket-footer::before {
+            content: 'RM FILM OFFICIAL TICKET';
+            letter-spacing: 2px;
+        }
+        .ticket-footer::after {
+            content: 'NO REFUND';
+            letter-spacing: 2px;
         }
         .close-ticket {
-            position: absolute;
-            top: -45px;
-            right: -45px;
-            background: #ff4757;
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255, 71, 87, 0.8);
             color: white;
             width: 45px;
             height: 45px;
@@ -1036,106 +1078,17 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 28px;
+            font-size: 24px;
             font-weight: bold;
-            box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4);
-            transition: all 0.3s ease;
-            z-index: 100;
-            border: 2px solid white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 10001;
+            border: 2px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(5px);
         }
         .close-ticket:hover {
             transform: scale(1.1) rotate(90deg);
             background: #ff6b81;
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-        }
-
-        /* --- RESPONSIVE DESIGN --- */
-        @media (max-width: 1024px) {
-            header {
-                flex-direction: column;
-                gap: 20px;
-                padding: 1.5rem 2%;
-            }
-            .header-left {
-                flex-direction: column;
-                width: 100%;
-                text-align: center;
-            }
-            .brand {
-                align-items: center;
-            }
-            .nav-menu {
-                margin-left: 0;
-                margin-top: 15px;
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-            .search-container {
-                align-items: center;
-                width: 100%;
-                text-align: center;
-            }
-            .search-container > div:last-child {
-                justify-content: center;
-                flex-wrap: wrap;
-                width: 100%;
-            }
-            .search {
-                width: 100%;
-                max-width: 400px;
-            }
-            .search:focus {
-                width: 100%;
-            }
-        }
-
-        @media (max-width: 600px) {
-            .logo { font-size: 1.8rem; }
-            .slogan { font-size: 0.65rem; letter-spacing: 2px; }
-            .nav-link { padding: 6px 10px; font-size: 0.85rem; }
-            .mood-container { flex-wrap: wrap; }
-            .mood-btn { padding: 8px 15px; font-size: 0.8rem; }
-             
-             main {
-                 grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-                 gap: 15px;
-                 padding: 10px 2%;
-             }
-             .movie-info h3 { font-size: 0.9rem; }
-             .movie img { height: 250px; }
-
-             .watch-party-layout {
-                flex-direction: column !important;
-                height: auto !important;
-                min-height: calc(100vh - 85px);
-                overflow-y: auto !important;
-            }
-            .video-side {
-                width: 100% !important;
-                height: 300px !important;
-                flex: none !important;
-            }
-            .chat-container {
-                width: 100% !important;
-                min-width: 100% !important;
-                height: 500px !important;
-                flex: 1 !important;
-            }
-            .retro-ticket {
-                width: 90% !important;
-                padding: 25px !important;
-            }
-            .close-ticket {
-                top: -15px;
-                right: -15px;
-                width: 35px;
-                height: 35px;
-                font-size: 20px;
-            }
         }
 
     </style>
@@ -1159,7 +1112,7 @@
     </div>
 
     <header>
-        <div class="header-left">
+        <div style="display: flex; align-items: center;">
             <div class="brand">
                 <h1 class="logo" onclick="location.reload()">RM Film</h1>
                 <span class="slogan">Minlərlə film, Tək Məkan</span>
@@ -1230,7 +1183,8 @@
 
         <!-- 3. Bilet Ekranı -->
         <div id="retro-ticket-screen" class="retro-ticket">
-            <span class="close-ticket" onclick="closeTicketModal()">&times;</span>
+            <div class="ticket-cut-left"></div>
+            <div class="ticket-cut-right"></div>
             <div class="ticket-header">
                 <div class="serial-no" id="t-serial">#000000</div>
                 <h1>RM FILM TICKET</h1>
@@ -1263,6 +1217,7 @@
                 RM FILM - Minlərlə film, Tək Məkan
             </div>
         </div>
+        <span class="close-ticket" id="close-ticket-btn" onclick="closeTicketModal()">&times;</span>
     </div>
 
     <div id="modal" class="modal">

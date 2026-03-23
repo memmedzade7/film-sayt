@@ -909,8 +909,9 @@
             position: relative;
             font-family: 'Courier New', Courier, monospace;
             box-shadow: 
-                0 30px 60px rgba(0,0,0,0.7),
-                0 0 0 10px rgba(253, 245, 230, 0.05);
+                0 30px 60px rgba(139, 69, 19, 0.4), /* Qəhvəyi tonlarda əsas kölgə */
+                0 0 0 10px rgba(139, 69, 19, 0.1), /* Qəhvəyi tonlarda xarici haşiyə kölgəsi */
+                inset 0 0 20px rgba(139, 69, 19, 0.1); /* Daxili qəhvəyi kölgə */
             display: none;
             border: 1px solid #d2b48c;
             overflow: visible;
@@ -1057,12 +1058,7 @@
             padding-top: 15px;
             border-top: 1px dashed rgba(139, 69, 19, 0.1);
         }
-        .ticket-footer::before {
-            content: 'RM FILM OFFICIAL TICKET';
-            letter-spacing: 2px;
-        }
-        .ticket-footer::after {
-            content: 'NO REFUND';
+        .ticket-footer span {
             letter-spacing: 2px;
         }
         .close-ticket {
@@ -1214,7 +1210,9 @@
                 </div>
             </div>
             <div class="ticket-footer">
-                RM FILM - Minlərlə film, Tək Məkan
+                <span>RM FILM OFFICIAL TICKET</span>
+                <span>Minlərlə film, Tək Məkan</span>
+                <span>NO REFUND</span>
             </div>
         </div>
         <span class="close-ticket" id="close-ticket-btn" onclick="closeTicketModal()">&times;</span>

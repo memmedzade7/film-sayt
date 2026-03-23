@@ -1642,9 +1642,12 @@
                         </div>
                         <div style="display:flex; flex-direction:column; background:#0d1117; border-bottom:1px solid #30363d;">
                             <div style="display:flex; width:100%;">
-                                <input id="external-url-input" placeholder="Video linkini bura yapışdırın (YouTube, MP4 və ya Movie Embed)..." style="flex:1; background:transparent; border:none; color:#fff; padding:12px 20px; outline:none; font-size:0.85rem;">
+                                <input id="external-url-input" placeholder="Video linkini bura yapışdırın (YouTube, zipfilmizle, MP4)..." style="flex:1; background:transparent; border:none; color:#fff; padding:12px 20px; outline:none; font-size:0.85rem;">
                                 <button class="player-btn" style="margin:5px; background:#3b82f6; color:#fff; padding:8px 15px;" onclick="googleSearchHelper()">🔍 Tap</button>
                                 <button class="player-btn" style="margin:5px; background:var(--party-color); color:#000; font-weight:bold; padding:8px 20px;" onclick="startExternalLink()">🚀 Başlat</button>
+                            </div>
+                            <div style="padding: 5px 20px; background: #0d1117; color: #8b949e; font-size: 0.75rem; border-top: 1px solid #30363d;">
+                                💡 Kömək: Google-dan link götürəndə <b>zipfilmizle</b> saytını seçin, bu zaman problemsiz açacaq.
                             </div>
                             <div id="player-warning" style="display:none; padding:5px 20px; background:#450a0a; color:#fecaca; font-size:0.7rem; border-top:1px solid #7f1d1d;">
                                 ⚠️ Bəzi saytlar birbaşa qoşulmağı bloklayır. Əgər video açılmasa, "Yeni Tabda Aç" düyməsini yoxlayın.
@@ -1853,11 +1856,11 @@ async function loadPartyCatalog(isNew = true) {
         }
 
         function googleSearchHelper() {
-            const query = prompt("Hansı filmi axtarırsınız? (Birbaşa Google-dan MP4 linkləri tapılacaq):");
+            const query = prompt("Hansı filmi axtarırsınız? (Kömək: zipfilmizle saytını seçin, bu zaman problemsiz açacaq):");
             if (query) {
-                const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query + ' index of mp4 OR "google drive" movie')}`;
+                const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query + ' zipfilmizle')}`;
                 window.open(searchUrl, '_blank');
-                addChatMessage("Sistem", `"${query}" üçün Google axtarışı açıldı. Tapdığınız linki bura yapışdırın.`, true);
+                addChatMessage("Sistem", `"${query}" üçün Google axtarışı açıldı. Tapdığınız linki bura yapışdırın (zipfilmizle tövsiyə edilir).`, true);
             }
         }
 

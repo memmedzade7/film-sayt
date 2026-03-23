@@ -1,4 +1,6 @@
 
+
+
 <!DOCTYPE html>
 <html lang="az">
 <head>
@@ -507,85 +509,6 @@
             background: #0d1117;
             scrollbar-width: thin;
             scrollbar-color: #30363d transparent;
-        }
-
-        /* Mobile Portrait Warning Overlay */
-        #rotate-warning {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.98);
-            z-index: 100000;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 20px;
-            color: #ffffff;
-            backdrop-filter: blur(15px);
-        }
-
-        .phone-animation {
-            width: 100px;
-            height: 160px;
-            border: 5px solid var(--accent-gold);
-            border-radius: 20px;
-            position: relative;
-            margin-bottom: 50px;
-            animation: rotatePhone 2.5s infinite ease-in-out;
-            box-shadow: 0 0 40px rgba(251, 191, 36, 0.4);
-        }
-
-        .phone-animation::before {
-            content: '';
-            position: absolute;
-            top: 15px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 25px;
-            height: 5px;
-            background: rgba(251, 191, 36, 0.5);
-            border-radius: 10px;
-        }
-
-        .phone-animation::after {
-            content: '';
-            position: absolute;
-            bottom: 15px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 20px;
-            height: 20px;
-            border: 3px solid var(--accent-gold);
-            border-radius: 50%;
-        }
-
-        @keyframes rotatePhone {
-            0% { transform: rotate(0deg); }
-            30% { transform: rotate(-90deg); }
-            70% { transform: rotate(-90deg); }
-            100% { transform: rotate(0deg); }
-        }
-
-        .warning-text {
-            font-size: 2.2rem;
-            font-weight: 900;
-            max-width: 500px;
-            line-height: 1.2;
-            letter-spacing: 1px;
-        }
-
-        .warning-text span {
-            color: var(--accent-gold);
-            display: block;
-            margin-top: 25px;
-            font-size: 1.2rem;
-            text-transform: uppercase;
-            letter-spacing: 6px;
-            opacity: 0.9;
         }
         
         .chat-msg { 
@@ -1178,15 +1101,6 @@
     </style>
 </head>
 <body>
-    <!-- Mobil Portrait Xəbərdarlığı -->
-    <div id="rotate-warning">
-        <div class="phone-animation"></div>
-        <div class="warning-text">
-            Daha yaxşı izləmə təcrübəsi üçün telefonu yan çevirin
-            <span>RM Film</span>
-        </div>
-    </div>
-
 
     <div id="bg-overlay"></div>
 
@@ -2562,34 +2476,9 @@ async function openActorDetails(id) {
             }
         }
 
-        // Mobil cihazlarda portrait xəbərdarlığı
-        function checkOrientation() {
-            const warning = document.getElementById('rotate-warning');
-            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            
-            if (isMobile) {
-                if (window.innerHeight > window.innerWidth) {
-                    // Portrait (dik) rejimi
-                    warning.style.display = 'flex';
-                    document.body.style.overflow = 'hidden';
-                } else {
-                    // Landscape (yan) rejimi - Tam Desktop görünüşü
-                    warning.style.display = 'none';
-                    document.body.style.overflow = 'auto';
-                }
-            } else {
-                warning.style.display = 'none';
-                document.body.style.overflow = 'auto';
-            }
-        }
-
-        window.addEventListener('resize', checkOrientation);
-        window.addEventListener('orientationchange', checkOrientation);
-
         // Reklam əngəlləmə (sadə səviyyə)
         window.open = function() { return null; };
 
-        checkOrientation();
         init();
     </script>
 </body>

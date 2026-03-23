@@ -837,6 +837,134 @@
 
         @keyframes pulse { from { opacity: 0.5; } to { opacity: 1; } }
 
+
+        /* Bilet Sistemi */
+        .ticket-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            backdrop-filter: blur(10px);
+        }
+
+        .ticket-question {
+            background: #1a1c23;
+            padding: 40px;
+            border-radius: 30px;
+            text-align: center;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            max-width: 400px;
+        }
+
+        .ticket-question h2 { color: white; margin-bottom: 20px; }
+        .ticket-question p { color: #9ca3af; margin-bottom: 30px; }
+        .ticket-btns { display: flex; gap: 15px; justify-content: center; }
+        .ticket-btn {
+            padding: 12px 30px;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .btn-yes { background: var(--primary-gradient); color: white; }
+        .btn-no { background: rgba(255,255,255,0.1); color: white; }
+
+        .ticket-form {
+            background: #1a1c23;
+            padding: 40px;
+            border-radius: 30px;
+            width: 400px;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+        }
+
+        .ticket-form h2 { color: white; margin-bottom: 20px; text-align: center; }
+        .ticket-form input {
+            width: 100%;
+            padding: 12px 20px;
+            margin-bottom: 15px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            color: white;
+            box-sizing: border-box;
+            outline: none;
+        }
+        .ticket-form input:focus { border-color: #a855f7; }
+
+        .retro-ticket {
+            background: #f3e5ab; /* Old paper color */
+            color: #2c1810;
+            width: 500px;
+            padding: 30px;
+            border-radius: 10px;
+            position: relative;
+            font-family: 'Courier New', Courier, monospace;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: none;
+            border: 2px dashed #8b4513;
+        }
+
+        .retro-ticket::before, .retro-ticket::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 30px;
+            height: 30px;
+            background: #000;
+            border-radius: 50%;
+            transform: translateY(-50%);
+        }
+        .retro-ticket::before { left: -15px; }
+        .retro-ticket::after { right: -15px; }
+
+        .ticket-header {
+            border-bottom: 2px solid #8b4513;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .ticket-header h1 { margin: 0; font-size: 24px; text-transform: uppercase; letter-spacing: 5px; }
+
+        .ticket-body { display: flex; justify-content: space-between; align-items: center; }
+        .ticket-info { flex: 1; }
+        .ticket-info div { margin-bottom: 10px; }
+        .ticket-info label { font-size: 10px; color: #8b4513; display: block; text-transform: uppercase; }
+        .ticket-info span { font-weight: bold; font-size: 16px; }
+
+        .qr-code {
+            width: 120px;
+            height: 120px;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .qr-code img { width: 100%; height: 100%; }
+
+        .ticket-footer {
+            margin-top: 20px;
+            border-top: 1px dashed #8b4513;
+            padding-top: 10px;
+            text-align: center;
+            font-size: 12px;
+            opacity: 0.7;
+        }
+        .close-ticket {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            color: white;
+            cursor: pointer;
+            font-size: 30px;
+        }
+
     </style>
 </head>
 <body>
@@ -905,6 +1033,62 @@
 
     <main id="main"></main>
     <div id="loader" class="loader">Yüklənir...</div>
+
+    <!-- Bilet Modalı -->
+    <div id="ticket-modal" class="ticket-modal">
+        <!-- 1. Sual Ekranı -->
+        <div id="ticket-question-screen" class="ticket-question">
+            <h2>Bilet istəyirsiniz?</h2>
+            <p>Bu film üçün xüsusi retro bilet əldə edə bilərsiniz.</p>
+            <div class="ticket-btns">
+                <button class="ticket-btn btn-yes" onclick="showTicketForm()">Bəli</button>
+                <button class="ticket-btn btn-no" onclick="skipTicket()">Xeyr</button>
+            </div>
+        </div>
+
+        <!-- 2. Forma Ekranı -->
+        <div id="ticket-form-screen" class="ticket-form" style="display: none;">
+            <h2>Bilet Məlumatları</h2>
+            <input type="text" id="ticket-name" placeholder="Adınız">
+            <input type="text" id="ticket-surname" placeholder="Soyadınız">
+            <input type="date" id="ticket-date">
+            <button class="ticket-btn btn-yes" style="width: 100%;" onclick="generateTicket()">Bileti Hazırla</button>
+        </div>
+
+        <!-- 3. Bilet Ekranı -->
+        <div id="retro-ticket-screen" class="retro-ticket">
+            <span class="close-ticket" onclick="closeTicketModal()">&times;</span>
+            <div class="ticket-header">
+                <h1>RM FILM TICKET</h1>
+            </div>
+            <div class="ticket-body">
+                <div class="ticket-info">
+                    <div>
+                        <label>FİLMİN ADI</label>
+                        <span id="t-movie-name">...</span>
+                    </div>
+                    <div>
+                        <label>TAM ADI</label>
+                        <span id="t-full-name">...</span>
+                    </div>
+                    <div>
+                        <label>TARİX</label>
+                        <span id="t-date">...</span>
+                    </div>
+                    <div>
+                        <label>ZAL / YER</label>
+                        <span>VTO / 01</span>
+                    </div>
+                </div>
+                <div class="qr-code" id="t-qr-code">
+                    <!-- QR Code here -->
+                </div>
+            </div>
+            <div class="ticket-footer">
+                RM FILM - Minlərlə film, Tək Məkan
+            </div>
+        </div>
+    </div>
 
     <div id="modal" class="modal">
         <div class="modal-content" id="modal-content"></div>
@@ -1817,17 +2001,81 @@ async function loadPartyCatalog(isNew = true) {
             });
         }
 
+        let currentMovieForTicket = null;
+
         async function openDetails(id) {
+            // Fetch movie details first to get the title
+            const res = await fetch(`${BASE_URL}/movie/${id}?api_key=${API_KEY}&language=${LANG}`);
+            const movie = await res.json();
+            currentMovieForTicket = movie;
+
+            // Show ticket question modal
+            const ticketModal = document.getElementById('ticket-modal');
+            ticketModal.style.display = 'flex';
+            document.getElementById('ticket-question-screen').style.display = 'block';
+            document.getElementById('ticket-form-screen').style.display = 'none';
+            document.getElementById('retro-ticket-screen').style.display = 'none';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function skipTicket() {
+            document.getElementById('ticket-modal').style.display = 'none';
+            proceedToMovie(currentMovieForTicket.id);
+        }
+
+        function showTicketForm() {
+            document.getElementById('ticket-question-screen').style.display = 'none';
+            document.getElementById('ticket-form-screen').style.display = 'block';
+            // Set current date as default
+            document.getElementById('ticket-date').valueAsDate = new Date();
+        }
+
+        function generateTicket() {
+            const name = document.getElementById('ticket-name').value;
+            const surname = document.getElementById('ticket-surname').value;
+            const date = document.getElementById('ticket-date').value;
+
+            if(!name || !surname || !date) {
+                alert("Zəhmət olmasa bütün xanaları doldurun!");
+                return;
+            }
+
+            document.getElementById('t-movie-name').innerText = "VTO";
+            document.getElementById('t-full-name').innerText = `${name} ${surname}`;
+            document.getElementById('t-date').innerText = date;
+            
+            // Generate QR Code pointing to current site
+            const siteUrl = window.location.origin + window.location.pathname;
+            const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(siteUrl)}`;
+            document.getElementById('t-qr-code').innerHTML = `<img src="${qrCodeUrl}" alt="QR Code">`;
+
+            document.getElementById('ticket-form-screen').style.display = 'none';
+            document.getElementById('retro-ticket-screen').style.display = 'block';
+        }
+
+        function closeTicketModal() {
+            document.getElementById('ticket-modal').style.display = 'none';
+            proceedToMovie(currentMovieForTicket.id);
+        }
+
+        async function proceedToMovie(id) {
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
-            const [mRes, vRes, cRes] = await Promise.all([
-                fetch(`${BASE_URL}/movie/${id}?api_key=${API_KEY}&language=${LANG}`),
+            
+            // Reuse the movie data if we already have it, or fetch if skipped ticket
+            let movie = currentMovieForTicket;
+            if(!movie || movie.id != id) {
+                const mRes = await fetch(`${BASE_URL}/movie/${id}?api_key=${API_KEY}&language=${LANG}`);
+                movie = await mRes.json();
+            }
+
+            const [vRes, cRes] = await Promise.all([
                 fetch(`${BASE_URL}/movie/${id}/videos?api_key=${API_KEY}`),
                 fetch(`${BASE_URL}/movie/${id}/credits?api_key=${API_KEY}&language=${LANG}`)
             ]);
-            const movie = await mRes.json();
             const credits = await cRes.json();
-modalContent.innerHTML = `
+
+            modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
                 <div class="video-container">
                     <iframe id="main-player" src="https://vidsrc.cc/v2/embed/movie/${id}" width="100%" height="100%" frameborder="0" allow-forms allow-scripts allow-same-origin allow-presentation sandbox="allow-forms allow-scripts allow-same-origin allow-presentation" allowfullscreen></iframe>
@@ -1868,16 +2116,31 @@ modalContent.innerHTML = `
             ]);
             const tv = await tvRes.json();
             const credits = await cRes.json();
-modalContent.innerHTML = `
+
+            const seasons = tv.seasons.filter(s => s.season_number > 0);
+            
+            modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
                 <div class="video-container">
                     <iframe id="main-player" src="https://vidsrc.cc/v2/embed/tv/${id}/1/1" width="100%" height="100%" frameborder="0" allow-forms allow-scripts allow-same-origin allow-presentation sandbox="allow-forms allow-scripts allow-same-origin allow-presentation" allowfullscreen></iframe>
                 </div>
-                <div class="search-options" style="background: #111; padding: 15px; display: flex; gap: 10px; border-bottom: 1px solid #222; overflow-x: auto;">
-                    <a href="https://www.youtube.com/results?search_query=${encodeURIComponent((tv.name || tv.title) + ' trailer')}" target="_blank" rel="noopener" class="player-btn alt-source" style="font-size: 0.8rem;">📺 Treyler</a>
-                    <a href="https://www.google.com/search?q=${encodeURIComponent('az dublaj ' + (tv.name || tv.title))}" target="_blank" rel="noopener" class="player-btn" style="font-size: 0.8rem;">🇦🇿 AZ Dublaj</a>
-                    <a href="https://www.google.com/search?q=${encodeURIComponent('türkçe dublaj ' + (tv.name || tv.title))}" target="_blank" rel="noopener" class="player-btn" style="font-size: 0.8rem;">🇹🇷 Türkçe</a>
-                    <a href="https://www.google.com/search?q=${encodeURIComponent('перевод ' + (tv.name || tv.title))}" target="_blank" rel="noopener" class="player-btn" style="font-size: 0.8rem;">🇷🇺 Rusça</a>
+                <div class="tv-controls" style="background: #111; padding: 20px; display: flex; flex-wrap: wrap; gap: 15px; border-bottom: 1px solid #222; align-items: center;">
+                    <div class="control-group">
+                        <label style="color: #888; font-size: 0.8rem; display: block; margin-bottom: 5px;">SEZON SEÇİN</label>
+                        <select id="season-select" onchange="updateEpisodes(${id}, this.value)" style="background: #222; color: white; border: 1px solid #333; padding: 8px 15px; border-radius: 8px; outline: none; min-width: 120px;">
+                            ${seasons.map(s => `<option value="${s.season_number}">${s.season_number}. Sezon</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label style="color: #888; font-size: 0.8rem; display: block; margin-bottom: 5px;">BÖLÜM SEÇİN</label>
+                        <select id="episode-select" onchange="updateTVPlayer(${id})" style="background: #222; color: white; border: 1px solid #333; padding: 8px 15px; border-radius: 8px; outline: none; min-width: 120px;">
+                            <!-- Episodes will be populated here -->
+                        </select>
+                    </div>
+                    <div class="search-options" style="margin-left: auto; display: flex; gap: 10px;">
+                        <a href="https://www.youtube.com/results?search_query=${encodeURIComponent((tv.name || tv.title) + ' trailer')}" target="_blank" rel="noopener" class="player-btn alt-source" style="font-size: 0.8rem;">📺 Treyler</a>
+                        <a href="https://www.google.com/search?q=${encodeURIComponent('az dublaj ' + (tv.name || tv.title))}" target="_blank" rel="noopener" class="player-btn" style="font-size: 0.8rem;">�� AZ Dublaj</a>
+                    </div>
                 </div>
                 <div class="details-grid">
                     <img src="${IMG_PATH + tv.poster_path}">
@@ -1895,6 +2158,38 @@ modalContent.innerHTML = `
                     </div>
                 </div>
             `;
+
+            // Initial episodes for Season 1
+            if(seasons.length > 0) {
+                updateEpisodes(id, seasons[0].season_number);
+            }
+        }
+
+        async function updateEpisodes(tvId, seasonNumber) {
+            const episodeSelect = document.getElementById('episode-select');
+            episodeSelect.innerHTML = '<option value="">Yüklənir...</option>';
+            
+            try {
+                const res = await fetch(`${BASE_URL}/tv/${tvId}/season/${seasonNumber}?api_key=${API_KEY}&language=${LANG}`);
+                const data = await res.json();
+                
+                episodeSelect.innerHTML = data.episodes.map(e => `
+                    <option value="${e.episode_number}">${e.episode_number}. Bölüm: ${e.name}</option>
+                `).join('');
+                
+                updateTVPlayer(tvId);
+            } catch (error) {
+                console.error("Bölümlər yüklənmədi:", error);
+                episodeSelect.innerHTML = '<option value="1">1. Bölüm</option>';
+            }
+        }
+
+        function updateTVPlayer(tvId) {
+            const season = document.getElementById('season-select').value;
+            const episode = document.getElementById('episode-select').value;
+            if(season && episode) {
+                document.getElementById('main-player').src = `https://vidsrc.cc/v2/embed/tv/${tvId}/${season}/${episode}`;
+            }
         }
 
         async function getActors(url, isNew = true) {

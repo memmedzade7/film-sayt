@@ -2,6 +2,7 @@
 <!DOCTYPE html>
 <html lang="az">
 <head>
+    
     <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-V5ESHNLC1K"></script>
 <script>
@@ -1151,7 +1152,6 @@
                 <div class="nav-link" id="nav-series" onclick="switchTo('series')">Seriallar</div>
                 <div class="nav-link" id="nav-actors" onclick="switchTo('actors')">Aktyorlar</div>
                 <div class="nav-link" id="nav-globe" onclick="switchTo('globe')">Qlobus</div>
-                <a href="/shopping" class="nav-link" id="nav-shopping">Alış-veriş</a>
                 <div class="nav-link" id="nav-telif" onclick="openTelifModal()">Telif</div>
                 <div class="nav-link party-nav" id="nav-party" onclick="switchTo('party')">Otaq </div>
             </nav>
@@ -2350,7 +2350,7 @@ async function loadPartyCatalog(isNew = true) {
                     </div>
                     <div class="search-options" style="margin-left: auto; display: flex; gap: 10px;">
                         <a href="https://www.youtube.com/results?search_query=${encodeURIComponent((tv.name || tv.title) + ' trailer')}" target="_blank" rel="noopener" class="player-btn alt-source" style="font-size: 0.8rem;">📺 Treyler</a>
-                        <a href="https://www.google.com/search?q=${encodeURIComponent('az dublaj ' + (tv.name || tv.title))}" target="_blank" rel="noopener" class="player-btn" style="font-size: 0.8rem;">�� AZ Dublaj</a>
+                        <a href="https://www.google.com/search?q=${encodeURIComponent('az dublaj ' + (tv.name || tv.title))}" target="_blank" rel="noopener" class="player-btn" style="font-size: 0.8rem;">   AZ Dublaj</a>
                     </div>
                 </div>
                 <div class="details-grid">

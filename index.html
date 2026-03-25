@@ -13,7 +13,7 @@
   gtag('config', 'G-V5ESHNLC1K');
 </script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=1200">
     
     <title>RM Film | Minlərlə film, Tək Məkan</title>
     <meta name="description" content="RM Film - Ən son filmlər, seriallar və aktyorlar haqqında məlumat, onlayn izləmə imkanı və şəxsi izləmə siyahısı.">
@@ -74,7 +74,7 @@
             color: var(--text-main);
             font-family: 'Plus Jakarta Sans', sans-serif;
             margin: 0;
-            overflow-x: hidden;
+            min-width: 1200px;
         }
 
         header {
@@ -1121,114 +1121,6 @@
         .close-ticket:hover {
             transform: scale(1.1) rotate(90deg);
             background: #ff6b81;
-        }
-
-        /* MOBİL ÜÇÜN XÜSUSİ TƏNZİMLƏMƏLƏR (MANDATORY OVERRIDES) */
-        @media screen and (max-width: 768px) {
-            header {
-                flex-direction: column !important;
-                gap: 15px !important;
-                padding: 1rem 5% !important;
-                align-items: center !important;
-            }
-            .logo {
-                font-size: 2rem !important;
-            }
-            .nav-menu {
-                margin-left: 0 !important;
-                flex-wrap: wrap !important;
-                justify-content: center !important;
-                gap: 10px !important;
-            }
-            .search {
-                width: 100% !important;
-            }
-            .search:focus {
-                width: 100% !important;
-            }
-            
-            /* Bilet Modalı Mobil */
-            .ticket-modal {
-                padding: 10px !important;
-            }
-            .ticket-question, .ticket-form {
-                width: 95% !important;
-                max-width: none !important;
-                padding: 40px 20px !important;
-                border-radius: 20px !important;
-            }
-            .ticket-question h2, .ticket-form h2 {
-                font-size: 2rem !important;
-                margin-bottom: 25px !important;
-            }
-            .ticket-question p {
-                font-size: 1.3rem !important;
-                line-height: 1.5 !important;
-                margin-bottom: 35px !important;
-            }
-            .ticket-btns {
-                flex-direction: column !important;
-                gap: 20px !important;
-                width: 100% !important;
-            }
-            .ticket-btn {
-                width: 100% !important;
-                padding: 18px !important;
-                font-size: 1.4rem !important;
-                border-radius: 15px !important;
-            }
-            
-            /* Form Inputları */
-            .ticket-form input {
-                padding: 15px !important;
-                font-size: 1.1rem !important;
-                margin-bottom: 20px !important;
-            }
-
-            .close-ticket {
-                top: 20px !important;
-                right: 20px !important;
-                width: 50px !important;
-                height: 50px !important;
-                font-size: 28px !important;
-            }
-
-            /* Retro Bilet Mobil */
-            .retro-ticket {
-                width: 100% !important;
-                padding: 40px 20px !important;
-                font-size: 0.9rem !important;
-                transform: none !important;
-            }
-            .ticket-cut-left, .ticket-cut-right {
-                display: none !important;
-            }
-            .retro-ticket::after {
-                right: 50px !important;
-            }
-            
-            /* Əsas Səhifə */
-            main {
-                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)) !important;
-                gap: 15px !important;
-                padding: 10px !important;
-            }
-            .movie img {
-                height: 240px !important;
-            }
-            .movie-info h3 {
-                font-size: 0.9rem !important;
-            }
-            
-            .details-grid {
-                grid-template-columns: 1fr !important;
-                padding: 20px !important;
-                gap: 20px !important;
-            }
-            .details-grid img {
-                max-width: 200px !important;
-                margin: 0 auto !important;
-            }
         }
 
     </style>

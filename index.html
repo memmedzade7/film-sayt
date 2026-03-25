@@ -1,17 +1,8 @@
 
+
 <!DOCTYPE html>
 <html lang="az">
 <head>
-    
-    <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-V5ESHNLC1K"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-V5ESHNLC1K');
-</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=1200">
     
@@ -409,6 +400,43 @@
         .player-btn.active { background: #6366f1; border-color: #6366f1; }
         
         .player-btn.alt-source { background: #fbbf24; color: #000; font-weight: bold; border: none; }
+
+        .alt-search-section {
+            background: #111;
+            padding: 20px;
+            border-bottom: 1px solid #222;
+        }
+        .alt-search-title {
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .alt-btns-container {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .alt-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            text-decoration: none;
+            transition: 0.3s;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .yt-btn { background: #ff000022; color: #ff4b4b; border-color: #ff000044; }
+        .yt-btn:hover { background: #ff0000; color: white; transform: translateY(-2px); }
+        .google-btn { background: #4285f422; color: #4285f4; border-color: #4285f444; }
+        .google-btn:hover { background: #4285f4; color: white; transform: translateY(-2px); }
+        .yandex-btn { background: #ffcc0022; color: #ffcc00; border-color: #ffcc0044; }
+        .yandex-btn:hover { background: #ffcc00; color: black; transform: translateY(-2px); }
 
         .details-grid { padding: 40px; display: grid; grid-template-columns: 300px 1fr; gap: 40px; }
         .details-grid img { width: 100%; border-radius: 20px; }
@@ -2241,6 +2269,22 @@ async function loadPartyCatalog(isNew = true) {
                 <div class="video-container">
                     <iframe id="main-player" src="https://vidsrc.cc/v2/embed/movie/${id}" width="100%" height="100%" frameborder="0" allow-forms allow-scripts allow-same-origin sandbox="allow-forms allow-scripts allow-same-origin" allowfullscreen></iframe>
                 </div>
+
+                <div class="alt-search-section">
+                    <p class="alt-search-title">Filmi tapmadınız? Alternativ axtarış:</p>
+                    <div class="alt-btns-container">
+                        <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(movie.title)}+izlə" target="_blank" class="alt-btn yt-btn">
+                            <span>🔴</span> YouTube-da axtar
+                        </a>
+                        <a href="https://www.google.com/search?q=${encodeURIComponent(movie.title)}+izlə" target="_blank" class="alt-btn google-btn">
+                            <span>🔵</span> Google-da axtar
+                        </a>
+                        <a href="https://yandex.com/search/?text=${encodeURIComponent(movie.title)}+izlə" target="_blank" class="alt-btn yandex-btn">
+                            <span>🟡</span> Yandex-də axtar
+                        </a>
+                    </div>
+                </div>
+
                 <div class="search-options" style="background: #111; padding: 15px; display: flex; gap: 10px; border-bottom: 1px solid #222; overflow-x: auto;">
                     <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(movie.title + ' trailer')}" target="_blank" rel="noopener" class="player-btn alt-source" style="font-size: 0.8rem;">📺 Treyler</a>
                     <a href="https://www.google.com/search?q=${encodeURIComponent('az dublaj ' + movie.title)}" target="_blank" rel="noopener" class="player-btn" style="font-size: 0.8rem;">🇦🇿 AZ Dublaj</a>
@@ -2285,6 +2329,22 @@ async function loadPartyCatalog(isNew = true) {
                 <div class="video-container">
                     <iframe id="main-player" src="https://vidsrc.cc/v2/embed/tv/${id}/1/1" width="100%" height="100%" frameborder="0" allow-forms allow-scripts allow-same-origin sandbox="allow-forms allow-scripts allow-same-origin" allowfullscreen></iframe>
                 </div>
+
+                <div class="alt-search-section">
+                    <p class="alt-search-title">Filmi tapmadınız? Alternativ axtarış:</p>
+                    <div class="alt-btns-container">
+                        <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(tv.name || tv.title)}+izlə" target="_blank" class="alt-btn yt-btn">
+                            <span>🔴</span> YouTube-da axtar
+                        </a>
+                        <a href="https://www.google.com/search?q=${encodeURIComponent(tv.name || tv.title)}+izlə" target="_blank" class="alt-btn google-btn">
+                            <span>🔵</span> Google-da axtar
+                        </a>
+                        <a href="https://yandex.com/search/?text=${encodeURIComponent(tv.name || tv.title)}+izlə" target="_blank" class="alt-btn yandex-btn">
+                            <span>🟡</span> Yandex-də axtar
+                        </a>
+                    </div>
+                </div>
+
                 <div class="tv-controls" style="background: #111; padding: 20px; display: flex; flex-wrap: wrap; gap: 15px; border-bottom: 1px solid #222; align-items: center;">
                     <div class="control-group">
                         <label style="color: #888; font-size: 0.8rem; display: block; margin-bottom: 5px;">SEZON SEÇİN</label>
@@ -2300,7 +2360,7 @@ async function loadPartyCatalog(isNew = true) {
                     </div>
                     <div class="search-options" style="margin-left: auto; display: flex; gap: 10px;">
                         <a href="https://www.youtube.com/results?search_query=${encodeURIComponent((tv.name || tv.title) + ' trailer')}" target="_blank" rel="noopener" class="player-btn alt-source" style="font-size: 0.8rem;">📺 Treyler</a>
-                        <a href="https://www.google.com/search?q=${encodeURIComponent('az dublaj ' + (tv.name || tv.title))}" target="_blank" rel="noopener" class="player-btn" style="font-size: 0.8rem;">   AZ Dublaj</a>
+                        <a href="https://www.google.com/search?q=${encodeURIComponent('az dublaj ' + (tv.name || tv.title))}" target="_blank" rel="noopener" class="player-btn" style="font-size: 0.8rem;">�� AZ Dublaj</a>
                     </div>
                 </div>
                 <div class="details-grid">

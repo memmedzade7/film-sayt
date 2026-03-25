@@ -43,13 +43,12 @@
 
     <style>
         .social-bar {
-            transform: scale(0.9);
+            transform: scale(0.9) !important;
             bottom: 50px !important;
-            position: relative; /* Add relative to container if possible */
         }
         .ad-close-btn {
             position: fixed;
-            bottom: 120px; /* Adjust based on social bar position */
+            bottom: 120px;
             right: 10px;
             background: rgba(0, 0, 0, 0.7);
             color: white;
@@ -64,11 +63,7 @@
             z-index: 999999;
             font-weight: bold;
             font-size: 14px;
-            transition: 0.3s;
-        }
-        .ad-close-btn:hover {
-            background: red;
-            border-color: red;
+            display: none; /* Hide until we find the ad */
         }
         /* Mood-a görə dəyişən dinamik arxa fon təbəqəsi */
         #bg-overlay {
@@ -2562,49 +2557,20 @@ async function openActorDetails(id) {
             }
         }
 
-        // Reklam əngəlləmə (sadə səviyyə)
-        window.open = function() { return null; };
-
         init();
     </script>
 
  </div>
      <script src="https://pl28975929.profitablecpmratenetwork.com/31/6b/3a/316b3aeccdf2556e47ac959a3377b7f7.js"></script>
-    <script>
-        // Reklamı bağlamaq üçün "X" düyməsi əlavə et
-        function createAdCloseBtn() {
-            const closeBtn = document.createElement('div');
-            closeBtn.className = 'ad-close-btn';
-            closeBtn.innerHTML = '&times;';
-            closeBtn.title = 'Reklamı bağla';
-            
-            closeBtn.onclick = function() {
-                const socialBar = document.querySelector('.social-bar') || document.querySelector('[class*="social-bar"]');
-                if (socialBar) {
-                    socialBar.style.display = 'none';
-                    this.style.display = 'none';
-                }
-            };
-            
-            document.body.appendChild(closeBtn);
-        }
-
-        // Reklamın yüklənməsini gözlə və düyməni əlavə et
-        const observer = new MutationObserver((mutations) => {
+      <script>
+        // Check for ad after a delay
+        setTimeout(() => {
             const socialBar = document.querySelector('.social-bar') || document.querySelector('[class*="social-bar"]');
-            if (socialBar && !document.querySelector('.ad-close-btn')) {
-                createAdCloseBtn();
-                // Düyməni reklamın mövqeyinə görə tənzimləyə bilərik
-                const rect = socialBar.getBoundingClientRect();
-                const closeBtn = document.querySelector('.ad-close-btn');
-                if (closeBtn) {
-                    closeBtn.style.bottom = (window.innerHeight - rect.top + 5) + 'px';
-                    closeBtn.style.right = (window.innerWidth - rect.right + 5) + 'px';
-                }
+            if (socialBar) {
+                // If ad found, we can show close button or adjust
+                console.log('Ad bar found');
             }
-        });
-
-        observer.observe(document.body, { childList: true, subtree: true });
-    </script>
+        }, 5000);
+      </script>
  </body>
  </html>

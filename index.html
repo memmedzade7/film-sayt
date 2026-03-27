@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="az">
 <head>
@@ -486,10 +487,46 @@
             display: flex !important;
             flex-direction: row !important;
             width: 100vw !important;
-            height: calc(100vh - 85px) !important; 
+            height: calc(100dvh - 85px) !important; 
             background: #000;
             overflow: hidden;
             position: relative;
+        }
+        
+        @media (max-width: 800px) {
+            .watch-party-layout {
+                flex-direction: column !important;
+                height: 100dvh !important;
+                position: fixed !important;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 2000;
+            }
+            .video-side {
+                width: 100% !important;
+                height: auto !important;
+                flex-shrink: 0;
+            }
+            .chat-container {
+                width: 100% !important;
+                min-width: 100% !important;
+                flex: 1 !important;
+                border-left: none !important;
+                border-top: 1px solid #30363d !important;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+            }
+            #chat-messages {
+                flex: 1;
+                overflow-y: auto;
+            }
+            .chat-input-area {
+                flex-shrink: 0;
+                padding-bottom: env(safe-area-inset-bottom, 20px) !important;
+            }
         }
         
         .video-side {
@@ -1528,11 +1565,14 @@
         let connections = []; 
         let myUsername = "";
         let isHost = false;
+        let currentRoomId = "";
+        let reconnectTimeout = null;
         let catalogPage = 1;
         let catalogQuery = "";
         let partyCatalogMode = 'movies';
         let isCatalogLoading = false;
         let catalogType = 'movie';
+        let isProcessingRemoteControl = false;
 
         const genres = [
             { id: 28, name: 'Aksiyon' }, { id: 12, name: 'Macəra' },
@@ -1544,10 +1584,137 @@
 
         const chatEmojis = ["😊", "🔥", "🍿", "😂", "😢", "😱", "😍", "🤝", "📽️", "🎬", "💯", "🎲"];
 
+        // --- STATE QORUNMASI VƏ AVTO-REJOIN ---
+        function checkSavedParty() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const roomFromUrl = urlParams.get('room');
+            const savedRoom = localStorage.getItem('watch-party-room');
+            const savedUser = localStorage.getItem('watch-party-user');
+            const savedIsHost = localStorage.getItem('watch-party-is-host') === 'true';
+
+            const activeRoom = roomFromUrl || savedRoom;
+
+            if (activeRoom) {
+                if (confirm(`${activeRoom} otağına qoşulmaq istəyirsiniz?`)) {
+                    currentRoomId = activeRoom;
+                    if (savedUser) {
+                        myUsername = savedUser;
+                        isHost = (activeRoom === savedRoom) ? savedIsHost : false;
+                        switchTo('party');
+                        setTimeout(() => initPeer(isHost ? 'host' : 'join', activeRoom), 500);
+                    } else {
+                        switchTo('party');
+                    }
+                } else {
+                    // İmtina edildikdə URL və localStorage-ı təmizləyirik
+                    clearPartyState();
+                }
+            }
+        }
+
+        function clearPartyState() {
+            localStorage.removeItem('watch-party-room');
+            localStorage.removeItem('watch-party-user');
+            localStorage.removeItem('watch-party-is-host');
+            
+            const url = new URL(window.location);
+            if (url.searchParams.has('room')) {
+                url.searchParams.delete('room');
+                window.history.replaceState({}, '', url);
+            }
+        }
+
+        function savePartyState(room, user, host) {
+            localStorage.setItem('watch-party-room', room);
+            localStorage.setItem('watch-party-user', user);
+            localStorage.setItem('watch-party-is-host', host);
+            
+            const url = new URL(window.location);
+            url.searchParams.set('room', room);
+            window.history.replaceState({}, '', url);
+        }
+
+        function initPeer(type, existingRoomId = null) {
+            if (peer && !peer.destroyed) {
+                try { peer.destroy(); } catch(e) {}
+            }
+            
+            connections = []; // Köhnə bağlantıları təmizləyirik
+            isHost = (type === 'host');
+            peer = new Peer();
+
+            peer.on('open', id => {
+                console.log('Peer opened with ID:', id);
+                const roomId = existingRoomId || (type === 'host' ? id : document.getElementById('join-room-id').value);
+                
+                if (!roomId) return showNotify("Otaq ID tapılmadı!");
+                
+                currentRoomId = roomId;
+                savePartyState(currentRoomId, myUsername, isHost);
+                
+                if (type === 'host' && !existingRoomId) {
+                    finalizePartyUI(id);
+                    listenForConnections();
+                } else {
+                    const conn = peer.connect(roomId);
+                    setupConnHandlers(conn);
+                    finalizePartyUI(roomId);
+                }
+            });
+
+            peer.on('disconnected', () => {
+                console.log('Peer disconnected, attempting reconnect...');
+                if (!peer.destroyed) peer.reconnect();
+            });
+
+            peer.on('error', err => {
+                console.error('Peer error:', err.type);
+                if (err.type === 'peer-unavailable') {
+                    showNotify('Otaq tapılmadı və ya host ayrıldı.');
+                    localStorage.removeItem('watch-party-room');
+                } else if (err.type === 'network' || err.type === 'server-error') {
+                    clearTimeout(reconnectTimeout);
+                    reconnectTimeout = setTimeout(() => {
+                        if (currentRoomId) initPeer(isHost ? 'host' : 'join', currentRoomId);
+                    }, 3000);
+                }
+            });
+        }
+
+        // Mobil cihazlar üçün bağlantı bərpası
+        function handleVisibilityChange() {
+            if (document.visibilityState === 'visible') {
+                if (currentRoomId && (!peer || peer.disconnected || peer.destroyed)) {
+                    console.log('App resumed, restoring connection...');
+                    initPeer(isHost ? 'host' : 'join', currentRoomId);
+                }
+            }
+        }
+
+        window.addEventListener('online', () => {
+            if (currentRoomId && (!peer || peer.disconnected)) {
+                initPeer(isHost ? 'host' : 'join', currentRoomId);
+            }
+        });
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        // Mobil klaviatura UI tənzimləməsi
+         if (window.visualViewport) {
+             window.visualViewport.addEventListener('resize', () => {
+                 const layout = document.querySelector('.watch-party-layout');
+                 if (layout && window.innerWidth <= 800) {
+                     layout.style.height = `${window.visualViewport.height}px`;
+                     const chatMsgs = document.getElementById('chat-messages');
+                     if (chatMsgs) chatMsgs.scrollTop = chatMsgs.scrollHeight;
+                 }
+             });
+         }
+
         function init() {
             renderGenres();
             getMovies(currentApiUrl);
             updateWatchlistCount();
+            checkSavedParty();
             window.addEventListener('scroll', () => {
                 if (isLoading || isFavoritesView || currentMode === 'party' || currentMode === 'globe') return;
                 if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
@@ -1649,24 +1816,7 @@
             document.getElementById('room-setup').classList.add('open');
 
             setTimeout(() => {
-                if(type === 'host') {
-                    isHost = true;
-                    peer = new Peer();
-                    peer.on('open', id => {
-                        finalizePartyUI(id);
-                        listenForConnections();
-                    });
-                } else {
-                    const rid = document.getElementById('join-room-id').value;
-                    if(!rid) return alert("ID daxil edilməyib!");
-                    isHost = false;
-                    peer = new Peer();
-                    peer.on('open', () => {
-                        const conn = peer.connect(rid);
-                        setupConnHandlers(conn);
-                        finalizePartyUI(rid);
-                    });
-                }
+                initPeer(type);
             }, 800);
         }
 
@@ -1737,11 +1887,25 @@
 
         // Sinxron hərəkət funksiyası
         function controlAction(action, time = null) {
-            const data = { type: 'video-control', action: action, user: myUsername, time: time };
+            if (isProcessingRemoteControl) return;
+
+            const video = document.getElementById('main-video');
+            let currentTime = time;
+            
+            if (video && time === null) {
+                currentTime = video.currentTime;
+            }
+
+            const data = { 
+                type: 'video-control', 
+                action: action, 
+                user: myUsername, 
+                time: currentTime,
+                timestamp: Date.now() 
+            };
             broadcast(data);
             
-            // Öz çatına da əlavə et
-            const msg = formatControlMessage(myUsername, action, time);
+            const msg = formatControlMessage(myUsername, action, currentTime);
             addChatMessage("Sistem", msg, true);
         }
 
@@ -1963,15 +2127,20 @@ async function loadPartyCatalog(isNew = true) {
         }
 
         function setupConnHandlers(conn) {
+            conn.on('open', () => {
+                console.log('Connection established with:', conn.peer);
+                if (!isHost) {
+                    connections = [conn];
+                    addChatMessage('Sistem', 'Otağa qoşuldunuz!', true);
+                }
+            });
+
             conn.on('data', data => {
                 console.log('Received:', data.type, 'from', data.user || 'unknown');
                 
                 if(data.type === 'chat') {
                     addChatMessage(data.user, data.msg);
-                    // Host rebroadcasts to ALL other connections (not sender)
-                    if(isHost) {
-                        broadcast(data, conn);
-                    }
+                    if(isHost) broadcast(data, conn);
                 } 
                 else if(data.type === 'sync-movie' || data.type === 'sync-tv' || data.type === 'sync-external') {
                     syncPartyPlayer(data.embedUrl);
@@ -1982,28 +2151,33 @@ async function loadPartyCatalog(isNew = true) {
                 }
                 else if(data.type === 'video-control') {
                     if(isHost) broadcast(data, conn);
+                    
+                    const video = document.getElementById('main-video');
+                    if(video) {
+                        isProcessingRemoteControl = true;
+                        const latency = (Date.now() - (data.timestamp || Date.now())) / 1000;
+                        const targetTime = parseFloat(data.time) + (data.action === 'play' ? latency : 0);
+                        
+                        if(data.action === 'play') {
+                            if (video.paused) video.play();
+                            if (Math.abs(video.currentTime - targetTime) > 2) {
+                                video.currentTime = targetTime;
+                            }
+                        }
+                        if(data.action === 'pause') {
+                            if (!video.paused) video.pause();
+                            video.currentTime = data.time;
+                        }
+                        if(data.action === 'seek') {
+                            video.currentTime = targetTime;
+                        }
+                        
+                        setTimeout(() => { isProcessingRemoteControl = false; }, 500);
+                    }
+
                     if(data.user) {
                         const msg = formatControlMessage(data.user, data.action, data.time);
                         addChatMessage("Sistem", msg, true);
-                        showNotify(msg);
-                    }
-                }
-                else if(data.type === 'typing') {
-                    // Handle typing indicators
-                    let typingMsg = document.querySelector('.chat-msg.typing');
-                    if(data.isTyping) {
-                        if(!typingMsg || typingMsg.dataset.user !== data.user) {
-                            if(typingMsg) typingMsg.remove();
-                            typingMsg = document.createElement('div');
-                            typingMsg.className = 'chat-msg typing';
-                            typingMsg.dataset.user = data.user;
-                            typingMsg.innerHTML = `<div class="msg-info"><span class="msg-user">${data.user}</span></div><div>${data.user} yazır...</div>`;
-                            document.getElementById('chat-messages').appendChild(typingMsg);
-                        }
-                    } else {
-                        if(typingMsg && typingMsg.dataset.user === data.user) {
-                            typingMsg.remove();
-                        }
                     }
                 }
             });
@@ -2011,16 +2185,13 @@ async function loadPartyCatalog(isNew = true) {
             // Connection close handling
             conn.on('close', () => {
                 connections = connections.filter(c => c !== conn);
-                addChatMessage('Sistem', `${data.user || 'İştirakçı'} otağı tərk etdi`, true);
-                updateConnectionStatus();
+                addChatMessage('Sistem', `İştirakçı otağı tərk etdi`, true);
             });
 
             conn.on('error', err => {
                 console.error('Connection error:', err);
                 addChatMessage('Sistem', 'Bağlantı xətası', true);
             });
-
-            if(!isHost) connections = [conn];
         }
 
         function broadcast(data, excludeConn = null) {
@@ -2041,6 +2212,8 @@ async function loadPartyCatalog(isNew = true) {
         // Helper: Safe message sending with validation
         function safeSend(data, targetConnections = null) {
             const targets = targetConnections || connections;
+            if (targets.length === 0) return true; // Heç kim yoxdur, amma xəta deyil
+            
             let sent = 0;
             for(let conn of targets) {
                 if(conn && conn.open) {
@@ -2133,12 +2306,17 @@ async function loadPartyCatalog(isNew = true) {
             // Check if it's a direct video file (ends with extension)
             if (url.match(/\.(mp4|mkv|webm|mov|avi)$/i)) {
                 container.innerHTML = `
-                    <video controls autoplay style="width:100%; height:100%; background:#000;">
+                    <video id="main-video" controls autoplay style="width:100%; height:100%; background:#000;">
                         <source src="${url}" type="video/mp4">
                         Sizin brauzeriniz bu videonu dəstəkləmir.
                     </video>`;
+                
+                const v = document.getElementById('main-video');
+                v.onplay = () => controlAction('play');
+                v.onpause = () => controlAction('pause');
+                v.onseeked = () => controlAction('seek');
             } else {
-                container.innerHTML = `<iframe src="${url}" allow-forms allow-scripts allow-same-origin sandbox="allow-forms allow-scripts allow-same-origin" allowfullscreen></iframe>`;
+                container.innerHTML = `<iframe id="main-iframe" src="${url}" allow-forms allow-scripts allow-same-origin sandbox="allow-forms allow-scripts allow-same-origin" allowfullscreen></iframe>`;
             }
         }
 

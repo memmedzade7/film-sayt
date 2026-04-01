@@ -598,6 +598,7 @@
             word-wrap: break-word;
             line-height: 1.5;
             color: #c9d1d9;
+            align-self: flex-start;
             animation: msgFadeIn 0.3s ease;
         }
 
@@ -1825,7 +1826,11 @@
         function finalizePartyUI(roomId) {
             const setup = document.getElementById('room-setup');
             if(setup) setup.remove();
-            renderActiveParty(roomId);
+            
+            // Əgər artıq otaq interfeysi qurulubsa, yenidən render etmə (videonu kəsməmək üçün)
+            if (!document.querySelector('.watch-party-layout')) {
+                renderActiveParty(roomId);
+            }
         }
 
         function renderActiveParty(roomId) {
@@ -1995,6 +2000,7 @@ function loadEpisodes(seasonNum) {
 
 function playPartyEpisode(seasonNum, epNum, epName) {
   const embed = `https://vidsrc.cc/v2/embed/tv/${currentSeriesData.id}/${seasonNum}/${epNum}`;
+  currentVideoUrl = embed;
   syncPartyPlayer(embed);
   broadcast({ type: 'sync-tv', embedUrl: embed, title: `${currentSeriesData.name} S${seasonNum} B${epNum} - ${epName}` });
   showNotify(`${myUsername} serial başladı: ${currentSeriesData.name} S${seasonNum}B${epNum}`);
@@ -2031,6 +2037,7 @@ async function loadPartyCatalog(isNew = true) {
         showSeasonEpisodePicker(item);
       } else {
         const embed = `https://vidsrc.cc/v2/embed/movie/${item.id}`;
+        currentVideoUrl = embed;
         syncPartyPlayer(embed);
         broadcast({ type: 'sync-movie', embedUrl: embed, title });
         showNotify(`${myUsername} film başladı: ${title}`);
@@ -2065,6 +2072,7 @@ async function loadPartyCatalog(isNew = true) {
             }
 
             syncPartyPlayer(parsed.embed);
+            currentVideoUrl = parsed.embed;
             broadcast({ type: 'sync-external', embedUrl: parsed.embed, user: myUsername, source: parsed.source });
             showNotify(`${myUsername} ${parsed.source} başladı`);
             addChatMessage("Sistem", `${myUsername} xarici link başlatdı: ${parsed.source}`, true);
@@ -2125,6 +2133,18 @@ async function loadPartyCatalog(isNew = true) {
                 connections.push(conn);
                 setupConnHandlers(conn);
                 addChatMessage("Sistem", "Yeni iştirakçı daxil oldu!", true);
+                
+                // Host olduğumuzda yeni qoşulan şəxsə hazırda oynayan videonu göndəririk
+                if (isHost && currentVideoUrl) {
+                    setTimeout(() => {
+                        conn.send({ 
+                            type: 'sync-external', 
+                            embedUrl: currentVideoUrl, 
+                            user: 'Sistem', 
+                            source: 'Mövcud Video' 
+                        });
+                    }, 1500);
+                }
             });
         }
 
@@ -2214,7 +2234,7 @@ async function loadPartyCatalog(isNew = true) {
         // Helper: Safe message sending with validation
         function safeSend(data, targetConnections = null) {
             const targets = targetConnections || connections;
-            if (targets.length === 0) return true; // Heç kim yoxdur, amma xəta deyil
+            if (targets.length === 0) return true; 
             
             let sent = 0;
             for(let conn of targets) {
@@ -2227,6 +2247,7 @@ async function loadPartyCatalog(isNew = true) {
                     }
                 }
             }
+            // Əgər heç kimə getmədisə və biz tək deyiliksə, o zaman xəta qaytar
             return sent > 0;
         }
 
@@ -2254,6 +2275,8 @@ async function loadPartyCatalog(isNew = true) {
         function addChatMessage(user, msg, isSystem = false, isMine = false) {
             const box = document.getElementById('chat-messages');
             if(!box) return;
+            
+            // Xüsusi: Sistem mesajları üçün rəng və dizayn
             const div = document.createElement('div');
             const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             
@@ -2266,19 +2289,23 @@ async function loadPartyCatalog(isNew = true) {
                 div.style.textAlign = "center";
                 div.style.fontSize = "0.8rem";
                 div.style.alignSelf = "center";
+                div.style.margin = "10px 0";
                 div.innerHTML = `<span>📢 ${msg}</span>`;
             } else {
-            div.innerHTML = `
-                <div class="msg-info">
-                    <span class="msg-user">${user}</span>
-                    <span class="msg-time">${time}</span>
-                </div>
-                ${msg}
-            `;
+                div.innerHTML = `
+                    <div class="msg-info">
+                        <span class="msg-user">${user}</span>
+                        <span class="msg-time">${time}</span>
+                    </div>
+                    ${msg}
+                `;
             }
             
             box.appendChild(div);
-            box.scrollTop = box.scrollHeight;
+            // Avtomatik aşağı çəkmək
+            setTimeout(() => {
+                box.scrollTop = box.scrollHeight;
+            }, 50);
         }
 
         function showNotify(text) {
@@ -2303,6 +2330,7 @@ async function loadPartyCatalog(isNew = true) {
         }
 
         function syncPartyPlayer(url) {
+            currentVideoUrl = url;
             const container = document.getElementById('party-player-container');
             
             // Check if it's a direct video file (ends with extension)

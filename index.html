@@ -1,7 +1,5 @@
 
-
-
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="az">
 <head>
     <!-- Google tag (gtag.js) -->
@@ -532,42 +530,6 @@
             position: relative;
         }
         
-        @media (max-width: 800px) {
-            .watch-party-layout {
-                flex-direction: column !important;
-                height: 100dvh !important;
-                position: fixed !important;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                z-index: 2000;
-            }
-            .video-side {
-                width: 100% !important;
-                height: auto !important;
-                flex-shrink: 0;
-            }
-            .chat-container {
-                width: 100% !important;
-                min-width: 100% !important;
-                flex: 1 !important;
-                border-left: none !important;
-                border-top: 1px solid #30363d !important;
-                overflow: hidden;
-                display: flex;
-                flex-direction: column;
-            }
-            #chat-messages {
-                flex: 1;
-                overflow-y: auto;
-            }
-            .chat-input-area {
-                flex-shrink: 0;
-                padding-bottom: env(safe-area-inset-bottom, 20px) !important;
-            }
-        }
-        
         .video-side {
             flex: 1 !important; 
             height: 100%;
@@ -1022,169 +984,187 @@
         .ticket-form input:focus { border-color: #a855f7; }
 
         .retro-ticket {
-            background: #fdf5e6;
+            background: #0d0e12;
             background-image: 
-                radial-gradient(circle at 50% 50%, rgba(255,255,255,0.3) 0%, rgba(0,0,0,0.05) 100%),
-                url('https://www.transparenttextures.com/patterns/paper-fibers.png');
-            color: #2c1810;
-            width: 700px;
-            padding: 50px;
-            border-radius: 4px;
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                radial-gradient(circle at 50% 50%, #1a1c23 0%, #0d0e12 100%);
+            background-size: 20px 20px, 20px 20px, 100% 100%;
+            color: #ffffff;
+            width: 780px;
+            padding: 70px;
+            border-radius: 8px;
             position: relative;
-            font-family: 'Courier New', Courier, monospace;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             box-shadow: 
-                0 30px 60px rgba(101, 45, 11, 0.5), /* Daha tünd kölgə */
-                0 0 0 10px rgba(101, 45, 11, 0.15), 
-                inset 0 0 30px rgba(101, 45, 11, 0.3); /* Daha tünd daxili kölgə */
+                0 50px 100px rgba(0, 0, 0, 0.9),
+                inset 0 0 40px rgba(212, 175, 55, 0.05);
             display: none;
-            border: 1px solid #a58e74; /* Daha tünd kənar */
+            border: 1px solid rgba(212, 175, 55, 0.3);
             overflow: visible;
-            transform: rotate(-0.5deg);
+            transform: none;
         }
 
-        /* Üst və alt kənar nöqtələri */
+        /* Gold Foil Frame */
         .retro-ticket::before {
-            content: '••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••';
-            position: absolute;
-            top: 2px;
-            left: 0;
-            right: 0;
-            text-align: center;
-            font-size: 10px;
-            color: rgba(139, 69, 19, 0.1);
-            letter-spacing: 5px;
-            overflow: hidden;
-            height: 10px;
-            pointer-events: none;
-        }
-
-        /* Perforasiya xətti */
-        .retro-ticket::after {
             content: '';
             position: absolute;
-            top: 0;
-            right: 200px;
-            bottom: 0;
-            border-left: 2px dashed rgba(139, 69, 19, 0.3);
-            z-index: 2;
+            top: 15px; left: 15px; right: 15px; bottom: 15px;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            pointer-events: none;
+            border-radius: 4px;
         }
 
-        /* Yanlardakı kəsiklər */
+        /* VIP Badge - Gold Foil Seal */
+        .vip-badge {
+            position: absolute;
+            top: 25px;
+            left: -15px;
+            background: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+            color: #1a1c23;
+            padding: 10px 35px;
+            font-size: 12px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            transform: rotate(-5deg);
+            box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.4);
+            z-index: 10;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
         .ticket-cut-left, .ticket-cut-right {
             position: absolute;
             top: 50%;
-            width: 50px;
-            height: 50px;
-            background: #000;
+            width: 60px;
+            height: 60px;
+            background: #05070a;
             border-radius: 50%;
             transform: translateY(-50%);
             z-index: 5;
-            box-shadow: inset 0 0 15px rgba(0,0,0,0.9);
+            box-shadow: inset 0 0 30px rgba(0,0,0,1);
         }
-        .ticket-cut-left { left: -25px; }
-        .ticket-cut-right { right: -25px; }
+        .ticket-cut-left { left: -30px; }
+        .ticket-cut-right { right: -30px; }
 
         .ticket-header {
-            border-bottom: 2px solid #8b4513;
-            padding-bottom: 25px;
-            margin-bottom: 30px;
-            text-align: left;
+            border-bottom: 2px solid transparent;
+            border-image: linear-gradient(to right, transparent, #d4af37, transparent) 1;
+            padding-bottom: 30px;
+            margin-bottom: 40px;
+            text-align: center;
             position: relative;
         }
         .ticket-header h1 { 
             margin: 0; 
-            font-size: 30px; 
+            font-size: 36px; 
             text-transform: uppercase; 
-            letter-spacing: 3px; 
-            color: #5d2e0a;
+            letter-spacing: 12px; 
             font-weight: 900;
-            opacity: 0.9;
+            background: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.5));
         }
+        
+        /* Red Ink Stamp Serial */
         .ticket-header .serial-no {
             position: absolute;
-            top: -15px;
-            right: 0;
+            bottom: -20px;
+            right: 20px;
             font-size: 14px;
-            color: #b22222;
-            font-weight: bold;
-            letter-spacing: 1px;
-            transform: rotate(4deg);
-            border: 2px solid #b22222;
-            padding: 3px 10px;
-            border-radius: 4px;
-            opacity: 0.8;
-            background: rgba(178, 34, 34, 0.05);
+            color: rgba(239, 68, 68, 0.8);
+            font-weight: 800;
+            letter-spacing: 2px;
+            font-family: 'Courier New', monospace;
+            border: 2px solid rgba(239, 68, 68, 0.5);
+            padding: 4px 12px;
+            transform: rotate(-8deg);
+            background: rgba(239, 68, 68, 0.05);
+            mix-blend-mode: plus-lighter;
         }
 
         .ticket-body { 
             display: flex; 
             justify-content: space-between; 
-            align-items: flex-start; 
-            gap: 50px;
+            align-items: center; 
+            gap: 60px;
         }
         .ticket-info { 
             flex: 1; 
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 25px;
+            gap: 35px;
         }
         .ticket-info .full-width { grid-column: span 2; }
         .ticket-info div { 
-            border-bottom: 1px solid rgba(139, 69, 19, 0.15);
+            border-left: 3px solid #d4af37;
+            padding-left: 20px;
+            background: rgba(255, 255, 255, 0.02);
+            padding-top: 5px;
             padding-bottom: 5px;
         }
         .ticket-info label { 
-            font-size: 9px; 
-            color: #8b4513; 
+            font-size: 11px; 
+            color: #d4af37; 
             display: block; 
             text-transform: uppercase; 
-            margin-bottom: 3px;
-            font-weight: bold;
-            letter-spacing: 1px;
-            opacity: 0.6;
+            margin-bottom: 8px;
+            font-weight: 800;
+            letter-spacing: 3px;
         }
         .ticket-info span { 
-            font-weight: 900; 
-            font-size: 17px; 
-            color: #3e1f0a;
+            font-weight: 700; 
+            font-size: 22px; 
+            color: #ffffff;
             display: block;
             text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .qr-section {
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: 150px;
-            padding-right: 10px;
+            width: 180px;
         }
 
         .qr-code {
-            width: 120px;
-            height: 120px;
+            width: 140px;
+            height: 140px;
             background: #fff;
-            padding: 8px;
-            border: 1px solid #d2b48c;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 12px;
+            border: 3px solid #d4af37;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+            border-radius: 4px;
         }
-        .qr-code img { width: 100%; height: 100%; mix-blend-mode: multiply; filter: contrast(1.1); }
-        .qr-text { font-size: 8px; margin-top: 12px; color: #8b4513; text-align: center; font-weight: bold; letter-spacing: 2px; opacity: 0.8; }
+        .qr-code img { width: 100%; height: 100%; }
+        .qr-text { 
+            font-size: 11px; 
+            margin-top: 20px; 
+            color: #d4af37; 
+            text-align: center; 
+            font-weight: 900; 
+            letter-spacing: 5px;
+        }
 
         .ticket-footer {
-            margin-top: 30px;
+            margin-top: 50px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 5px;
-            font-size: 10px;
-            color: #8b4513;
+            gap: 8px;
+            font-size: 12px;
+            color: #d4af37;
             font-weight: bold;
-            opacity: 0.6;
-            padding-top: 15px;
-            border-top: 1px dashed rgba(139, 69, 19, 0.2);
+            opacity: 0.8;
+            padding-top: 25px;
+            border-top: 1px solid rgba(212, 175, 55, 0.2);
+            text-align: center;
         }
         .ticket-footer span {
-            letter-spacing: 2px;
+            letter-spacing: 5px;
+            text-transform: uppercase;
         }
         .close-ticket {
             position: fixed;
@@ -1287,7 +1267,7 @@
         <!-- 1. Sual Ekranı -->
         <div id="ticket-question-screen" class="ticket-question">
             <h2>Bilet istəyirsiniz?</h2>
-            <p>Bu film üçün xüsusi retro bilet əldə edə bilərsiniz.</p>
+            <p>Bu film üçün xüsusi  bilet əldə edə bilərsiniz.</p>
             <div class="ticket-btns">
                 <button class="ticket-btn btn-yes" onclick="showTicketForm()">Bəli</button>
                 <button class="ticket-btn btn-no" onclick="skipTicket()">Xeyr</button>
@@ -1305,6 +1285,7 @@
 
         <!-- 3. Bilet Ekranı -->
         <div id="retro-ticket-screen" class="retro-ticket">
+            <div class="vip-badge">DIAMOND VIP</div>
             <div class="ticket-cut-left"></div>
             <div class="ticket-cut-right"></div>
             <div class="ticket-header">
@@ -1672,7 +1653,22 @@
             
             connections = []; // Köhnə bağlantıları təmizləyirik
             isHost = (type === 'host');
-            peer = new Peer();
+            
+            // PeerJS konfiqurasiyası: Google STUN serverləri əlavə edildi
+            const peerConfig = {
+                config: {
+                    'iceServers': [
+                        { urls: 'stun:stun.l.google.com:19302' },
+                        { urls: 'stun:stun1.l.google.com:19302' },
+                        { urls: 'stun:stun2.l.google.com:19302' },
+                        { urls: 'stun:stun3.l.google.com:19302' },
+                        { urls: 'stun:stun4.l.google.com:19302' }
+                    ]
+                },
+                debug: 1
+            };
+
+            peer = new Peer(peerConfig);
 
             peer.on('open', id => {
                 console.log('Peer opened with ID:', id);
@@ -1695,19 +1691,28 @@
 
             peer.on('disconnected', () => {
                 console.log('Peer disconnected, attempting reconnect...');
-                if (!peer.destroyed) peer.reconnect();
+                if (!peer.destroyed) {
+                    peer.reconnect();
+                }
             });
 
             peer.on('error', err => {
                 console.error('Peer error:', err.type);
+                
                 if (err.type === 'peer-unavailable') {
-                    showNotify('Otaq tapılmadı və ya host ayrıldı.');
+                    showNotify('Xəta: Otaq tapılmadı və ya host offline-dır.');
+                    addChatMessage('Sistem', 'Otaq tapılmadı və ya bağlantı kəsildi.', true);
                     localStorage.removeItem('watch-party-room');
-                } else if (err.type === 'network' || err.type === 'server-error') {
+                } else if (err.type === 'network' || err.type === 'server-error' || err.type === 'network-dedicated') {
+                    showNotify('Bağlantı xətası! Yenidən qoşulmağa çalışılır...');
+                    addChatMessage('Sistem', 'Şəbəkə xətası - Avtomatik bərpa edilir...', true);
+                    
                     clearTimeout(reconnectTimeout);
                     reconnectTimeout = setTimeout(() => {
                         if (currentRoomId) initPeer(isHost ? 'host' : 'join', currentRoomId);
-                    }, 3000);
+                    }, 5000);
+                } else {
+                    showNotify(`PeerJS Xətası: ${err.type}`);
                 }
             });
         }
@@ -1728,18 +1733,6 @@
             }
         });
         document.addEventListener('visibilitychange', handleVisibilityChange);
-
-        // Mobil klaviatura UI tənzimləməsi
-         if (window.visualViewport) {
-             window.visualViewport.addEventListener('resize', () => {
-                 const layout = document.querySelector('.watch-party-layout');
-                 if (layout && window.innerWidth <= 800) {
-                     layout.style.height = `${window.visualViewport.height}px`;
-                     const chatMsgs = document.getElementById('chat-messages');
-                     if (chatMsgs) chatMsgs.scrollTop = chatMsgs.scrollHeight;
-                 }
-             });
-         }
 
         function init() {
             renderGenres();
@@ -2472,6 +2465,20 @@ async function loadPartyCatalog(isNew = true) {
             const movie = await res.json();
             currentMovieForTicket = movie;
 
+            // Dinamik SEO yenilənməsi
+            document.title = `${movie.title} İzlə - RM Film`;
+            const metaDesc = document.querySelector('meta[name="description"]');
+            if(metaDesc) metaDesc.content = movie.overview.substring(0, 160) + "...";
+            
+            const ogTitle = document.querySelector('meta[property="og:title"]');
+            if(ogTitle) ogTitle.content = `${movie.title} İzlə - RM Film`;
+            
+            const ogImg = document.querySelector('meta[property="og:image"]');
+            if(ogImg) ogImg.content = IMG_PATH + movie.backdrop_path;
+
+            const ogDesc = document.querySelector('meta[property="og:description"]');
+            if(ogDesc) ogDesc.content = movie.overview.substring(0, 160) + "...";
+
             // Show ticket question modal
             const ticketModal = document.getElementById('ticket-modal');
             ticketModal.style.display = 'flex';
@@ -2619,6 +2626,20 @@ async function loadPartyCatalog(isNew = true) {
             const tv = await tvRes.json();
             const credits = await cRes.json();
             const extData = await extRes.json();
+
+            // Dinamik SEO yenilənməsi
+            document.title = `${tv.name} İzlə - RM Film`;
+            const metaDesc = document.querySelector('meta[name="description"]');
+            if(metaDesc) metaDesc.content = tv.overview.substring(0, 160) + "...";
+            
+            const ogTitle = document.querySelector('meta[property="og:title"]');
+            if(ogTitle) ogTitle.content = `${tv.name} İzlə - RM Film`;
+            
+            const ogImg = document.querySelector('meta[property="og:image"]');
+            if(ogImg) ogImg.content = IMG_PATH + tv.backdrop_path;
+
+            const ogDesc = document.querySelector('meta[property="og:description"]');
+            if(ogDesc) ogDesc.content = tv.overview.substring(0, 160) + "...";
 
             let imdbRatingHTML = '';
             if (extData.imdb_id) {

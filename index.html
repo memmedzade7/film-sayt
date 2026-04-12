@@ -1,5 +1,9 @@
+22 KB
 
- <!DOCTYPE html>
+
+
+
+<!DOCTYPE html>
 <html lang="az">
 <head>
     <!-- Google tag (gtag.js) -->
@@ -1267,7 +1271,7 @@
         <!-- 1. Sual Ekranı -->
         <div id="ticket-question-screen" class="ticket-question">
             <h2>Bilet istəyirsiniz?</h2>
-            <p>Bu film üçün xüsusi  bilet əldə edə bilərsiniz.</p>
+            <p>Bu film üçün xüsusi retro bilet əldə edə bilərsiniz.</p>
             <div class="ticket-btns">
                 <button class="ticket-btn btn-yes" onclick="showTicketForm()">Bəli</button>
                 <button class="ticket-btn btn-no" onclick="skipTicket()">Xeyr</button>
@@ -1646,7 +1650,25 @@
             window.history.replaceState({}, '', url);
         }
 
+        let heartbeatInterval;
+        function startHeartbeat() {
+            clearInterval(heartbeatInterval);
+            heartbeatInterval = setInterval(() => {
+                if (peer && !peer.destroyed && connections.length > 0) {
+                    safeSend({ type: 'heartbeat', timestamp: Date.now() });
+                }
+            }, 30000);
+        }
+
+        function reconnectPeer() {
+            if (currentRoomId) {
+                addChatMessage('Sistem', 'Yenidən qoşulmağa cəhd edilir...', true);
+                initPeer(isHost ? 'host' : 'join', currentRoomId);
+            }
+        }
+
         function initPeer(type, existingRoomId = null) {
+            startHeartbeat();
             if (peer && !peer.destroyed) {
                 try { peer.destroy(); } catch(e) {}
             }
@@ -1897,7 +1919,10 @@
                     </div>
 
                     <div class="chat-container">
-                        <div class="chat-header">Canlı</div>
+                        <div class="chat-header">
+                            <span>Canlı Çat</span>
+                            <button onclick="reconnectPeer()" style="background:none; border:1px solid #d4af37; color:#d4af37; font-size:10px; padding:2px 8px; border-radius:4px; cursor:pointer; margin-left:10px;">Yenidən Qoşul</button>
+                        </div>
                         <div id="chat-messages"></div>
                         <div class="chat-input-area">
                             <div class="chat-controls">
@@ -2183,6 +2208,7 @@ async function loadPartyCatalog(isNew = true) {
             });
 
             conn.on('data', data => {
+                if (data.type === 'heartbeat') return;
                 console.log('Received:', data.type, 'from', data.user || 'unknown');
                 
                 if(data.type === 'chat') {
@@ -2258,21 +2284,29 @@ async function loadPartyCatalog(isNew = true) {
 
         // Helper: Safe message sending with validation
         function safeSend(data, targetConnections = null) {
+            // Əvvəlcə qapalı bağlantıları təmizləyirik
+            connections = connections.filter(c => c && c.open);
+            
             const targets = targetConnections || connections;
-            if (targets.length === 0) return true; 
+            if (targets.length === 0) return true; // Heç kim yoxdur, amma xəta deyil
             
             let sent = 0;
             for(let conn of targets) {
-                if(conn && conn.open) {
-                    try {
-                        conn.send(data);
-                        sent++;
-                    } catch(e) {
-                        console.error('Send failed:', e);
-                    }
+                try {
+                    conn.send(data);
+                    sent++;
+                } catch(e) {
+                    console.error('Send failed for a connection:', e);
                 }
             }
-            // Əgər heç kimə getmədisə və biz tək deyiliksə, o zaman xəta qaytar
+
+            // Əgər iştirakçıyıqsa və hosta mesaj getmədisə, yenidən qoşulmağa cəhd edirik
+            if (!isHost && sent === 0 && currentRoomId) {
+                console.log("Hostla bağlantı itib, bərpa edilir...");
+                const conn = peer.connect(currentRoomId);
+                setupConnHandlers(conn);
+            }
+
             return sent > 0;
         }
 
@@ -2288,12 +2322,15 @@ async function loadPartyCatalog(isNew = true) {
             inp.value = '';
             
             // Send to network
-            if(safeSend(chatData)) {
+            const result = safeSend(chatData);
+            console.log('Chat send result:', result, 'Connections:', connections.length);
+            
+            if(result) {
                 // Typing indicator cleanup if active
                 const typingMsg = document.querySelector('.chat-msg.typing');
                 if(typingMsg) typingMsg.remove();
             } else {
-                addChatMessage('Sistem', 'Bağlantı xətası - mesaj göndərilə bilmədi', true);
+                addChatMessage('Sistem', 'Bağlantı xətası - mesaj göndərilə bilmədi (Hostla bağlantı yoxdur)', true);
             }
         }
 

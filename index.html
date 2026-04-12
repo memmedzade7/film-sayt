@@ -1,8 +1,4 @@
-
-
-
-
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="az">
 <head>
     <!-- Google tag (gtag.js) -->
@@ -1270,7 +1266,7 @@
         <!-- 1. Sual Ekranı -->
         <div id="ticket-question-screen" class="ticket-question">
             <h2>Bilet istəyirsiniz?</h2>
-            <p>Bu film üçün xüsusi retro bilet əldə edə bilərsiniz.</p>
+            <p>Bu film üçün xüsusi  bilet əldə edə bilərsiniz.</p>
             <div class="ticket-btns">
                 <button class="ticket-btn btn-yes" onclick="showTicketForm()">Bəli</button>
                 <button class="ticket-btn btn-no" onclick="skipTicket()">Xeyr</button>
@@ -1649,33 +1645,15 @@
             window.history.replaceState({}, '', url);
         }
 
-        let heartbeatInterval;
-        function startHeartbeat() {
-            clearInterval(heartbeatInterval);
-            heartbeatInterval = setInterval(() => {
-                if (peer && !peer.destroyed && connections.length > 0) {
-                    safeSend({ type: 'heartbeat', timestamp: Date.now() });
-                }
-            }, 30000);
-        }
-
-        function reconnectPeer() {
-            if (currentRoomId) {
-                addChatMessage('Sistem', 'Yenidən qoşulmağa cəhd edilir...', true);
-                initPeer(isHost ? 'host' : 'join', currentRoomId);
-            }
-        }
-
         function initPeer(type, existingRoomId = null) {
-            startHeartbeat();
             if (peer && !peer.destroyed) {
                 try { peer.destroy(); } catch(e) {}
             }
             
-            connections = []; 
+            connections = []; // Köhnə bağlantıları təmizləyirik
             isHost = (type === 'host');
             
-            // Daha geniş STUN server siyahısı
+            // PeerJS konfiqurasiyası: Google STUN serverləri əlavə edildi
             const peerConfig = {
                 config: {
                     'iceServers': [
@@ -1683,9 +1661,7 @@
                         { urls: 'stun:stun1.l.google.com:19302' },
                         { urls: 'stun:stun2.l.google.com:19302' },
                         { urls: 'stun:stun3.l.google.com:19302' },
-                        { urls: 'stun:stun4.l.google.com:19302' },
-                        { urls: 'stun:stun.services.mozilla.com' },
-                        { urls: 'stun:stun.cloudflare.com:3478' }
+                        { urls: 'stun:stun4.l.google.com:19302' }
                     ]
                 },
                 debug: 1
@@ -1706,37 +1682,36 @@
                     finalizePartyUI(id);
                     listenForConnections();
                 } else {
-                    const conn = peer.connect(roomId, { reliable: true });
+                    const conn = peer.connect(roomId);
                     setupConnHandlers(conn);
                     finalizePartyUI(roomId);
                 }
-                updateConnectionStatus();
             });
 
             peer.on('disconnected', () => {
                 console.log('Peer disconnected, attempting reconnect...');
-                updateConnectionStatus();
                 if (!peer.destroyed) {
                     peer.reconnect();
                 }
             });
 
             peer.on('error', err => {
-                console.error('Peer error:', err.type, err);
-                updateConnectionStatus();
+                console.error('Peer error:', err.type);
                 
                 if (err.type === 'peer-unavailable') {
                     showNotify('Xəta: Otaq tapılmadı və ya host offline-dır.');
                     addChatMessage('Sistem', 'Otaq tapılmadı və ya bağlantı kəsildi.', true);
                     localStorage.removeItem('watch-party-room');
-                } else if (['network', 'server-error', 'socket-error', 'socket-closed'].includes(err.type)) {
-                    showNotify('Şəbəkə xətası! Yenidən qoşulmağa çalışılır...');
+                } else if (err.type === 'network' || err.type === 'server-error' || err.type === 'network-dedicated') {
+                    showNotify('Bağlantı xətası! Yenidən qoşulmağa çalışılır...');
+                    addChatMessage('Sistem', 'Şəbəkə xətası - Avtomatik bərpa edilir...', true);
+                    
                     clearTimeout(reconnectTimeout);
                     reconnectTimeout = setTimeout(() => {
                         if (currentRoomId) initPeer(isHost ? 'host' : 'join', currentRoomId);
                     }, 5000);
                 } else {
-                    console.log(`PeerJS Error Handled: ${err.type}`);
+                    showNotify(`PeerJS Xətası: ${err.type}`);
                 }
             });
         }
@@ -1763,9 +1738,6 @@
             getMovies(currentApiUrl);
             updateWatchlistCount();
             checkSavedParty();
-            
-            setInterval(updateConnectionStatus, 5000); // Hər 5 saniyədən bir statusu yoxla
-            
             window.addEventListener('scroll', () => {
                 if (isLoading || isFavoritesView || currentMode === 'party' || currentMode === 'globe') return;
                 if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
@@ -1891,10 +1863,7 @@
                 <div class="watch-party-layout">
                     <div class="video-side">
                         <div style="padding:10px 20px; background:#111; border-bottom:1px solid #30363d; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-                            <div style="display:flex; flex-direction:column; gap:2px;">
-                                <span style="font-size:0.75rem; color:#8b949e;">Otaq ID: <b style="color:var(--party-color);">${roomId}</b></span>
-                                <span id="my-peer-id" style="font-size:0.65rem; color:#636e72;">Sizin ID: Yüklənir...</span>
-                            </div>
+                            <span style="font-size:0.8rem; color:#8b949e;">Otaq ID: <b style="color:var(--party-color);">${roomId}</b></span>
                             <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
                                 <button class="player-btn" onclick="openPartyCatalog('movie')">🎬 Film</button>
                                 <button class="player-btn" onclick="openPartyCatalog('tv')">📺 Serial</button>
@@ -1927,16 +1896,7 @@
                     </div>
 
                     <div class="chat-container">
-                        <div class="chat-header">
-                            <div style="display:flex; flex-direction:column; gap:2px;">
-                                <span style="font-weight:bold;">Canlı Çat</span>
-                                <div style="display:flex; align-items:center; gap:5px;">
-                                    <div id="connection-status-dot" style="width:8px; height:8px; border-radius:50%; background:#ef4444;"></div>
-                                    <span id="connection-status-text" style="font-size:10px; color:#8b949e;">Yoxlanılır...</span>
-                                </div>
-                            </div>
-                            <button onclick="reconnectPeer()" style="background:none; border:1px solid #d4af37; color:#d4af37; font-size:10px; padding:4px 10px; border-radius:6px; cursor:pointer; font-weight:bold;">Yenidən Qoşul</button>
-                        </div>
+                        <div class="chat-header">Canlı</div>
                         <div id="chat-messages"></div>
                         <div class="chat-input-area">
                             <div class="chat-controls">
@@ -2192,41 +2152,13 @@ async function loadPartyCatalog(isNew = true) {
             }
         }
 
-        function updateConnectionStatus() {
-            const statusDot = document.getElementById('connection-status-dot');
-            const statusText = document.getElementById('connection-status-text');
-            const myIdEl = document.getElementById('my-peer-id');
-            
-            if (myIdEl && peer) {
-                myIdEl.innerText = peer.id ? `Sizin ID: ${peer.id}` : 'Sizin ID: Gözlənilir...';
-            }
-
-            if (!statusDot || !statusText) return;
-
-            const isOpen = peer && !peer.disconnected && !peer.destroyed;
-            const hasConns = connections.some(c => c && c.open);
-
-            if (isOpen && (isHost || hasConns)) {
-                statusDot.style.background = '#4ade80';
-                statusText.innerText = isHost ? `Online (${connections.filter(c => c.open).length} iştirakçı)` : 'Online (Hosta qoşulub)';
-            } else if (peer && peer.disconnected) {
-                statusDot.style.background = '#fbbf24';
-                statusText.innerText = 'Bağlantı kəsildi (Reconnecting...)';
-            } else {
-                statusDot.style.background = '#ef4444';
-                statusText.innerText = 'Offline';
-            }
-        }
-
         function listenForConnections() {
             peer.on('connection', conn => {
-                // Dublikat bağlantıları yoxlayırıq
-                if (connections.find(c => c.peer === conn.peer)) return;
-                
                 connections.push(conn);
                 setupConnHandlers(conn);
                 addChatMessage("Sistem", "Yeni iştirakçı daxil oldu!", true);
                 
+                // Host olduğumuzda yeni qoşulan şəxsə hazırda oynayan videonu göndəririk
                 if (isHost && currentVideoUrl) {
                     setTimeout(() => {
                         conn.send({ 
@@ -2237,11 +2169,8 @@ async function loadPartyCatalog(isNew = true) {
                         });
                     }, 1500);
                 }
-                updateConnectionStatus();
             });
         }
-
-        let isProcessingRemoteControl = false;
 
         function setupConnHandlers(conn) {
             conn.on('open', () => {
@@ -2250,11 +2179,9 @@ async function loadPartyCatalog(isNew = true) {
                     connections = [conn];
                     addChatMessage('Sistem', 'Otağa qoşuldunuz!', true);
                 }
-                updateConnectionStatus();
             });
 
             conn.on('data', data => {
-                if (data.type === 'heartbeat') return;
                 console.log('Received:', data.type, 'from', data.user || 'unknown');
                 
                 if(data.type === 'chat') {
@@ -2301,16 +2228,15 @@ async function loadPartyCatalog(isNew = true) {
                 }
             });
             
+            // Connection close handling
             conn.on('close', () => {
                 connections = connections.filter(c => c !== conn);
                 addChatMessage('Sistem', `İştirakçı otağı tərk etdi`, true);
-                updateConnectionStatus();
             });
 
             conn.on('error', err => {
                 console.error('Connection error:', err);
-                connections = connections.filter(c => c !== conn);
-                updateConnectionStatus();
+                addChatMessage('Sistem', 'Bağlantı xətası', true);
             });
         }
 
@@ -2329,26 +2255,23 @@ async function loadPartyCatalog(isNew = true) {
             console.log(`Broadcast ${data.type} to ${sent}/${connections.length} connections`);
         }
 
+        // Helper: Safe message sending with validation
         function safeSend(data, targetConnections = null) {
-            const targets = (targetConnections || connections).filter(c => c && c.open);
-            
-            if (targets.length === 0) {
-                if (!isHost && currentRoomId) {
-                    reconnectPeer();
-                    return false;
-                }
-                return isHost;
-            }
+            const targets = targetConnections || connections;
+            if (targets.length === 0) return true; 
             
             let sent = 0;
             for(let conn of targets) {
-                try {
-                    conn.send(data);
-                    sent++;
-                } catch(e) {
-                    console.error('Send failed:', e);
+                if(conn && conn.open) {
+                    try {
+                        conn.send(data);
+                        sent++;
+                    } catch(e) {
+                        console.error('Send failed:', e);
+                    }
                 }
             }
+            // Əgər heç kimə getmədisə və biz tək deyiliksə, o zaman xəta qaytar
             return sent > 0;
         }
 
@@ -2364,15 +2287,12 @@ async function loadPartyCatalog(isNew = true) {
             inp.value = '';
             
             // Send to network
-            const result = safeSend(chatData);
-            console.log('Chat send result:', result, 'Connections:', connections.length);
-            
-            if(result) {
+            if(safeSend(chatData)) {
                 // Typing indicator cleanup if active
                 const typingMsg = document.querySelector('.chat-msg.typing');
                 if(typingMsg) typingMsg.remove();
             } else {
-                addChatMessage('Sistem', 'Bağlantı xətası - mesaj göndərilə bilmədi (Hostla bağlantı yoxdur)', true);
+                addChatMessage('Sistem', 'Bağlantı xətası - mesaj göndərilə bilmədi', true);
             }
         }
 

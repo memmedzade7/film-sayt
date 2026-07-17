@@ -2591,6 +2591,25 @@ async function loadPartyCatalog(isNew = true) {
             proceedToMovie(currentMovieForTicket.id);
         }
 
+        function changeMovieSource(id, source) {
+            let src = '';
+            switch(source) {
+                case 'original':
+                    src = `https://vidsrc.xyz/embed/movie/${id}`;
+                    break;
+                case 'turkish':
+                    src = `https://embed.su/embed/movie/${id}`;
+                    break;
+                case 'az':
+                    src = `https://vidsrc.to/embed/movie/${id}`;
+                    break;
+                case 'russian':
+                    src = `https://vidsrc.xyz/embed/movie/${id}`;
+                    break;
+            }
+            document.getElementById('main-player').src = src;
+        }
+
         async function proceedToMovie(id) {
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
@@ -2624,7 +2643,7 @@ async function loadPartyCatalog(isNew = true) {
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
                 <div class="video-container">
-                    <iframe id="main-player" src="https://player.vidsrc.nl/embed/movie/${id}" width="100%" height="100%" frameborder="0" allow-forms allow-scripts allow-same-origin sandbox="allow-forms allow-scripts allow-same-origin" allowfullscreen></iframe>
+                    <iframe id="main-player" src="https://vidsrc.xyz/embed/movie/${id}" width="100%" height="100%" frameborder="0" allow-forms allow-scripts allow-same-origin sandbox="allow-forms allow-scripts allow-same-origin" allowfullscreen></iframe>
                 </div>
 
                 <div class="alt-search-section">
@@ -2644,9 +2663,10 @@ async function loadPartyCatalog(isNew = true) {
 
                 <div class="search-options" style="background: #111; padding: 15px; display: flex; gap: 10px; border-bottom: 1px solid #222; overflow-x: auto;">
                     <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(movie.title + ' trailer')}" target="_blank" rel="noopener" class="player-btn alt-source" style="font-size: 0.8rem;">📺 Treyler</a>
-                    <a href="https://www.google.com/search?q=${encodeURIComponent('az dublaj ' + movie.title)}" target="_blank" rel="noopener" class="player-btn" style="font-size: 0.8rem;">🇦🇿 AZ Dublaj</a>
-                    <a href="https://www.google.com/search?q=${encodeURIComponent('türkçe dublaj ' + movie.title)}" target="_blank" rel="noopener" class="player-btn" style="font-size: 0.8rem;">🇹🇷 Türkçe</a>
-                    <a href="https://www.google.com/search?q=${encodeURIComponent('перевод ' + movie.title)}" target="_blank" rel="noopener" class="player-btn" style="font-size: 0.8rem;">🇷🇺 Rusça</a>
+                    <button onclick="changeMovieSource(${id}, 'az')" class="player-btn" style="font-size: 0.8rem;">🇦🇿 AZ Dublaj</button>
+                    <button onclick="changeMovieSource(${id}, 'turkish')" class="player-btn" style="font-size: 0.8rem;">🇹🇷 Türkçe</button>
+                    <button onclick="changeMovieSource(${id}, 'russian')" class="player-btn" style="font-size: 0.8rem;">🇷🇺 Rusça</button>
+                    <button onclick="changeMovieSource(${id}, 'original')" class="player-btn" style="font-size: 0.8rem;">🇬🇧 Orijinal (Altyazılı)</button>
                 </div>
                 <div class="details-grid">
                     <img src="${IMG_PATH + movie.poster_path}">
@@ -2715,7 +2735,7 @@ async function loadPartyCatalog(isNew = true) {
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
                 <div class="video-container">
-                    <iframe id="main-player" src="https://player.vidsrc.nl/embed/tv/${id}/1/1" width="100%" height="100%" frameborder="0" allow-forms allow-scripts allow-same-origin sandbox="allow-forms allow-scripts allow-same-origin" allowfullscreen></iframe>
+                    <iframe id="main-player" src="https://vidsrc.xyz/embed/tv/${id}/1/1" width="100%" height="100%" frameborder="0" allow-forms allow-scripts allow-same-origin sandbox="allow-forms allow-scripts allow-same-origin" allowfullscreen></iframe>
                 </div>
 
                 <div class="alt-search-section">
@@ -2748,7 +2768,10 @@ async function loadPartyCatalog(isNew = true) {
                     </div>
                     <div class="search-options" style="margin-left: auto; display: flex; gap: 10px;">
                         <a href="https://www.youtube.com/results?search_query=${encodeURIComponent((tv.name || tv.title) + ' trailer')}" target="_blank" rel="noopener" class="player-btn alt-source" style="font-size: 0.8rem;">📺 Treyler</a>
-                        <a href="https://www.google.com/search?q=${encodeURIComponent('az dublaj ' + (tv.name || tv.title))}" target="_blank" rel="noopener" class="player-btn" style="font-size: 0.8rem;">�� AZ Dublaj</a>
+                        <button onclick="updateTVPlayer(${id}, 'az')" class="player-btn" style="font-size: 0.8rem;">🇦🇿 AZ Dublaj</button>
+                        <button onclick="updateTVPlayer(${id}, 'turkish')" class="player-btn" style="font-size: 0.8rem;">🇹🇷 Türkçe</button>
+                        <button onclick="updateTVPlayer(${id}, 'russian')" class="player-btn" style="font-size: 0.8rem;">🇷🇺 Rusça</button>
+                        <button onclick="updateTVPlayer(${id}, 'original')" class="player-btn" style="font-size: 0.8rem;">🇬🇧 Orijinal (Altyazılı)</button>
                     </div>
                 </div>
                 <div class="details-grid">
@@ -2797,11 +2820,30 @@ async function loadPartyCatalog(isNew = true) {
             }
         }
 
-        function updateTVPlayer(tvId) {
+        function changeTVSource(tvId, season, episode, source) {
+            let src = '';
+            switch(source) {
+                case 'original':
+                    src = `https://vidsrc.xyz/embed/tv/${tvId}/${season}/${episode}`;
+                    break;
+                case 'turkish':
+                    src = `https://embed.su/embed/tv/${tvId}/${season}/${episode}`;
+                    break;
+                case 'az':
+                    src = `https://vidsrc.to/embed/tv/${tvId}/${season}/${episode}`;
+                    break;
+                case 'russian':
+                    src = `https://vidsrc.xyz/embed/tv/${tvId}/${season}/${episode}`;
+                    break;
+            }
+            document.getElementById('main-player').src = src;
+        }
+
+        function updateTVPlayer(tvId, source='original') {
             const season = document.getElementById('season-select').value;
             const episode = document.getElementById('episode-select').value;
             if(season && episode) {
-                document.getElementById('main-player').src = `https://player.vidsrc.nl/embed/tv/${tvId}/${season}/${episode}`;
+                changeTVSource(tvId, season, episode, source);
             }
         }
 

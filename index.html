@@ -2616,9 +2616,13 @@ async function loadPartyCatalog(isNew = true) {
             
             // Reuse the movie data if we already have it, or fetch if skipped ticket
             let movie = currentMovieForTicket;
-            if(!movie || movie.id != id) {
-                const mRes = await fetch(`${BASE_URL}/movie/${id}?api_key=${API_KEY}&language=${LANG}`);
-                movie = await mRes.json();
+            try {
+                if(!movie || movie.id != id) {
+                    const mRes = await fetch(`${BASE_URL}/movie/${id}?api_key=${API_KEY}&language=${LANG}`);
+                    movie = await mRes.json();
+                }
+            } catch(e) {
+                movie = { id: id, title: 'Film', poster_path: null, vote_average: 0, overview: '' };
             }
 
             let imdbRatingHTML = '';
@@ -2626,19 +2630,24 @@ async function loadPartyCatalog(isNew = true) {
                 const extRes = await fetch(`${BASE_URL}/movie/${id}/external_ids?api_key=${API_KEY}`);
                 const extData = await extRes.json();
                 if (extData.imdb_id) {
-                    const omdbRes = await fetch(`https://www.omdbapi.com/?i=${extData.imdb_id}&apikey=b6d77341`);
-                    const omdbData = await omdbRes.json();
-                    if (omdbData.imdbRating && omdbData.imdbRating !== 'N/A') {
-                        imdbRatingHTML = `<span style="color: #f5c518; font-weight: bold; margin-left: 10px;">⭐ IMDb: ${omdbData.imdbRating}</span>`;
-                    }
+                    try {
+                        const omdbRes = await fetch(`https://www.omdbapi.com/?i=${extData.imdb_id}&apikey=b6d77341`);
+                        const omdbData = await omdbRes.json();
+                        if (omdbData.imdbRating && omdbData.imdbRating !== 'N/A') {
+                            imdbRatingHTML = `<span style="color: #f5c518; font-weight: bold; margin-left: 10px;">⭐ IMDb: ${omdbData.imdbRating}</span>`;
+                        }
+                    } catch(e) {}
                 }
             } catch(e) {}
 
-            const [vRes, cRes] = await Promise.all([
-                fetch(`${BASE_URL}/movie/${id}/videos?api_key=${API_KEY}`),
-                fetch(`${BASE_URL}/movie/${id}/credits?api_key=${API_KEY}&language=${LANG}`)
-            ]);
-            const credits = await cRes.json();
+            let credits = { cast: [] };
+            try {
+                const [vRes, cRes] = await Promise.all([
+                    fetch(`${BASE_URL}/movie/${id}/videos?api_key=${API_KEY}`),
+                    fetch(`${BASE_URL}/movie/${id}/credits?api_key=${API_KEY}&language=${LANG}`)
+                ]);
+                credits = await cRes.json();
+            } catch(e) {}
 
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
@@ -2662,23 +2671,23 @@ async function loadPartyCatalog(isNew = true) {
                 </div>
 
                 <div class="search-options" style="background: #111; padding: 15px; display: flex; gap: 10px; border-bottom: 1px solid #222; overflow-x: auto;">
-                    <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(movie.title + ' trailer')}" target="_blank" rel="noopener" class="player-btn alt-source" style="font-size: 0.8rem;">📺 Treyler</a>
+                    <a href="https://www.youtube.com/results?search_query=${encodeURIComponent((movie.title || 'film') + ' trailer')}" target="_blank" rel="noopener" class="player-btn alt-source" style="font-size: 0.8rem;">📺 Treyler</a>
                     <button onclick="changeMovieSource(${id}, 'az')" class="player-btn" style="font-size: 0.8rem;">🇦🇿 AZ Dublaj</button>
                     <button onclick="changeMovieSource(${id}, 'turkish')" class="player-btn" style="font-size: 0.8rem;">🇹🇷 Türkçe</button>
                     <button onclick="changeMovieSource(${id}, 'russian')" class="player-btn" style="font-size: 0.8rem;">🇷🇺 Rusça</button>
                     <button onclick="changeMovieSource(${id}, 'original')" class="player-btn" style="font-size: 0.8rem;">🇬🇧 Orijinal (Altyazılı)</button>
                 </div>
                 <div class="details-grid">
-                    <img src="${IMG_PATH + movie.poster_path}">
+                    <img src="${movie.poster_path ? (IMG_PATH + movie.poster_path) : 'https://via.placeholder.com/80x80'}">
                     <div>
                         <h2>${movie.title}</h2>
                         <div style="margin-bottom: 15px;">
-                            <span style="color: #4ade80; font-weight: bold;">⭐ TMDB: ${movie.vote_average.toFixed(1)}</span>
+                            <span style="color: #4ade80; font-weight: bold;">⭐ TMDB: ${(movie.vote_average || 0).toFixed(1)}</span>
                             ${imdbRatingHTML}
                         </div>
-                        <p>${movie.overview}</p>
+                        <p>${movie.overview || ''}</p>
                         <div class="cast-container">
-                            ${credits.cast.slice(0, 8).map(c => `
+                            ${(credits.cast || []).slice(0, 8).map(c => `
                                 <div class="cast-card" onclick="openActorDetails(${c.id})">
                                     <img src="${c.profile_path ? CAST_IMG_PATH + c.profile_path : 'https://via.placeholder.com/80x80'}">
                                     <div>${c.name}</div>
@@ -2696,41 +2705,52 @@ async function loadPartyCatalog(isNew = true) {
         async function openTVDetails(id) {
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
-            const [tvRes, cRes, extRes] = await Promise.all([
-                fetch(`${BASE_URL}/tv/${id}?api_key=${API_KEY}&language=${LANG}`),
-                fetch(`${BASE_URL}/tv/${id}/credits?api_key=${API_KEY}&language=${LANG}`),
-                fetch(`${BASE_URL}/tv/${id}/external_ids?api_key=${API_KEY}`)
-            ]);
-            const tv = await tvRes.json();
-            const credits = await cRes.json();
-            const extData = await extRes.json();
+
+            let tv = { id: id, name: 'Serial', poster_path: null, vote_average: 0, overview: '', seasons: [] };
+            let credits = { cast: [] };
+            let extData = {};
+            
+            try {
+                const [tvRes, cRes, extRes] = await Promise.all([
+                    fetch(`${BASE_URL}/tv/${id}?api_key=${API_KEY}&language=${LANG}`),
+                    fetch(`${BASE_URL}/tv/${id}/credits?api_key=${API_KEY}&language=${LANG}`),
+                    fetch(`${BASE_URL}/tv/${id}/external_ids?api_key=${API_KEY}`)
+                ]);
+                tv = await tvRes.json();
+                credits = await cRes.json();
+                extData = await extRes.json();
+            } catch(e) {}
 
             // Dinamik SEO yenilənməsi
-            document.title = `${tv.name} İzlə - RM Film`;
-            const metaDesc = document.querySelector('meta[name="description"]');
-            if(metaDesc) metaDesc.content = tv.overview.substring(0, 160) + "...";
-            
-            const ogTitle = document.querySelector('meta[property="og:title"]');
-            if(ogTitle) ogTitle.content = `${tv.name} İzlə - RM Film`;
-            
-            const ogImg = document.querySelector('meta[property="og:image"]');
-            if(ogImg) ogImg.content = IMG_PATH + tv.backdrop_path;
+            try {
+                document.title = `${tv.name || 'Serial'} İzlə - RM Film`;
+                const metaDesc = document.querySelector('meta[name="description"]');
+                if(metaDesc && tv.overview) metaDesc.content = tv.overview.substring(0, 160) + "...";
+                
+                const ogTitle = document.querySelector('meta[property="og:title"]');
+                if(ogTitle) ogTitle.content = `${tv.name || 'Serial'} İzlə - RM Film`;
+                
+                const ogImg = document.querySelector('meta[property="og:image"]');
+                if(ogImg && tv.backdrop_path) ogImg.content = IMG_PATH + tv.backdrop_path;
 
-            const ogDesc = document.querySelector('meta[property="og:description"]');
-            if(ogDesc) ogDesc.content = tv.overview.substring(0, 160) + "...";
+                const ogDesc = document.querySelector('meta[property="og:description"]');
+                if(ogDesc && tv.overview) ogDesc.content = tv.overview.substring(0, 160) + "...";
+            } catch(e) {}
 
             let imdbRatingHTML = '';
-            if (extData.imdb_id) {
-                try {
-                    const omdbRes = await fetch(`https://www.omdbapi.com/?i=${extData.imdb_id}&apikey=b6d77341`);
-                    const omdbData = await omdbRes.json();
-                    if (omdbData.imdbRating && omdbData.imdbRating !== 'N/A') {
-                        imdbRatingHTML = `<span style="color: #f5c518; font-weight: bold; margin-left: 10px;">⭐ IMDb: ${omdbData.imdbRating}</span>`;
-                    }
-                } catch(e) {}
-            }
+            try {
+                if (extData.imdb_id) {
+                    try {
+                        const omdbRes = await fetch(`https://www.omdbapi.com/?i=${extData.imdb_id}&apikey=b6d77341`);
+                        const omdbData = await omdbRes.json();
+                        if (omdbData.imdbRating && omdbData.imdbRating !== 'N/A') {
+                            imdbRatingHTML = `<span style="color: #f5c518; font-weight: bold; margin-left: 10px;">⭐ IMDb: ${omdbData.imdbRating}</span>`;
+                        }
+                    } catch(e) {}
+                }
+            } catch(e) {}
 
-            const seasons = tv.seasons.filter(s => s.season_number > 0);
+            const seasons = (tv.seasons || []).filter(s => s.season_number > 0);
             
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
@@ -2741,13 +2761,13 @@ async function loadPartyCatalog(isNew = true) {
                 <div class="alt-search-section">
                     <p class="alt-search-title">Filmi tapmadınız? Alternativ axtarış:</p>
                     <div class="alt-btns-container">
-                        <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(tv.name || tv.title)}+izlə" target="_blank" class="alt-btn yt-btn">
+                        <a href="https://www.youtube.com/results?search_query=${encodeURIComponent((tv.name || tv.title) || 'serial')}+izlə" target="_blank" class="alt-btn yt-btn">
                             <span>🔴</span> YouTube-da axtar
                         </a>
-                        <a href="https://www.google.com/search?q=${encodeURIComponent(tv.name || tv.title)}+izlə" target="_blank" class="alt-btn google-btn">
+                        <a href="https://www.google.com/search?q=${encodeURIComponent((tv.name || tv.title) || 'serial')}+izlə" target="_blank" class="alt-btn google-btn">
                             <span>🔵</span> Google-da axtar
                         </a>
-                        <a href="https://yandex.com/search/?text=${encodeURIComponent(tv.name || tv.title)}+izlə" target="_blank" class="alt-btn yandex-btn">
+                        <a href="https://yandex.com/search/?text=${encodeURIComponent((tv.name || tv.title) || 'serial')}+izlə" target="_blank" class="alt-btn yandex-btn">
                             <span>🟡</span> Yandex-də axtar
                         </a>
                     </div>
@@ -2767,7 +2787,7 @@ async function loadPartyCatalog(isNew = true) {
                         </select>
                     </div>
                     <div class="search-options" style="margin-left: auto; display: flex; gap: 10px;">
-                        <a href="https://www.youtube.com/results?search_query=${encodeURIComponent((tv.name || tv.title) + ' trailer')}" target="_blank" rel="noopener" class="player-btn alt-source" style="font-size: 0.8rem;">📺 Treyler</a>
+                        <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(((tv.name || tv.title) || 'serial') + ' trailer')}" target="_blank" rel="noopener" class="player-btn alt-source" style="font-size: 0.8rem;">📺 Treyler</a>
                         <button onclick="updateTVPlayer(${id}, 'az')" class="player-btn" style="font-size: 0.8rem;">🇦🇿 AZ Dublaj</button>
                         <button onclick="updateTVPlayer(${id}, 'turkish')" class="player-btn" style="font-size: 0.8rem;">🇹🇷 Türkçe</button>
                         <button onclick="updateTVPlayer(${id}, 'russian')" class="player-btn" style="font-size: 0.8rem;">🇷🇺 Rusça</button>
@@ -2775,16 +2795,16 @@ async function loadPartyCatalog(isNew = true) {
                     </div>
                 </div>
                 <div class="details-grid">
-                    <img src="${IMG_PATH + tv.poster_path}">
+                    <img src="${tv.poster_path ? (IMG_PATH + tv.poster_path) : 'https://via.placeholder.com/80x80'}">
                     <div>
                         <h2>${tv.name}</h2>
                         <div style="margin-bottom: 15px;">
-                            <span style="color: #4ade80; font-weight: bold;">⭐ TMDB: ${tv.vote_average.toFixed(1)}</span>
+                            <span style="color: #4ade80; font-weight: bold;">⭐ TMDB: ${(tv.vote_average || 0).toFixed(1)}</span>
                             ${imdbRatingHTML}
                         </div>
-                        <p>${tv.overview}</p>
+                        <p>${tv.overview || ''}</p>
                         <div class="cast-container">
-                            ${credits.cast.slice(0, 8).map(c => `
+                            ${(credits.cast || []).slice(0, 8).map(c => `
                                 <div class="cast-card" onclick="openActorDetails(${c.id})">
                                     <img src="${c.profile_path ? CAST_IMG_PATH + c.profile_path : 'https://via.placeholder.com/80x80'}">
                                     <div>${c.name}</div>
